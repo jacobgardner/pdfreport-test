@@ -2,30 +2,38 @@
 
 use std::{fs::File, io::BufWriter};
 
-use piet_common::{
-    Device, FontWeight, LineMetric, RenderContext, Text, TextAttribute, TextLayout,
-    TextLayoutBuilder,
-};
-use printpdf::{Color, Mm, PdfDocument, Pt, Px, Rgb, TextMatrix};
+use printpdf::{Color, Line, Mm, PdfDocument, Point, Pt, Rgb, TextMatrix};
 use skia_safe::{
     font_style::{Slant, Weight, Width},
     textlayout::{
-        DrawOptions, FontCollection, ParagraphBuilder, ParagraphStyle, TextHeightBehavior,
-        TextStyle,
+        FontCollection, ParagraphBuilder, ParagraphStyle, TextStyle, TypefaceFontProvider,
     },
-    FontMgr, FontStyle,
+    Data, FontMgr, FontStyle, Typeface,
 };
 use tracing::{span, Level};
 use tracing_chrome::ChromeLayerBuilder;
-use tracing_subscriber::{
-    prelude::__tracing_subscriber_SubscriberExt, util::SubscriberInitExt, FmtSubscriber,
-};
+use tracing_subscriber::prelude::*;
+
+const FONTS: [&[u8]; 9] = [
+    include_bytes!("../assets/fonts/inter/Inter-Black.ttf"),
+    include_bytes!("../assets/fonts/inter/Inter-Bold.ttf"),
+    include_bytes!("../assets/fonts/inter/Inter-ExtraBold.ttf"),
+    include_bytes!("../assets/fonts/inter/Inter-Light.ttf"),
+    include_bytes!("../assets/fonts/inter/Inter-ExtraLight.ttf"),
+    include_bytes!("../assets/fonts/inter/Inter-Medium.ttf"),
+    include_bytes!("../assets/fonts/inter/Inter-Regular.ttf"),
+    include_bytes!("../assets/fonts/inter/Inter-SemiBold.ttf"),
+    include_bytes!("../assets/fonts/inter/Inter-Thin.ttf"),
+];
 
 fn build_text() -> String {
     r#"
-Chapter 1Y ouAr cppruaWh tu kur2
+Chapter 1: Your approach to Work
+
 Introduction
-W H Y T H I S M AT T E R S
+
+Why this matters
+
 Your results indicate that you are moderate in Decision-Making. This indicates that you are likely to be generally effective
 when it comes to making decisions. You are likely to spend
 an adequate amount of time gathering and analyzing available
@@ -92,9 +100,25 @@ fn main() {
     let span = span!(Level::TRACE, "Build context").entered();
 
     let mut font_collection = FontCollection::new();
-    font_collection.set_default_font_manager(FontMgr::new(), None);
 
-    let paragraph_style = ParagraphStyle::new();
+    let mut tfp = TypefaceFontProvider::new();
+
+    for font in FONTS {
+        // Safe because all the font data is 'static
+        // They probably could have enforced this with a type to be safe...
+        unsafe {
+            let d = Data::new_bytes(font);
+            let t = Typeface::from_data(d, None);
+            tfp.register_typeface(t.unwrap(), Some("Inter"));
+        }
+    }
+
+    let manager = FontMgr::from(tfp);
+
+    font_collection.set_asset_font_manager(manager);
+    font_collection.disable_font_fallback();
+
+    let mut paragraph_style = ParagraphStyle::new();
 
     let mut ts = TextStyle::new();
     ts.set_font_style(FontStyle::new(
@@ -102,6 +126,9 @@ fn main() {
         Width::NORMAL,
         Slant::Upright,
     ));
+    ts.set_font_size(12.);
+    ts.set_font_families(&["Inter"]);
+    paragraph_style.set_text_style(&ts);
 
     span.exit();
 
@@ -116,9 +143,7 @@ fn main() {
 
     let layout_span = span!(Level::DEBUG, "Layout & Building PDF").entered();
 
-    for _ in 1..1000 {
-
-
+    for _ in 1..54 {
         let span = span!(Level::TRACE, "Computing layout").entered();
 
         let mut paragraph_builder =
@@ -137,8 +162,23 @@ fn main() {
         let mut current_y = layout_y_start;
 
         let current_page = doc.get_page(current_page_index);
-
         let current_layer = current_page.get_layer(current_layer_index);
+
+        let points = vec![
+            (Point::new(Mm(20.), Mm(20.)), false),
+            (Point::new(Mm(20. + 210. - 40.), Mm(20.)), false),
+            (Point::new(Mm(20. + 210. - 40.), Mm(280.)), false),
+            (Point::new(Mm(20.), Mm(280.)), false),
+        ];
+        let line = Line {
+            points,
+            is_closed: true,
+            has_fill: false,
+            has_stroke: true,
+            is_clipping_path: false,
+        };
+
+        current_layer.add_shape(line);
 
         let span = span!(Level::TRACE, "Write Lines").entered();
         current_layer.begin_text_section();
@@ -146,8 +186,7 @@ fn main() {
         current_layer.set_fill_color(Color::Rgb(Rgb::new(0.267, 0.29, 0.353, None)));
 
         for line_metric in metrics {
-            current_layer.set_text_matrix(TextMatrix::Translate(Mm(20.0).into_pt(), current_y));
-            // current_layer.set_text_cursor(Mm(0.), Pt(-line_metric.baseline).into());
+            current_layer.set_text_matrix(TextMatrix::Translate(Mm(20.0).into_pt(), current_y - Pt(line_metric.height)));
             current_layer.write_text(
                 &output_string[line_metric.start_index..line_metric.end_index],
                 &font,
@@ -164,11 +203,6 @@ fn main() {
         current_layer_index = cli;
     }
     layout_span.exit();
-
-    // current_layer.use_text(output_text, 12.0, Mm(0.0), Mm(200.0), &font);
-
-    // Text::
-    // TextLayoutBuilder::font(self, font, font_size)
 
     let span = span!(Level::TRACE, "Writing File");
     let _guard = span.enter();
