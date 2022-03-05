@@ -45,13 +45,13 @@ decisions prior to making them.
 While you are likely to be effective in most day-to-day decision-making situations, you might have difficulty when presented with especially complex decisions. These difficulties
 might take the form of being overwhelmed by options, spending too much time analyzing information, or making decisions
 based on incomplete information.
-CA L LO U T
+CALLOUT
 These callout boxes will
 provide supplemental information pertaining to the
 adjacent section (or the
 section above, depending
 on your screen size).
-E X P L A I N T H E G R O U P I N G S
+EXPLAIN THE GROUPINGS
 Here's a quick snapshot of what these three groupings mean.
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc
 viverra ligula nec posuere dictum. Curabitur varius erat eget
@@ -64,25 +64,25 @@ Nulla non sapien leo. Vestibulum non ligula sapien. Nullam
 finibus nibh a massa auctor sodales. Nulla mauris neque,
 bibendum vel velit id, aliquam pharetra neque. Nam ultricies
 posuere dolor eget congue.
-CA L LO U T
+CALLOUT
 These callout boxes will
 provide supplemental information pertaining to the
 adjacent section (or the
 section above, depending
 on your screen size).
-H OW TO U S E I T
+HOW TO USE IT
 Explaining how every measure should be completed, but allows for the user to browse at their own pace and leisure.
 They're welcome to scroll through, but a deep dive is necessary. At the end of each measure the users will have two
 actions to take: adding items to their action planner or marking
 the measure as complete.
-CA L LO U T
+CALLOUT
 These callout boxes will
 provide supplemental information pertaining to the
 adjacent section (or the
 section above, depending
 on your screen size).
 Decision Making
-W H Y T H I S M AT T E R S
+WHY THIS MATTERS
     "#
     .replace("\n", " ")
     .replace("  ", " ")
@@ -143,7 +143,7 @@ fn main() {
 
     let layout_span = span!(Level::DEBUG, "Layout & Building PDF").entered();
 
-    for _ in 1..54 {
+    for _ in 1..1000 {
         let span = span!(Level::TRACE, "Computing layout").entered();
 
         let mut paragraph_builder =
