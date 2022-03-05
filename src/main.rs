@@ -6,34 +6,23 @@ use piet_common::{
     Device, FontWeight, LineMetric, RenderContext, Text, TextAttribute, TextLayout,
     TextLayoutBuilder,
 };
-use printpdf::{Mm, PdfDocument, Pt, Px, TextMatrix, Color, Rgb};
+use printpdf::{Color, Mm, PdfDocument, Pt, Px, Rgb, TextMatrix};
+use skia_safe::{
+    font_style::{Slant, Weight, Width},
+    textlayout::{
+        DrawOptions, FontCollection, ParagraphBuilder, ParagraphStyle, TextHeightBehavior,
+        TextStyle,
+    },
+    FontMgr, FontStyle,
+};
 use tracing::{span, Level};
 use tracing_chrome::ChromeLayerBuilder;
 use tracing_subscriber::{
     prelude::__tracing_subscriber_SubscriberExt, util::SubscriberInitExt, FmtSubscriber,
 };
 
-fn main() {
-    let (chrome_layer, _guard) = ChromeLayerBuilder::new().build();
-    tracing_subscriber::registry().with(chrome_layer).init();
-
-    let span = span!(Level::DEBUG, "Full Time");
-    let _guard = span.enter();
-
-    let span = span!(Level::TRACE, "Build context").entered();
-
-    let mut device = Device::new().unwrap();
-    let mut bitmap = device.bitmap_target(1024, 1024, 96.).unwrap();
-    let mut rc = bitmap.render_context();
-
-    span.exit();
-
-    let text = rc.text();
-    let piet_font = text
-        .load_font(include_bytes!("../assets/fonts/inter/Inter-Regular.ttf"))
-        .unwrap();
-
-    let output_text = r#"
+fn build_text() -> String {
+    r#"
 Chapter 1Y ouAr cppruaWh tu kur2
 Introduction
 W H Y T H I S M AT T E R S
@@ -88,7 +77,33 @@ Decision Making
 W H Y T H I S M AT T E R S
     "#
     .replace("\n", " ")
-    .replace("  ", " ");
+    .replace("  ", " ")
+}
+
+fn main() {
+    let (chrome_layer, _guard) = ChromeLayerBuilder::new().build();
+    tracing_subscriber::registry().with(chrome_layer).init();
+
+    let output_string = build_text();
+
+    let span = span!(Level::DEBUG, "Full Time");
+    let _guard = span.enter();
+
+    let span = span!(Level::TRACE, "Build context").entered();
+
+    let mut font_collection = FontCollection::new();
+    font_collection.set_default_font_manager(FontMgr::new(), None);
+
+    let paragraph_style = ParagraphStyle::new();
+
+    let mut ts = TextStyle::new();
+    ts.set_font_style(FontStyle::new(
+        Weight::NORMAL,
+        Width::NORMAL,
+        Slant::Upright,
+    ));
+
+    span.exit();
 
     let (doc, page1, layer1) = PdfDocument::new("DVP Report", Mm(210.0), Mm(297.0), "Layer 1");
 
@@ -99,46 +114,49 @@ W H Y T H I S M AT T E R S
     let mut current_page_index = page1;
     let mut current_layer_index = layer1;
 
-
     let layout_span = span!(Level::DEBUG, "Layout & Building PDF").entered();
 
-    for _ in 0..54 {
-        let current_layer = doc
-            .get_page(current_page_index)
-            .get_layer(current_layer_index);
+    for _ in 1..1000 {
 
+
+        let span = span!(Level::TRACE, "Computing layout").entered();
+
+        let mut paragraph_builder =
+            ParagraphBuilder::new(&paragraph_style, font_collection.clone());
+        paragraph_builder.push_style(&ts);
+        paragraph_builder.add_text(output_string.as_str());
+
+        let mut paragraph = paragraph_builder.build();
+        paragraph.layout(Mm(210. - 40.).into_pt().0 as f32);
+
+        let metrics = paragraph.get_line_metrics();
+
+        span.exit();
+
+        let layout_y_start = Pt::from(Mm(280.0));
+        let mut current_y = layout_y_start;
+
+        let current_page = doc.get_page(current_page_index);
+
+        let current_layer = current_page.get_layer(current_layer_index);
+
+        let span = span!(Level::TRACE, "Write Lines").entered();
         current_layer.begin_text_section();
         current_layer.set_font(&font, 12.0);
         current_layer.set_fill_color(Color::Rgb(Rgb::new(0.267, 0.29, 0.353, None)));
 
-        let span = span!(Level::TRACE, "Computing layout").entered();
-        let layout = text
-            .new_text_layout(output_text.clone())
-            .font(piet_font.clone(), 12.0)
-            .max_width(Pt::from(Mm(150.0)).0)
-            .default_attribute(TextAttribute::Weight(FontWeight::BLACK))
-            .build()
-            .unwrap();
-        span.exit();
-
-        let layout_y_start = Pt::from(Mm(280.0));
-        for line_index in 0..layout.line_count() {
-            let line_metric = layout.line_metric(line_index).unwrap();
-
-            // let line_y_start = Mm(layout_y_start - 30. * line_index as f64); // - Px(line_metric.y_offset as usize).into_pt(96.0).into();
-            let line = layout.line_text(line_index).unwrap();
-            // println!("y_start: {:?}", line_y_start);
-            // println!("line: {}", line);
-
-            current_layer.set_text_matrix(TextMatrix::Translate(
-                Pt(10.0),
-                layout_y_start - Pt(line_metric.y_offset),
-            ));
+        for line_metric in metrics {
+            current_layer.set_text_matrix(TextMatrix::Translate(Mm(20.0).into_pt(), current_y));
             // current_layer.set_text_cursor(Mm(0.), Pt(-line_metric.baseline).into());
-            current_layer.write_text(line, &font);
-            current_layer.add_line_break();
+            current_layer.write_text(
+                &output_string[line_metric.start_index..line_metric.end_index],
+                &font,
+            );
+
+            current_y -= Pt(line_metric.height);
         }
         current_layer.end_text_section();
+        span.exit();
 
         let (cpi, cli) = doc.add_page(Mm(210.0), Mm(297.0), "layer 1");
 
@@ -151,8 +169,6 @@ W H Y T H I S M AT T E R S
 
     // Text::
     // TextLayoutBuilder::font(self, font, font_size)
-
-    rc.finish().unwrap();
 
     let span = span!(Level::TRACE, "Writing File");
     let _guard = span.enter();

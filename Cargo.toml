@@ -12,3 +12,4 @@ printpdf = "0.5"
 tracing = "*"
 tracing-subscriber = { version = "*", features = ["std", "fmt"] }
 tracing-chrome = "*"
+skia-safe = { version = "*", features = ["textlayout"] }
