@@ -1,8 +1,8 @@
 use std::{fs::File, io::BufWriter};
 
 use printpdf::{
-    Color, IndirectFontRef, Line, Mm, PdfDocument, PdfDocumentReference,
-    PdfLayerIndex, PdfLayerReference, PdfPageIndex, Point, Pt, Rgb, TextMatrix,
+    Color, IndirectFontRef, Line, Mm, PdfDocument, PdfDocumentReference, PdfLayerIndex,
+    PdfLayerReference, PdfPageIndex, Point, Pt, Rgb, TextMatrix,
 };
 use skia_safe::textlayout::LineMetrics;
 use tracing::{instrument, span, Level};
@@ -95,30 +95,15 @@ impl<'a> PageWriter<'a> {
         let _guard = span.enter();
         let current_layer = self.get_current_layer();
 
+        // RustFmt kinda fucks up this if we let it do its thing
+        #[rustfmt::skip]
         let points = vec![
-            (
-                Point {
-                    x: start.x,
-                    y: start.y,
-                },
-                false,
-            ),
-            (
-                Point {
-                    x: end.x,
-                    y: start.y,
-                },
-                false,
-            ),
-            (Point { x: end.x, y: end.y }, false),
-            (
-                Point {
-                    x: start.x,
-                    y: end.y,
-                },
-                false,
-            ),
+            (Point { x: start.x, y: start.y, }, false),
+            (Point { x: end.x,   y: start.y, }, false,),
+            (Point { x: end.x,   y: end.y },    false),
+            (Point { x: start.x, y: end.y, },   false,),
         ];
+
         let line = Line {
             points,
             is_closed: true,
