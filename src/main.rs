@@ -2,11 +2,6 @@
 
 use pdf_writer::PdfWriter;
 use printpdf::{Mm, Point};
-use skia_safe::{
-    font_style::{Slant, Weight, Width},
-    textlayout::{ParagraphBuilder, ParagraphStyle, TextStyle},
-    FontStyle,
-};
 use text_layout::TextLayout;
 use tracing::{span, Level};
 
@@ -14,6 +9,7 @@ mod fonts;
 mod math;
 mod pdf_writer;
 mod text_layout;
+mod line_metric;
 
 fn build_text() -> String {
     r#"
@@ -95,42 +91,20 @@ fn main() {
     let span = span!(Level::DEBUG, "Full Time");
     let _guard = span.enter();
 
-    let span = span!(Level::TRACE, "Build context").entered();
+    // let span = span!(Level::TRACE, "Build context").entered();
 
-    let mut paragraph_style = ParagraphStyle::new();
-
-    let mut ts = TextStyle::new();
-    ts.set_font_style(FontStyle::new(
-        Weight::NORMAL,
-        Width::NORMAL,
-        Slant::Upright,
-    ));
-    ts.set_font_size(12.);
-    ts.set_font_families(&["Inter"]);
-
-    paragraph_style.set_text_style(&ts);
-
-    span.exit();
+    // span.exit();
 
     let mut page_writer = pdf_writer.get_page(0);
 
     let layout_span = span!(Level::DEBUG, "Layout & Building PDF").entered();
 
     for i in 0..54 {
-        let mut paragraph_builder =
-            ParagraphBuilder::new(&paragraph_style, text_layout.font_collection.clone());
-        paragraph_builder.push_style(&ts);
         // We have to change the string every time otherwise Skia caches the
         // layout calculation and we cheat in performance
         let page_string = &output_string[i..];
-        paragraph_builder.add_text(page_string);
 
-        let mut paragraph = paragraph_builder.build();
-        let span = span!(Level::TRACE, "Computing layout").entered();
-        paragraph.layout(Mm(210. - 40.).into_pt().0 as f32);
-        span.exit();
-
-        let line_metrics = paragraph.get_line_metrics();
+        let line_metrics = text_layout.compute_paragraph_layout(page_string);
 
         page_writer
             .draw_rect(

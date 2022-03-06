@@ -4,10 +4,10 @@ use printpdf::{
     lopdf, Color, IndirectFontRef, Line, Mm, PdfDocument, PdfDocumentReference, PdfLayerIndex,
     PdfLayerReference, PdfPageIndex, Point, Pt, Rgb, TextMatrix,
 };
-use skia_safe::{textlayout::LineMetrics, Typeface};
+use skia_safe::Typeface;
 use tracing::{instrument, span, Level};
 
-use crate::fonts::FONTS;
+use crate::{fonts::FONTS, line_metric::LineMetric};
 
 pub struct PdfWriter {
     dimensions: (Mm, Mm),
@@ -123,7 +123,7 @@ impl<'a> PageWriter<'a> {
         start: Point,
         typeface: &Typeface,
         string_to_write: &str,
-        line_metrics: Vec<LineMetrics>,
+        line_metrics: Vec<LineMetric>,
     ) -> &Self {
         let span = span!(Level::TRACE, "Writing Lines");
         let _guard = span.enter();
