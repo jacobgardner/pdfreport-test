@@ -6,10 +6,10 @@ use text_layout::TextLayout;
 use tracing::{span, Level};
 
 mod fonts;
+mod line_metric;
 mod math;
 mod pdf_writer;
 mod text_layout;
-mod line_metric;
 
 fn build_text() -> String {
     r#"
@@ -91,10 +91,6 @@ fn main() {
     let span = span!(Level::DEBUG, "Full Time");
     let _guard = span.enter();
 
-    // let span = span!(Level::TRACE, "Build context").entered();
-
-    // span.exit();
-
     let mut page_writer = pdf_writer.get_page(0);
 
     let layout_span = span!(Level::DEBUG, "Layout & Building PDF").entered();
@@ -104,18 +100,24 @@ fn main() {
         // layout calculation and we cheat in performance
         let page_string = &output_string[i..];
 
-        let line_metrics = text_layout.compute_paragraph_layout(page_string);
+        // 20 Mm of padding on left & right
+        let text_width = Mm(210. - 40.).into_pt();
+
+        let paragraph_metrics = text_layout.compute_paragraph_layout(page_string, text_width);
 
         page_writer
             .draw_rect(
-                Point::new(Mm(20.), Mm(20.)),
-                Point::new(Mm(20. + 210. - 40.), Mm(280.)),
+                Point::new(Mm(20.), Mm(280.)),
+                Point::new(
+                    Mm(20. + 210. - 40.),
+                    Mm(280.) - paragraph_metrics.height.into(),
+                ),
             )
             .write_lines(
                 Point::new(Mm(20.), Mm(280.)),
                 &text_layout.typeface,
                 page_string,
-                line_metrics,
+                paragraph_metrics.line_metrics,
             );
 
         page_writer = pdf_writer.add_page();

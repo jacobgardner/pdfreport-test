@@ -2,7 +2,7 @@ use std::{fs::File, io::BufWriter};
 
 use printpdf::{
     lopdf, Color, IndirectFontRef, Line, Mm, PdfDocument, PdfDocumentReference, PdfLayerIndex,
-    PdfLayerReference, PdfPageIndex, Point, Pt, Rgb, TextMatrix,
+    PdfLayerReference, PdfPageIndex, Point, Rgb, TextMatrix, Pt,
 };
 use skia_safe::Typeface;
 use tracing::{instrument, span, Level};
@@ -19,6 +19,7 @@ pub struct PdfWriter {
 impl PdfWriter {
     #[instrument(name = "Create PDF Context")]
     pub fn new() -> Self {
+        // A4 Page dimensions
         let dimensions = (Mm(210.), Mm(297.));
 
         let (doc, page1, layer1) =
@@ -104,10 +105,11 @@ impl<'a> PageWriter<'a> {
             (Point { x: start.x, y: end.y, },   false,),
         ];
 
+        current_layer.set_fill_color(Color::Rgb(Rgb::new(0.8, 1., 0.8, None)));
         let line = Line {
             points,
             is_closed: true,
-            has_fill: false,
+            has_fill: true,
             has_stroke: true,
             is_clipping_path: false,
         };
@@ -115,6 +117,32 @@ impl<'a> PageWriter<'a> {
         current_layer.add_shape(line);
 
         self
+    }
+
+    // Borrowed from `printpdf`
+    // Assumption: all styles of a typeface share the same glyph_ids
+    fn encode_pdf_text(line: &str, typeface: &Typeface) -> Vec<u8> {
+        let mut glyph_ids = vec![0; line.len()];
+        typeface.str_to_glyphs(line, &mut glyph_ids);
+
+        glyph_ids
+            .iter()
+            .flat_map(|x| vec![(x >> 8) as u8, (x & 255) as u8])
+            .collect::<Vec<u8>>()
+    }
+
+    // This is more efficient than printpdf's write_line call
+    //  because this uses Skia's much faster glyph lookup
+    fn write_line(current_layer: &PdfLayerReference, line: &str, typeface: &Typeface) {
+        let bytes = PageWriter::encode_pdf_text(line, typeface);
+
+        current_layer.add_operation(lopdf::content::Operation::new(
+            "Tj",
+            vec![lopdf::Object::String(
+                bytes,
+                lopdf::StringFormat::Hexadecimal,
+            )],
+        ));
     }
 
     // TODO: Decouple this from Skia's line metrics
@@ -138,29 +166,15 @@ impl<'a> PageWriter<'a> {
         let mut current_y = start.y;
         for line_metric in line_metrics {
             current_layer.set_text_matrix(TextMatrix::Translate(
-                start.x,
-                current_y - Pt(line_metric.height),
+                start.x + line_metric.left - Pt(1.),  
+                current_y - line_metric.ascent,
             ));
 
             let line_to_write = &string_to_write[line_metric.start_index..line_metric.end_index];
 
-            let mut glyph_ids = vec![0; line_to_write.len()];
-            typeface.str_to_glyphs(line_to_write, &mut glyph_ids);
+            PageWriter::write_line(&current_layer, line_to_write, typeface);
 
-            let bytes = glyph_ids
-                .iter()
-                .flat_map(|x| vec![(x >> 8) as u8, (x & 255) as u8])
-                .collect::<Vec<u8>>();
-
-            current_layer.add_operation(lopdf::content::Operation::new(
-                "Tj",
-                vec![lopdf::Object::String(
-                    bytes,
-                    lopdf::StringFormat::Hexadecimal,
-                )],
-            ));
-
-            current_y -= Pt(line_metric.height);
+            current_y -= line_metric.height;
         }
         current_layer.end_text_section();
 

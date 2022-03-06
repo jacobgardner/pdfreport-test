@@ -1,15 +1,18 @@
-use printpdf::Mm;
+use printpdf::Pt;
 use skia_safe::{
     font_style::{Slant, Weight, Width},
     textlayout::{
-        FontCollection, ParagraphBuilder, ParagraphStyle, TextStyle,
+        FontCollection, ParagraphBuilder, ParagraphStyle, TextAlign, TextStyle,
         TypefaceFontProvider,
     },
     Data, FontMgr, FontStyle, Typeface,
 };
 use tracing::instrument;
 
-use crate::{fonts::FONTS, line_metric::LineMetric};
+use crate::{
+    fonts::FONTS,
+    line_metric::{LineMetric, ParagraphMetrics},
+};
 
 #[derive(Debug)]
 pub struct TextLayout {
@@ -50,7 +53,7 @@ impl TextLayout {
     }
 
     #[instrument(name = "Computing paragraph layout")]
-    pub fn compute_paragraph_layout(&self, text: &str) -> Vec<LineMetric> {
+    pub fn compute_paragraph_layout(&self, text: &str, width: Pt) -> ParagraphMetrics {
         let mut paragraph_style = ParagraphStyle::new();
 
         let mut ts = TextStyle::new();
@@ -63,24 +66,42 @@ impl TextLayout {
         ts.set_font_families(&["Inter"]);
 
         paragraph_style.set_text_style(&ts);
+        paragraph_style.set_text_align(TextAlign::Center);
 
         let mut paragraph_builder =
             ParagraphBuilder::new(&paragraph_style, self.font_collection.clone());
+
         paragraph_builder.push_style(&ts);
 
         paragraph_builder.add_text(text);
+        // paragraph_builder.set_paragraph_style(ParagraphStyle::new().set_text_align(TextAlign::Center));
 
         let mut paragraph = paragraph_builder.build();
-        paragraph.layout(Mm(210. - 40.).into_pt().0 as f32);
+        paragraph.layout(width.0 as f32);
 
-        paragraph
+        let mut height = 0.;
+
+        let metrics = paragraph
             .get_line_metrics()
             .iter()
-            .map(|metrics| LineMetric {
-                start_index: metrics.start_index,
-                end_index: metrics.end_index,
-                height: metrics.height,
+            .map(|metrics| {
+                let metric = LineMetric {
+                    start_index: metrics.start_index,
+                    end_index: metrics.end_index,
+                    height: Pt(metrics.height),
+                    left: Pt(metrics.left),
+                    ascent: Pt(metrics.ascent),
+                };
+
+                height += metrics.height;
+
+                metric
             })
-            .collect()
+            .collect();
+
+        ParagraphMetrics {
+            line_metrics: metrics,
+            height: Pt(height),
+        }
     }
 }
