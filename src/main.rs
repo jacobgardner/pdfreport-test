@@ -103,6 +103,7 @@ fn main() {
     ));
     ts.set_font_size(12.);
     ts.set_font_families(&["Inter"]);
+
     paragraph_style.set_text_style(&ts);
 
     span.exit();
@@ -111,27 +112,35 @@ fn main() {
 
     let layout_span = span!(Level::DEBUG, "Layout & Building PDF").entered();
 
-    for _ in 1..1000 {
-        let span = span!(Level::TRACE, "Computing layout").entered();
+    for i in 1..1000 {
 
         let mut paragraph_builder =
             ParagraphBuilder::new(&paragraph_style, text_layout.font_collection.clone());
         paragraph_builder.push_style(&ts);
-        paragraph_builder.add_text(output_string.as_str());
+        // We have to change the string every time otherwise Skia caches the
+        // layout calculation and we cheat in performance
+        let page_string = &output_string[i..];
+        paragraph_builder.add_text(page_string);
 
         let mut paragraph = paragraph_builder.build();
+        let span = span!(Level::TRACE, "Computing layout").entered();
         paragraph.layout(Mm(210. - 40.).into_pt().0 as f32);
+        span.exit();
 
         let line_metrics = paragraph.get_line_metrics();
 
-        span.exit();
 
         page_writer
             .draw_rect(
                 Point::new(Mm(20.), Mm(20.)),
                 Point::new(Mm(20. + 210. - 40.), Mm(280.)),
             )
-            .write_lines(Point::new(Mm(20.), Mm(280.)), &output_string, line_metrics);
+            .write_lines(
+                Point::new(Mm(20.), Mm(280.)),
+                &text_layout.typeface,
+                page_string,
+                line_metrics,
+            );
 
         page_writer = pdf_writer.add_page();
     }

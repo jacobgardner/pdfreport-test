@@ -1,10 +1,10 @@
 use std::{fs::File, io::BufWriter};
 
 use printpdf::{
-    Color, IndirectFontRef, Line, Mm, PdfDocument, PdfDocumentReference, PdfLayerIndex,
+    lopdf, Color, IndirectFontRef, Line, Mm, PdfDocument, PdfDocumentReference, PdfLayerIndex,
     PdfLayerReference, PdfPageIndex, Point, Pt, Rgb, TextMatrix,
 };
-use skia_safe::textlayout::LineMetrics;
+use skia_safe::{textlayout::LineMetrics, Typeface};
 use tracing::{instrument, span, Level};
 
 use crate::fonts::FONTS;
@@ -121,6 +121,7 @@ impl<'a> PageWriter<'a> {
     pub fn write_lines(
         &self,
         start: Point,
+        typeface: &Typeface,
         string_to_write: &str,
         line_metrics: Vec<LineMetrics>,
     ) -> &Self {
@@ -140,10 +141,24 @@ impl<'a> PageWriter<'a> {
                 start.x,
                 current_y - Pt(line_metric.height),
             ));
-            current_layer.write_text(
-                &string_to_write[line_metric.start_index..line_metric.end_index],
-                &font,
-            );
+
+            let line_to_write = &string_to_write[line_metric.start_index..line_metric.end_index];
+
+            let mut glyph_ids = vec![0; line_to_write.len()];
+            typeface.str_to_glyphs(line_to_write, &mut glyph_ids);
+
+            let bytes = glyph_ids
+                .iter()
+                .flat_map(|x| vec![(x >> 8) as u8, (x & 255) as u8])
+                .collect::<Vec<u8>>();
+
+            current_layer.add_operation(lopdf::content::Operation::new(
+                "Tj",
+                vec![lopdf::Object::String(
+                    bytes,
+                    lopdf::StringFormat::Hexadecimal,
+                )],
+            ));
 
             current_y -= Pt(line_metric.height);
         }
