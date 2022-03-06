@@ -1,8 +1,7 @@
 // Compute layout -> Draw Shit -> Draw Text -> Profit
 
-use std::{fs::File, io::BufWriter};
-
-use printpdf::{Color, Line, Mm, PdfDocument, Point, Pt, Rgb, TextMatrix};
+use pdf_writer::PdfWriter;
+use printpdf::{Mm, Point};
 use skia_safe::{
     font_style::{Slant, Weight, Width},
     textlayout::{ParagraphBuilder, ParagraphStyle, TextStyle},
@@ -14,6 +13,8 @@ use tracing_chrome::ChromeLayerBuilder;
 use tracing_subscriber::prelude::*;
 
 mod fonts;
+mod math;
+mod pdf_writer;
 mod text_layout;
 
 fn build_text() -> String {
@@ -84,6 +85,7 @@ fn main() {
 
     let output_string = build_text();
 
+    let mut pdf_writer = PdfWriter::new();
     let text_layout = TextLayout::new();
 
     let span = span!(Level::DEBUG, "Full Time");
@@ -105,14 +107,7 @@ fn main() {
 
     span.exit();
 
-    let (doc, page1, layer1) = PdfDocument::new("DVP Report", Mm(210.0), Mm(297.0), "Layer 1");
-
-    let font = doc
-        .add_external_font(File::open("assets/fonts/inter/Inter-Regular.ttf").unwrap())
-        .unwrap();
-
-    let mut current_page_index = page1;
-    let mut current_layer_index = layer1;
+    let mut page_writer = pdf_writer.get_page(0);
 
     let layout_span = span!(Level::DEBUG, "Layout & Building PDF").entered();
 
@@ -127,62 +122,20 @@ fn main() {
         let mut paragraph = paragraph_builder.build();
         paragraph.layout(Mm(210. - 40.).into_pt().0 as f32);
 
-        let metrics = paragraph.get_line_metrics();
+        let line_metrics = paragraph.get_line_metrics();
 
         span.exit();
 
-        let layout_y_start = Pt::from(Mm(280.0));
-        let mut current_y = layout_y_start;
+        page_writer
+            .draw_rect(
+                Point::new(Mm(20.), Mm(20.)),
+                Point::new(Mm(20. + 210. - 40.), Mm(280.)),
+            )
+            .write_lines(Point::new(Mm(20.), Mm(280.)), &output_string, line_metrics);
 
-        let current_page = doc.get_page(current_page_index);
-        let current_layer = current_page.get_layer(current_layer_index);
-
-        let points = vec![
-            (Point::new(Mm(20.), Mm(20.)), false),
-            (Point::new(Mm(20. + 210. - 40.), Mm(20.)), false),
-            (Point::new(Mm(20. + 210. - 40.), Mm(280.)), false),
-            (Point::new(Mm(20.), Mm(280.)), false),
-        ];
-        let line = Line {
-            points,
-            is_closed: true,
-            has_fill: false,
-            has_stroke: true,
-            is_clipping_path: false,
-        };
-
-        current_layer.add_shape(line);
-
-        let span = span!(Level::TRACE, "Write Lines").entered();
-        current_layer.begin_text_section();
-        current_layer.set_font(&font, 12.0);
-        current_layer.set_fill_color(Color::Rgb(Rgb::new(0.267, 0.29, 0.353, None)));
-
-        for line_metric in metrics {
-            current_layer.set_text_matrix(TextMatrix::Translate(
-                Mm(20.0).into_pt(),
-                current_y - Pt(line_metric.height),
-            ));
-            current_layer.write_text(
-                &output_string[line_metric.start_index..line_metric.end_index],
-                &font,
-            );
-
-            current_y -= Pt(line_metric.height);
-        }
-        current_layer.end_text_section();
-        span.exit();
-
-        let (cpi, cli) = doc.add_page(Mm(210.0), Mm(297.0), "layer 1");
-
-        current_page_index = cpi;
-        current_layer_index = cli;
+        page_writer = pdf_writer.add_page();
     }
     layout_span.exit();
 
-    let span = span!(Level::TRACE, "Writing File");
-    let _guard = span.enter();
-
-    doc.save(&mut BufWriter::new(File::create("output.pdf").unwrap()))
-        .unwrap();
+    pdf_writer.save("output.pdf");
 }
