@@ -13,11 +13,15 @@ trace_chrome = [ "tracing-chrome" ]
 
 [dependencies]
 printpdf = "*"
+# Leaving these dependencies as required because I don't feel like abstracting
+# the tracing layer right now
 tracing = { version = "*" }
 tracing-subscriber = { version = "*", features = ["std", "fmt"] }
-tracing-chrome = { version = "*", optional = true }
 skia-safe = { version = "*", features = ["textlayout"] }
 stretch = "*"
+
+# Optional Dependencies
+tracing-chrome = { version = "*", optional = true }
 
 [profile.release]
 # debug = true
