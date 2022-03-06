@@ -12,3 +12,4 @@ tracing = "*"
 tracing-subscriber = { version = "*", features = ["std", "fmt"] }
 tracing-chrome = "*"
 skia-safe = { version = "*", features = ["textlayout"] }
+stretch = "*"

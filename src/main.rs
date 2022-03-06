@@ -5,26 +5,16 @@ use std::{fs::File, io::BufWriter};
 use printpdf::{Color, Line, Mm, PdfDocument, Point, Pt, Rgb, TextMatrix};
 use skia_safe::{
     font_style::{Slant, Weight, Width},
-    textlayout::{
-        FontCollection, ParagraphBuilder, ParagraphStyle, TextStyle, TypefaceFontProvider,
-    },
-    Data, FontMgr, FontStyle, Typeface,
+    textlayout::{ParagraphBuilder, ParagraphStyle, TextStyle},
+    FontStyle,
 };
+use text_layout::TextLayout;
 use tracing::{span, Level};
 use tracing_chrome::ChromeLayerBuilder;
 use tracing_subscriber::prelude::*;
 
-const FONTS: [&[u8]; 9] = [
-    include_bytes!("../assets/fonts/inter/Inter-Black.ttf"),
-    include_bytes!("../assets/fonts/inter/Inter-Bold.ttf"),
-    include_bytes!("../assets/fonts/inter/Inter-ExtraBold.ttf"),
-    include_bytes!("../assets/fonts/inter/Inter-Light.ttf"),
-    include_bytes!("../assets/fonts/inter/Inter-ExtraLight.ttf"),
-    include_bytes!("../assets/fonts/inter/Inter-Medium.ttf"),
-    include_bytes!("../assets/fonts/inter/Inter-Regular.ttf"),
-    include_bytes!("../assets/fonts/inter/Inter-SemiBold.ttf"),
-    include_bytes!("../assets/fonts/inter/Inter-Thin.ttf"),
-];
+mod fonts;
+mod text_layout;
 
 fn build_text() -> String {
     r#"
@@ -94,29 +84,12 @@ fn main() {
 
     let output_string = build_text();
 
+    let text_layout = TextLayout::new();
+
     let span = span!(Level::DEBUG, "Full Time");
     let _guard = span.enter();
 
     let span = span!(Level::TRACE, "Build context").entered();
-
-    let mut font_collection = FontCollection::new();
-
-    let mut tfp = TypefaceFontProvider::new();
-
-    for font in FONTS {
-        // Safe because all the font data is 'static
-        // They probably could have enforced this with a type to be safe...
-        unsafe {
-            let d = Data::new_bytes(font);
-            let t = Typeface::from_data(d, None);
-            tfp.register_typeface(t.unwrap(), Some("Inter"));
-        }
-    }
-
-    let manager = FontMgr::from(tfp);
-
-    font_collection.set_asset_font_manager(manager);
-    font_collection.disable_font_fallback();
 
     let mut paragraph_style = ParagraphStyle::new();
 
@@ -147,7 +120,7 @@ fn main() {
         let span = span!(Level::TRACE, "Computing layout").entered();
 
         let mut paragraph_builder =
-            ParagraphBuilder::new(&paragraph_style, font_collection.clone());
+            ParagraphBuilder::new(&paragraph_style, text_layout.font_collection.clone());
         paragraph_builder.push_style(&ts);
         paragraph_builder.add_text(output_string.as_str());
 
@@ -186,7 +159,10 @@ fn main() {
         current_layer.set_fill_color(Color::Rgb(Rgb::new(0.267, 0.29, 0.353, None)));
 
         for line_metric in metrics {
-            current_layer.set_text_matrix(TextMatrix::Translate(Mm(20.0).into_pt(), current_y - Pt(line_metric.height)));
+            current_layer.set_text_matrix(TextMatrix::Translate(
+                Mm(20.0).into_pt(),
+                current_y - Pt(line_metric.height),
+            ));
             current_layer.write_text(
                 &output_string[line_metric.start_index..line_metric.end_index],
                 &font,
