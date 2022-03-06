@@ -4,12 +4,20 @@ version = "0.1.0"
 edition = "2021"
 publish = false
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+# See more keys and their definitions at
+# https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[features]
+trace_chrome = [ "tracing-chrome" ]
+
 
 [dependencies]
 printpdf = "*"
-tracing = "*"
+tracing = { version = "*" }
 tracing-subscriber = { version = "*", features = ["std", "fmt"] }
-tracing-chrome = "*"
+tracing-chrome = { version = "*", optional = true }
 skia-safe = { version = "*", features = ["textlayout"] }
 stretch = "*"
+
+[profile.release]
+# debug = true

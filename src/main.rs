@@ -9,8 +9,6 @@ use skia_safe::{
 };
 use text_layout::TextLayout;
 use tracing::{span, Level};
-use tracing_chrome::ChromeLayerBuilder;
-use tracing_subscriber::prelude::*;
 
 mod fonts;
 mod math;
@@ -80,8 +78,14 @@ WHY THIS MATTERS
 }
 
 fn main() {
-    let (chrome_layer, _guard) = ChromeLayerBuilder::new().build();
-    tracing_subscriber::registry().with(chrome_layer).init();
+    #[cfg(feature = "trace_chrome")]
+    let _guard = {
+        use tracing_chrome::ChromeLayerBuilder;
+        use tracing_subscriber::prelude::*;
+        let (chrome_layer, _guard) = ChromeLayerBuilder::new().build();
+        tracing_subscriber::registry().with(chrome_layer).init();
+        _guard
+    };
 
     let output_string = build_text();
 
@@ -112,8 +116,7 @@ fn main() {
 
     let layout_span = span!(Level::DEBUG, "Layout & Building PDF").entered();
 
-    for i in 1..1000 {
-
+    for i in 0..54 {
         let mut paragraph_builder =
             ParagraphBuilder::new(&paragraph_style, text_layout.font_collection.clone());
         paragraph_builder.push_style(&ts);
@@ -128,7 +131,6 @@ fn main() {
         span.exit();
 
         let line_metrics = paragraph.get_line_metrics();
-
 
         page_writer
             .draw_rect(
