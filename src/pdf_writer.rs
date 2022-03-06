@@ -2,7 +2,7 @@ use std::{fs::File, io::BufWriter};
 
 use printpdf::{
     lopdf, Color, IndirectFontRef, Line, Mm, PdfDocument, PdfDocumentReference, PdfLayerIndex,
-    PdfLayerReference, PdfPageIndex, Point, Rgb, TextMatrix, Pt,
+    PdfLayerReference, PdfPageIndex, Point, Rgb, TextMatrix,
 };
 use skia_safe::Typeface;
 use tracing::{instrument, span, Level};
@@ -166,7 +166,7 @@ impl<'a> PageWriter<'a> {
         let mut current_y = start.y;
         for line_metric in line_metrics {
             current_layer.set_text_matrix(TextMatrix::Translate(
-                start.x + line_metric.left - Pt(1.),  
+                start.x + line_metric.left,  
                 current_y - line_metric.ascent,
             ));
 

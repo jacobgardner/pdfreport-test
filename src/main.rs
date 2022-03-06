@@ -109,7 +109,7 @@ fn main() {
             .draw_rect(
                 Point::new(Mm(20.), Mm(280.)),
                 Point::new(
-                    Mm(20. + 210. - 40.),
+                    Mm(20.) + text_width.into(),
                     Mm(280.) - paragraph_metrics.height.into(),
                 ),
             )
