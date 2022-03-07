@@ -2,7 +2,7 @@
 
 use pdf_writer::PdfWriter;
 use printpdf::{Mm, Point, Pt};
-use rich_text::{FontWeight, RichText, RichTextStyle};
+use rich_text::{RichText, RichTextStyle, RichTextStyleChanges};
 use text_layout::TextLayout;
 use tracing::{span, Level};
 
@@ -87,19 +87,18 @@ fn main() {
     let output_text = build_text();
 
     let default_style = RichTextStyle {
-        font_size: Some(Pt(16.)),
-        weight: Some(rich_text::FontWeight::Regular),
-        italic: Some(false),
-        color: Some((0.267, 0.29, 0.353)),
+        font_size: Pt(16.),
+        weight: rich_text::FontWeight::Regular,
+        italic: false,
+        color: (0.267, 0.29, 0.353),
     };
 
-    let mut rich_text = RichText::new(&output_text, default_style.clone());
+    let mut rich_text = RichText::new(&output_text, default_style);
 
     rich_text.push_style(
-        RichTextStyle {
+        RichTextStyleChanges {
             font_size: Some(Pt(32.)),
             weight: Some(rich_text::FontWeight::Bold),
-
             ..Default::default()
         },
         0..32,
@@ -115,7 +114,7 @@ fn main() {
 
     let layout_span = span!(Level::DEBUG, "Layout & Building PDF").entered();
 
-    for i in 0..1 {
+    for _i in 0..1 {
         // // We have to change the string every time otherwise Skia caches the
         // // layout calculation and we cheat in performance
         // let page_string = &output_string[i..];
