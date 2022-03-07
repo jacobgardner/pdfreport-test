@@ -1,5 +1,6 @@
 use printpdf::Pt;
 
+#[derive(Debug)]
 pub struct LineMetric {
     pub start_index: usize,
     pub end_index: usize,

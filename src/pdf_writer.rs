@@ -160,7 +160,7 @@ impl<'a> PageWriter<'a> {
         let font = self.writer.fonts[6].clone();
 
         current_layer.begin_text_section();
-        current_layer.set_font(&font, 16.0);
+        current_layer.set_font(&font, 16.);
         current_layer.set_fill_color(Color::Rgb(Rgb::new(0.267, 0.29, 0.353, None)));
 
         let mut current_y = start.y;

@@ -84,24 +84,26 @@ fn main() {
         _guard
     };
 
-
     let output_text = build_text();
 
-    let mut rich_text = RichText::new(
-        &output_text,
-        RichTextStyle {
-            font_size: Some(Pt(16.)),
-            weight: Some(rich_text::FontWeight::Regular),
-            italic: Some(false),
-            color: Some((0.267, 0.29, 0.353)),
-        },
-    );
+    let default_style = RichTextStyle {
+        font_size: Some(Pt(16.)),
+        weight: Some(rich_text::FontWeight::Regular),
+        italic: Some(false),
+        color: Some((0.267, 0.29, 0.353)),
+    };
 
-    rich_text.push_style(RichTextStyle {
-        font_size: Some(Pt(32.)),
-        weight: Some(rich_text::FontWeight::Bold),
-       ..Default::default() 
-    }, 0..32);
+    let mut rich_text = RichText::new(&output_text, default_style.clone());
+
+    rich_text.push_style(
+        RichTextStyle {
+            font_size: Some(Pt(32.)),
+            weight: Some(rich_text::FontWeight::Bold),
+
+            ..Default::default()
+        },
+        0..32,
+    );
 
     let mut pdf_writer = PdfWriter::new();
     let text_layout = TextLayout::new();
@@ -113,7 +115,7 @@ fn main() {
 
     let layout_span = span!(Level::DEBUG, "Layout & Building PDF").entered();
 
-    for i in 0..54 {
+    for i in 0..1 {
         // // We have to change the string every time otherwise Skia caches the
         // // layout calculation and we cheat in performance
         // let page_string = &output_string[i..];

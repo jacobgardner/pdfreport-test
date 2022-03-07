@@ -1,14 +1,14 @@
 use std::ops::RangeBounds;
 
 use itertools::Itertools;
-use printpdf::Pt;
+use printpdf::{Pt, Rgb};
 use skia_safe::{
     font_style::{Slant, Weight, Width},
     textlayout::{
         FontCollection, ParagraphBuilder, ParagraphStyle, TextAlign, TextStyle,
         TypefaceFontProvider,
     },
-    Data, FontMgr, FontStyle, Typeface,
+    Color, Data, FontMgr, FontStyle, Typeface, RGB,
 };
 use tracing::instrument;
 
@@ -77,72 +77,103 @@ impl TextLayout {
         default_style.set_font_families(&["Inter"]);
 
         paragraph_style.set_text_style(&default_style);
-        paragraph_style.set_text_align(TextAlign::Center);
+        // paragraph_style.set_text_align(TextAlign::Center);
 
         let mut paragraph_builder =
             ParagraphBuilder::new(&paragraph_style, self.font_collection.clone());
 
-        let style_stack = vec![default_style];
+        let mut style_stack = vec![default_style];
 
+        let mut range_stack = vec![0..rich_text.paragraph.len()];
+
+        let mut next_range_index = 0;
         let mut current_position = 0;
 
-        let range_stack = vec![0..rich_text.paragraph.len()];
-
-        let next_range = 0;
-        
+        // let mut next_position = rich_text.paragraph.len();
 
         while !range_stack.is_empty() {
-            let current_range = range_stack.last().unwrap();
+            let current_range = range_stack.last().unwrap().clone();
+            let current_style = style_stack.last().unwrap().clone();
 
-            if let Some((a, b)) = rich_text.style_ranges.get(next_range) {
+            let end_position =
+                if let Some((range, _)) = rich_text.style_ranges.get(next_range_index) {
+                    if range.start < current_range.end {
+                        range.start
+                    } else {
+                        style_stack.pop();
+                        range_stack.pop();
+                        // Finish up the current range
+                        current_range.end
+                    }
+                } else {
+                    style_stack.pop();
+                    range_stack.pop();
+                    current_range.end
+                };
 
+            if current_position < end_position {
+                // Do the stuff
+
+                // let mut style = ParagraphStyle::new();
+                // paragraph_style.set_text_style(&current_style);
+                // style.set_text_style(&current_style);
+                paragraph_builder.push_style(&current_style);
+
+                let current_span = &rich_text.paragraph[current_position..end_position];
+                paragraph_builder.add_text(current_span);
+                println!("{}..{}", current_position, end_position);
+                println!("{}", current_span);
             }
 
+            current_position = end_position;
 
-            // next_range += 1;
+            if let Some((range, style)) = rich_text.style_ranges.get(next_range_index) {
+                range_stack.push(range.clone());
 
+                let mut next_style = current_style.clone();
+                if let Some(Pt(font_size)) = style.font_size {
+                    next_style.set_font_size(font_size as f32);
+                }
 
-            // if let Some((a, b)) = range_iter.next() {
+                let prev_font_style = next_style.font_style();
 
-            // } else {
+                let next_weight = if let Some(weight) = style.weight {
+                    weight.into()
+                } else {
+                    prev_font_style.weight()
+                };
 
-            // }
+                let next_slant = if let Some(italic) = style.italic {
+                    if italic {
+                        Slant::Italic
+                    } else {
+                        Slant::Upright
+                    }
+                } else {
+                    prev_font_style.slant()
+                };
 
+                let next_font_style =
+                    FontStyle::new(next_weight, prev_font_style.width(), next_slant);
 
+                if next_font_style != prev_font_style {
+                    next_style.set_font_style(next_font_style);
+                }
 
+                // Don't need Color doesn't matter for layout...
+                // if let Some(color) = style.color {
+                //     next_style.set_color(
+                //         Color::from_rgb(color.0, color.1 as f64, color.2 as f64).into(),
+                //     );
+                // }
+
+                // Create new style based on prev_style
+                style_stack.push(next_style);
+                next_range_index += 1;
+            };
         }
 
-        // for (range, style) in rich_text.style_ranges.iter() {
-
-        //     let current_range = range_stack.last().unwrap();
-
-        //     if range.start <= current_range.end {
-        //         // Nested
-
-        //         // current_range.start -> range.start
-        //         // push?
-        //     } else {
-        //         // current_range.end -> range.start
-        //         // pop?
-
-        //     }
-
-        // }
-
-
-
-
-
-        // for (first, second) in rich_text.style_ranges.iter().tuple_windows() {
-
-        //     // if current_position < first.0.start {
-
-        //     // }
-        // }
-
-        // paragraph_builder.push_style(&ts);
-
-        paragraph_builder.add_text(rich_text.paragraph);
+        // paragraph_builder.add_text(rich_text.paragraph);
         // paragraph_builder.set_paragraph_style(ParagraphStyle::new().set_text_align(TextAlign::Center));
 
         let mut paragraph = paragraph_builder.build();
@@ -167,6 +198,8 @@ impl TextLayout {
                 metric
             })
             .collect();
+
+        println!("{:?}", metrics);
 
         ParagraphMetrics {
             line_metrics: metrics,
