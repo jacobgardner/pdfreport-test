@@ -7,7 +7,7 @@ use printpdf::{
 use skia_safe::Typeface;
 use tracing::{instrument, span, Level};
 
-use crate::{fonts::FONTS, line_metric::LineMetric};
+use crate::{fonts::{FONTS, find_font_index_by_style}, line_metric::LineMetric, rich_text::RichText};
 
 pub struct PdfWriter {
     dimensions: (Mm, Mm),
@@ -28,7 +28,7 @@ impl PdfWriter {
         let mut fonts = vec![];
 
         for font in FONTS {
-            let font = doc.add_external_font(font).unwrap();
+            let font = doc.add_external_font(font.bytes).unwrap();
             fonts.push(font);
         }
 
@@ -133,7 +133,7 @@ impl<'a> PageWriter<'a> {
 
     // This is more efficient than printpdf's write_line call
     //  because this uses Skia's much faster glyph lookup
-    fn write_line(current_layer: &PdfLayerReference, line: &str, typeface: &Typeface) {
+    fn write_text(current_layer: &PdfLayerReference, line: &str, typeface: &Typeface) {
         let bytes = PageWriter::encode_pdf_text(line, typeface);
 
         current_layer.add_operation(lopdf::content::Operation::new(
@@ -145,34 +145,60 @@ impl<'a> PageWriter<'a> {
         ));
     }
 
-    // TODO: Decouple this from Skia's line metrics
+    // TODO: Decouple this from Skia's structures
     pub fn write_lines(
         &self,
         start: Point,
         typeface: &Typeface,
-        string_to_write: &str,
+        rich_text: &RichText,
         line_metrics: Vec<LineMetric>,
     ) -> &Self {
         let span = span!(Level::TRACE, "Writing Lines");
         let _guard = span.enter();
         let current_layer = self.get_current_layer();
 
-        let font = self.writer.fonts[6].clone();
-
         current_layer.begin_text_section();
-        current_layer.set_font(&font, 12.0);
-        current_layer.set_fill_color(Color::Rgb(Rgb::new(0.267, 0.29, 0.353, None)));
+
+        let mut style_iterator = rich_text.style_range_iter();
+        let (mut current_range, mut current_style) = style_iterator.next().unwrap();
 
         let mut current_y = start.y;
         for line_metric in line_metrics {
             current_layer.set_text_matrix(TextMatrix::Translate(
-                start.x + line_metric.left,  
+                start.x + line_metric.left,
                 current_y - line_metric.ascent,
             ));
 
-            let line_to_write = &string_to_write[line_metric.start_index..line_metric.end_index];
+            let mut current_index = line_metric.start_index;
 
-            PageWriter::write_line(&current_layer, line_to_write, typeface);
+            loop {
+                let end_index = current_range.end.min(line_metric.end_index);
+                let current_span = &rich_text.paragraph[current_index..end_index];
+
+                current_index = end_index;
+
+                let font_idx = find_font_index_by_style(current_style.weight, current_style.italic);
+                let current_font = &self.writer.fonts[font_idx];
+
+                current_layer.set_font(current_font, current_style.font_size.0);
+                let clr = current_style.color;
+                current_layer.set_fill_color(Color::Rgb(Rgb::new(clr.0 as f64, clr.1 as f64, clr.2 as f64, None)));
+
+                PageWriter::write_text(&current_layer, current_span, typeface);
+
+                if current_index == line_metric.end_index {
+                    break;
+                } else {
+                    let (next_range, next_style) = style_iterator.next().unwrap();
+
+                    current_range = next_range;
+                    current_style = next_style;
+
+                    // (current_range, current_style) = ;
+                }
+            }
+
+            // let line_to_write = &rich_text.paragraph[line_metric.start_index..line_metric.end_index];
 
             current_y -= line_metric.height;
         }

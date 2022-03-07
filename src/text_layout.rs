@@ -12,6 +12,7 @@ use tracing::instrument;
 use crate::{
     fonts::FONTS,
     line_metric::{LineMetric, ParagraphMetrics},
+    rich_text::RichText,
 };
 
 #[derive(Debug)]
@@ -31,10 +32,11 @@ impl TextLayout {
         let mut typeface: Option<Typeface> = None;
 
         for font in FONTS {
-            // Safe because all the font data is 'static
+            // Safe because all the font dat
+            // a is 'static
             // They probably could have enforced this with a type to be safe...
             unsafe {
-                let d = Data::new_bytes(font);
+                let d = Data::new_bytes(font.bytes);
                 let t = Typeface::from_data(d, None);
                 typeface = Some(t.clone().unwrap());
                 tfp.register_typeface(t.unwrap(), Some("Inter"));
@@ -53,28 +55,48 @@ impl TextLayout {
     }
 
     #[instrument(name = "Computing paragraph layout")]
-    pub fn compute_paragraph_layout(&self, text: &str, width: Pt) -> ParagraphMetrics {
+    pub fn compute_paragraph_layout(&self, rich_text: &RichText, width: Pt) -> ParagraphMetrics {
         let mut paragraph_style = ParagraphStyle::new();
 
-        let mut ts = TextStyle::new();
-        ts.set_font_style(FontStyle::new(
-            Weight::NORMAL,
-            Width::NORMAL,
-            Slant::Upright,
-        ));
-        ts.set_font_size(12.);
-        ts.set_font_families(&["Inter"]);
+        let mut default_style = TextStyle::new();
 
-        paragraph_style.set_text_style(&ts);
+        default_style.set_font_style(FontStyle::new(
+            rich_text.default_style.weight.into(),
+            Width::NORMAL,
+            if rich_text.default_style.italic {
+                Slant::Italic
+            } else {
+                Slant::Upright
+            },
+        ));
+        default_style.set_font_size(rich_text.default_style.font_size.0 as f32);
+        // TODO: Make configurable in the future
+        default_style.set_font_families(&["Inter"]);
+
+        paragraph_style.set_text_style(&default_style);
         paragraph_style.set_text_align(TextAlign::Center);
 
         let mut paragraph_builder =
             ParagraphBuilder::new(&paragraph_style, self.font_collection.clone());
 
-        paragraph_builder.push_style(&ts);
+        for (range, style) in rich_text.style_range_iter() {
+            let mut ts = default_style.clone();
+            ts.set_font_style(FontStyle::new(
+                style.weight.into(),
+                Width::NORMAL,
+                if style.italic {
+                    Slant::Italic
+                } else {
+                    Slant::Upright
+                },
+            ));
+            ts.set_font_size(style.font_size.0 as f32);
 
-        paragraph_builder.add_text(text);
-        // paragraph_builder.set_paragraph_style(ParagraphStyle::new().set_text_align(TextAlign::Center));
+            paragraph_builder.push_style(&ts);
+
+            let current_span = &rich_text.paragraph[range.start..range.end];
+            paragraph_builder.add_text(current_span);
+        }
 
         let mut paragraph = paragraph_builder.build();
         paragraph.layout(width.0 as f32);
@@ -102,6 +124,27 @@ impl TextLayout {
         ParagraphMetrics {
             line_metrics: metrics,
             height: Pt(height),
+        }
+    }
+}
+
+use crate::rich_text::FontWeight;
+
+impl From<FontWeight> for Weight {
+    fn from(weight: FontWeight) -> Self {
+        // TODO: FIXME
+        // There's an easier way to do this, but I didn't feel like looking it
+        // up right now.
+        match weight {
+            FontWeight::Thin => Weight::THIN,
+            FontWeight::ExtraLight => Weight::EXTRA_LIGHT,
+            FontWeight::Light => Weight::LIGHT,
+            FontWeight::Regular => Weight::NORMAL,
+            FontWeight::Medium => Weight::MEDIUM,
+            FontWeight::SemiBold => Weight::SEMI_BOLD,
+            FontWeight::Bold => Weight::BOLD,
+            FontWeight::ExtraBold => Weight::EXTRA_BOLD,
+            FontWeight::Black => Weight::BLACK,
         }
     }
 }
