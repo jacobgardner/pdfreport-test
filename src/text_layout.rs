@@ -36,7 +36,7 @@ impl TextLayout {
             // a is 'static
             // They probably could have enforced this with a type to be safe...
             unsafe {
-                let d = Data::new_bytes(font);
+                let d = Data::new_bytes(font.bytes);
                 let t = Typeface::from_data(d, None);
                 typeface = Some(t.clone().unwrap());
                 tfp.register_typeface(t.unwrap(), Some("Inter"));
@@ -96,8 +96,6 @@ impl TextLayout {
 
             let current_span = &rich_text.paragraph[range.start..range.end];
             paragraph_builder.add_text(current_span);
-            println!("{:?}", range);
-            println!("{}", current_span);
         }
 
         let mut paragraph = paragraph_builder.build();
@@ -122,8 +120,6 @@ impl TextLayout {
                 metric
             })
             .collect();
-
-        println!("{:?}", metrics);
 
         ParagraphMetrics {
             line_metrics: metrics,

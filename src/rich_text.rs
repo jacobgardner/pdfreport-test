@@ -2,7 +2,7 @@ use std::ops::Range;
 
 use printpdf::Pt;
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum FontWeight {
     Thin = 100,
     ExtraLight = 200,

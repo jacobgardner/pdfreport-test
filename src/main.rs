@@ -86,24 +86,6 @@ fn main() {
 
     let output_text = build_text();
 
-    let default_style = RichTextStyle {
-        font_size: Pt(16.),
-        weight: rich_text::FontWeight::Regular,
-        italic: false,
-        color: (0.267, 0.29, 0.353),
-    };
-
-    let mut rich_text = RichText::new(&output_text, default_style);
-
-    rich_text.push_style(
-        RichTextStyleChanges {
-            font_size: Some(Pt(32.)),
-            weight: Some(rich_text::FontWeight::Bold),
-            ..Default::default()
-        },
-        0..32,
-    );
-
     let mut pdf_writer = PdfWriter::new();
     let text_layout = TextLayout::new();
 
@@ -114,7 +96,37 @@ fn main() {
 
     let layout_span = span!(Level::DEBUG, "Layout & Building PDF").entered();
 
-    for _i in 0..1 {
+
+    let page_count = 54;
+
+    for i in 0..page_count {
+        let default_style = RichTextStyle {
+            font_size: Pt(14.),
+            weight: rich_text::FontWeight::Regular,
+            italic: false,
+            color: (0.267, 0.29, 0.353),
+        };
+
+        let mut rich_text = RichText::new(&output_text[i..], default_style);
+
+        rich_text
+            .push_style(
+                RichTextStyleChanges {
+                    font_size: Some(Pt(32.)),
+                    weight: Some(rich_text::FontWeight::Bold),
+                    ..Default::default()
+                },
+                0..32,
+            )
+            .push_style(
+                RichTextStyleChanges {
+                    color: Some((i as f32 / page_count as f32, 0., 0.)),
+                    italic: Some(true),
+                    ..Default::default()
+                },
+                16..32,
+            );
+
         // // We have to change the string every time otherwise Skia caches the
         // // layout calculation and we cheat in performance
         // let page_string = &output_string[i..];
