@@ -7,7 +7,7 @@ use printpdf::{
 use skia_safe::Typeface;
 use tracing::{instrument, span, Level};
 
-use crate::{fonts::FONTS, line_metric::LineMetric};
+use crate::{fonts::FONTS, line_metric::LineMetric, rich_text::RichText};
 
 pub struct PdfWriter {
     dimensions: (Mm, Mm),
@@ -150,7 +150,7 @@ impl<'a> PageWriter<'a> {
         &self,
         start: Point,
         typeface: &Typeface,
-        string_to_write: &str,
+        rich_text: &RichText,
         line_metrics: Vec<LineMetric>,
     ) -> &Self {
         let span = span!(Level::TRACE, "Writing Lines");
@@ -160,7 +160,7 @@ impl<'a> PageWriter<'a> {
         let font = self.writer.fonts[6].clone();
 
         current_layer.begin_text_section();
-        current_layer.set_font(&font, 12.0);
+        current_layer.set_font(&font, 16.0);
         current_layer.set_fill_color(Color::Rgb(Rgb::new(0.267, 0.29, 0.353, None)));
 
         let mut current_y = start.y;
@@ -170,7 +170,7 @@ impl<'a> PageWriter<'a> {
                 current_y - line_metric.ascent,
             ));
 
-            let line_to_write = &string_to_write[line_metric.start_index..line_metric.end_index];
+            let line_to_write = &rich_text.paragraph[line_metric.start_index..line_metric.end_index];
 
             PageWriter::write_line(&current_layer, line_to_write, typeface);
 
