@@ -20,6 +20,8 @@ tracing-subscriber = { version = "*", features = ["std", "fmt"] }
 skia-safe = { version = "*", features = ["textlayout"] }
 stretch = "*"
 itertools = "*"
+serde = {version = "*", features = ["derive"]}
+serde_json = "*"
 
 # Optional Dependencies
 tracing-chrome = { version = "*", optional = true }

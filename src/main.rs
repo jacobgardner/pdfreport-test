@@ -12,6 +12,9 @@ mod math;
 mod pdf_writer;
 mod rich_text;
 mod text_layout;
+mod paginated_layout;
+mod styles;
+mod dom;
 
 fn build_text() -> String {
     r#"Chapter 1: Your approach to Work
@@ -97,7 +100,7 @@ fn main() {
     let layout_span = span!(Level::DEBUG, "Layout & Building PDF").entered();
 
 
-    let page_count = 54;
+    let page_count = 2000;
 
     for i in 0..page_count {
         let default_style = RichTextStyle {
