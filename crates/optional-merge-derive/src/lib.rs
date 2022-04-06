@@ -103,7 +103,7 @@ pub fn mergeable(input: TokenStream) -> TokenStream {
 
     let token_stream: TokenStream = quote! {
         #[derive(Deserialize, Clone)]
-        #[serde(rename_all = "camelCase")]
+        #[serde(rename_all = "camelCase", deny_unknown_fields)]
         #ast
 
         impl From<#name> for #mergeable_name {

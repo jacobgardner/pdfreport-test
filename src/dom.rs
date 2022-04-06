@@ -1,6 +1,7 @@
 use optional_merge_derive::MergeOptional;
 
 use serde::Deserialize;
+use serde_json::Value;
 use std::collections::HashMap;
 
 type Color = String;
@@ -109,8 +110,7 @@ impl Default for FlexStyle {
     }
 }
 
-#[derive(MergeOptional, 
-    Clone)]
+#[derive(MergeOptional, Clone)]
 pub struct MarginStyle {
     pub top: f32,
     pub right: f32,
@@ -199,11 +199,13 @@ pub enum Node {
 pub struct FontInformation {}
 
 #[derive(Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct PdfLayout {
     pub fonts: Vec<FontInformation>,
     pub styles: HashMap<String, MergeableStyle>,
     pub root: Node,
+    // #[serde(flatten)]
+    // other: HashMap<String, Value>,
 }
 
 #[cfg(test)]
@@ -247,6 +249,9 @@ mod tests {
                 }]
             }
         }"##).unwrap();
+
+        // println!("{:?}", dom.other);
+        // assert_eq!(dom.other.len(), 0);
 
         assert_eq!(dom.fonts.len(), 0);
 
