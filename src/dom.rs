@@ -1,10 +1,9 @@
-use optional_merge_derive::{MergeOptional};
+use optional_merge_derive::MergeOptional;
+
 use serde::Deserialize;
 use std::collections::HashMap;
 
-
 type Color = String;
-
 
 macro_rules! primitive_merge  {
     ($name : ident) => {
@@ -71,7 +70,8 @@ impl Default for BorderRadiusStyle {
 pub struct BorderStyle {
     pub width: f32,
     pub color: Color,
-    #[nested] pub radius: BorderRadiusStyle,
+    #[nested]
+    pub radius: BorderRadiusStyle,
 }
 
 impl Default for BorderStyle {
@@ -88,13 +88,13 @@ fn merge_clone<T: Clone>(lhs: &Option<T>, rhs: &Option<T>) -> Option<T> {
     rhs.as_ref().or(lhs.as_ref()).map(|f| f.clone())
 }
 
-#[derive(Deserialize, Clone, Copy, PartialEq)]
+#[derive(Deserialize, Clone, Copy, PartialEq, Debug)]
 pub enum Direction {
     Column,
     Row,
 }
 
-#[derive(MergeOptional, Deserialize, Clone)]
+#[derive(MergeOptional, Clone)]
 pub struct FlexStyle {
     // size: Option<f32>,
     pub direction: Direction,
@@ -109,7 +109,8 @@ impl Default for FlexStyle {
     }
 }
 
-#[derive(MergeOptional, Deserialize, Clone)]
+#[derive(MergeOptional, 
+    Clone)]
 pub struct MarginStyle {
     pub top: f32,
     pub right: f32,
@@ -152,17 +153,23 @@ impl Default for Style {
     }
 }
 
-// impl Style {
-//     pub fn merge_style(&self, rhs: &Style) -> Style {
-//         Style {
-//             border: self.border.clone().unwrap().merge_optional(&rhs.border),
-//             flex: self.flex.clone().unwrap().merge_optional(&rhs.flex),
-//             color: merge_clone(&self.color, &rhs.color),
-//             background_color: merge_clone(&self.background_color, &rhs.background_color),
-//             margin: merge_clone(&self.margin, &rhs.margin),
-//         }
-//     }
-// }
+impl Style {
+    pub fn merge_style(&self, rhs: &MergeableStyle) -> Style {
+        let base: MergeableStyle = MergeableStyle::from(self.clone());
+
+        let merged: MergeableStyle = base.merge(rhs);
+
+        return merged.into();
+
+        // Style {
+        //     border: self.border.clone().merge_optional(&rhs.border),
+        //     flex: self.flex.clone().merge_optional(&rhs.flex),
+        //     color:  merge_clone(&self.color, &rhs.color),
+        //     background_color: merge_clone(&self.background_color, &rhs.background_color),
+        //     margin: merge_clone(&self.margin, &rhs.margin),
+        // }
+    }
+}
 
 #[derive(Deserialize)]
 #[serde(untagged)]
@@ -195,7 +202,7 @@ pub struct FontInformation {}
 #[serde(rename_all = "camelCase")]
 pub struct PdfLayout {
     pub fonts: Vec<FontInformation>,
-    pub styles: HashMap<String, MergableStyle>,
+    pub styles: HashMap<String, MergeableStyle>,
     pub root: Node,
 }
 
@@ -242,10 +249,17 @@ mod tests {
         }"##).unwrap();
 
         assert_eq!(dom.fonts.len(), 0);
-        // assert_eq!(
-        //     dom.styles.get("h1").unwrap().color.as_ref().unwrap(),
-        //     "#ABCDEF"
-        // );
+
+        let style = Style::default().merge_style(dom.styles.get("h1").unwrap());
+
+        assert_eq!(style.color, "#ABCDEF");
+        assert_eq!(style.flex.direction, Direction::Column);
+        assert_eq!(style.background_color, "#FFFFFF");
+        assert_eq!(style.border.radius.top_right, 5.);
+        assert_eq!(style.border.radius.bottom_right, 5.);
+        assert_eq!(style.border.radius.top_left, 0.);
+        assert_eq!(style.border.radius.bottom_left, 0.);
+
         if let Node::StyledNode { styles, children } = dom.root {
             assert_eq!(styles.len(), 0);
             assert_eq!(children.len(), 1);

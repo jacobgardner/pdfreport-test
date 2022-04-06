@@ -3,45 +3,35 @@ extern crate proc_macro;
 use proc_macro::TokenStream;
 use proc_macro2::Span;
 use quote::{quote, ToTokens};
-use syn::{self, Data, Fields, Type};
 use std::str::FromStr;
-
-// #[proc_macro_attribute]
-// pub fn nested(_args: TokenStream, input: TokenStream) -> TokenStream {
-//     input
-// }
+use syn::{self, Data, Fields, Type};
 
 #[proc_macro_derive(MergeOptional, attributes(nested))]
-pub fn mergable(input: TokenStream) -> TokenStream {
+pub fn mergeable(input: TokenStream) -> TokenStream {
     let mut ast: syn::DeriveInput = syn::parse(input).unwrap();
+    let original_ast = ast.clone();
 
     if let Data::Struct(s) = &mut ast.data {
         if let Fields::Named(named_fields) = &mut s.fields {
             named_fields.named.iter_mut().for_each(|f| {
                 let nested_pos = f.attrs.iter().position(|a| a.path.is_ident("nested"));
                 // let ty = f.ty.clone();
-                let mergable_type: syn::Type = if let Some(pos) = nested_pos {
+                let mergeable_type: syn::Type = if let Some(pos) = nested_pos {
                     f.attrs.remove(pos);
-                    let ty_name = format!("Mergable{}", f.ty.to_token_stream());
+                    let ty_name = format!("Mergeable{}", f.ty.to_token_stream());
                     Type::Verbatim(proc_macro2::TokenStream::from_str(&ty_name).unwrap())
                 } else {
                     f.ty.clone()
                 };
 
-                // let mergable_name = Type::Verbatim(quote! { #mergeable_name_string });
-                // println!("{}", mergeable_name_string);
-
-                f.ty = Type::Verbatim(quote! { Option< #mergable_type > });
+                f.ty = Type::Verbatim(quote! { Option< #mergeable_type > });
             });
-            // named_fields.
         }
     } else {
         unimplemented!()
     }
 
-    let original_ast = ast.clone();
-
-    let merge_fields = if let Data::Struct(s) = &ast.data {
+    let merge_fields = if let Data::Struct(s) = &original_ast.data {
         if let Fields::Named(named_fields) = &s.fields {
             named_fields.named.iter().map(|field| {
                 let name = field.clone().ident;
@@ -57,37 +47,96 @@ pub fn mergable(input: TokenStream) -> TokenStream {
         unimplemented!()
     };
 
-    // ast.vis = syn::parse2(quote! { pub(super ) }).unwrap();
+    let to_mergeable = if let Data::Struct(s) = &original_ast.data {
+        if let Fields::Named(named_fields) = &s.fields {
+            named_fields.named.iter().map(|field| {
+                let is_nested = field.attrs.iter().any(|a| a.path.is_ident("nested"));
+                let name = field.clone().ident;
 
-    // syn::
+                // println!("N: {}", name);
 
-    // let expanded = quote! {
-    //     impl Merges for #name {
+                if is_nested {
+                    quote! {
+                        #name: Some(orig.#name.into())
+                    }
+                } else {
+                    quote! {
+                        #name: Some(orig.#name)
+                    }
+                }
+            })
+        } else {
+            unimplemented!()
+        }
+    } else {
+        unimplemented!()
+    };
 
-    //     }
-    // };
+    let to_unwrapped = if let Data::Struct(s) = &original_ast.data {
+        if let Fields::Named(named_fields) = &s.fields {
+            named_fields.named.iter().map(|field| {
+                let is_nested = field.attrs.iter().any(|a| a.path.is_ident("nested"));
+                let name = field.clone().ident;
 
-    // TokenStream::from(expanded)
+                // println!("N: {}", name);
+
+                if is_nested {
+                    quote! {
+                        #name: orig.#name.unwrap().into()
+                    }
+                } else {
+                    quote! {
+                        #name: orig.#name.unwrap()
+                    }
+                }
+            })
+        } else {
+            unimplemented!()
+        }
+    } else {
+        unimplemented!()
+    };
+
     let name = original_ast.ident.clone();
-    let mergable_name = format!("Mergable{}", name);
-    // ast.ident = syn::parse2( quote! { #mergable_name }).unwrap();
-    ast.ident = syn::Ident::new(&mergable_name, Span::call_site());
+    let mergeable_name = syn::Ident::new(&format!("Mergeable{}", name), Span::call_site());
+    ast.ident = mergeable_name.clone();
 
-    quote! {
-
+    let token_stream: TokenStream = quote! {
         #[derive(Deserialize, Clone)]
+        #[serde(rename_all = "camelCase")]
         #ast
 
-            // impl Merges for #mergable_name {
-            //     fn merge(&self, rhs: &Self) -> Self {
-            //         Self {
-            //             #(#merge_fields),*
-            //         }
-            //     }
-            // }
+        impl From<#name> for #mergeable_name {
+            fn from(orig: #name) -> #mergeable_name {
+                Self {
+                    #(#to_mergeable),*
+                }
+            }
+        }
+
+        impl From<#mergeable_name> for #name {
+            fn from(orig: #mergeable_name) -> #name {
+                Self {
+                    #(#to_unwrapped),*
+                }
+            }
+        }
+
+
+        impl Merges for #mergeable_name {
+            fn merge(&self, rhs: &Self) -> Self {
+                Self {
+                    #(#merge_fields),*
+                }
+            }
+        }
 
     }
-    .into()
+    .into();
+
+    // println!("{}", token_stream.to_string());
+
+    token_stream
 }
 
 #[cfg(test)]

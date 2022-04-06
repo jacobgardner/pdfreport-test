@@ -1,7 +1,7 @@
 use printpdf::DirectFontRef;
 use stretch::{geometry::Rect, style::*, Stretch};
 
-use crate::dom::{PdfLayout, MergableStyle, Style};
+use crate::dom::{PdfLayout, MergeableStyle, Style};
 
 impl From<Style> for stretch::style::Style {
     fn from(s: Style) -> Self {
