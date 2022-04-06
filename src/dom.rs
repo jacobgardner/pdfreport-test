@@ -1,8 +1,57 @@
 use std::collections::HashMap;
 
+
+
+use optional_merge_derive::mergable;
 use serde::Deserialize;
 
 type Color = String;
+
+
+macro_rules! primitive_merge  {
+    ($name : ident) => {
+        impl Merges for Option<$name> {
+            fn merge(&self, rhs: &Self) -> Self {
+                rhs.as_ref().or(self.as_ref()).map(|f| f.clone())
+            }           
+        }
+    };
+    ($name: ident, $($remain:ident),+) => {
+        primitive_merge!($name);
+        primitive_merge!($($remain),+);
+    }
+}
+
+// macro_rules! nested_merge  {
+//     ($name : ident) => {
+//         impl Merges for Option<$name> {
+//             fn merge(&self, rhs: &Self) -> Self {
+//                 rhs.as_ref().or(self.as_ref()).map(|f| f.clone())
+//             }           
+//         }
+//     };
+//     ($name: ident, $($remain:ident),+) => {
+//         nested_merge!($name);
+//         nested_merge!($($remain),+);
+//     }
+// }
+
+impl<T: Merges + Clone> Merges for Option<T> {
+    fn merge(&self, rhs: &Self) -> Self {
+        if let Some(lhs) = self {
+            if let Some(rhs) = rhs {
+                Some(lhs.merge(rhs))
+            } else {
+                self.clone()
+            }
+        } else {
+            rhs.clone()
+        }
+    }
+}
+
+primitive_merge!(f32, String, Direction);
+
 
 trait Merges: Sized + Clone {
     fn merge(&self, rhs: &Self) -> Self;
@@ -16,12 +65,13 @@ trait Merges: Sized + Clone {
     }
 }
 
+#[mergable]
 #[derive(Deserialize, Clone)]
 struct BorderRadiusStyle {
-    top_right: Option<f32>,
-    bottom_right: Option<f32>,
-    bottom_left: Option<f32>,
-    top_left: Option<f32>,
+    top_right: f32,
+    bottom_right: f32,
+    bottom_left: f32,
+    top_left: f32,
 }
 
 impl Default for BorderRadiusStyle {
@@ -35,22 +85,23 @@ impl Default for BorderRadiusStyle {
     }
 }
 
-impl Merges for BorderRadiusStyle {
-    fn merge(&self, rhs: &Self) -> Self {
-        Self {
-            top_right: rhs.top_right.or(self.top_right),
-            bottom_right: rhs.bottom_right.or(self.bottom_right),
-            bottom_left: rhs.bottom_left.or(self.bottom_left),
-            top_left: rhs.top_left.or(self.top_left),
-        }
-    }
-}
+// impl Merges for BorderRadiusStyle {
+//     fn merge(&self, rhs: &Self) -> Self {
+//         Self {
+//             top_right: rhs.top_right.or(self.top_right),
+//             bottom_right: rhs.bottom_right.or(self.bottom_right),
+//             bottom_left: rhs.bottom_left.or(self.bottom_left),
+//             top_left: rhs.top_left.or(self.top_left),
+//         }
+//     }
+// }
 
+#[mergable]
 #[derive(Deserialize, Clone)]
-struct BorderStyle {
-    width: Option<f32>,
-    color: Option<Color>,
-    radius: Option<BorderRadiusStyle>,
+pub struct BorderStyle {
+    width: f32,
+    color: Color,
+    radius: BorderRadiusStyle,
 }
 
 impl Default for BorderStyle {
@@ -67,43 +118,94 @@ fn merge_clone<T: Clone>(lhs: &Option<T>, rhs: &Option<T>) -> Option<T> {
     rhs.as_ref().or(lhs.as_ref()).map(|f| f.clone())
 }
 
-impl Merges for BorderStyle {
-    fn merge(&self, rhs: &Self) -> Self {
-        // let color_ref = rhs.color.as_ref().or(self.color.as_ref()).map(|f| f.clone());
+// impl Merges for BorderStyle {
+//     fn merge(&self, rhs: &Self) -> Self {
+//         // let color_ref = rhs.color.as_ref().or(self.color.as_ref()).map(|f| f.clone());
 
+//         Self {
+//             width: rhs.width.or(self.width),
+//             color: merge_clone(&self.color, &rhs.color),
+//             radius: rhs.radius.clone().unwrap().merge_optional(&self.radius),
+//         }
+//     }
+// }
+
+#[derive(Deserialize, Clone, Copy, PartialEq)]
+pub enum Direction {
+    Column,
+    Row,
+}
+
+#[mergable]
+#[derive(Deserialize, Clone)]
+pub struct FlexStyle {
+    // size: Option<f32>,
+    pub direction: Direction,
+    // wrap: Option<bool>,
+}
+
+// impl Merges for FlexStyle {
+//     fn merge(&self, rhs: &Self) -> Self {
+//         Self {
+//             direction: rhs.direction.or(self.direction), // direction: Some(Direction::Vertical),
+//         }
+//     }
+// }
+
+impl Default for FlexStyle {
+    fn default() -> Self {
         Self {
-            width: rhs.width.or(self.width),
-            color: merge_clone(&self.color, &rhs.color),
-            radius: rhs.radius.clone().unwrap().merge_optional(&self.radius),
+            direction: Some(Direction::Column),
         }
     }
 }
 
+// impl<T: Clone + Merges> Merges for Option<T> {
+//     fn merge(&self, rhs: &Self) -> Self {
+//         rhs.as_ref().or(self.as_ref()).map(|f| f.clone())
+//         // if let Some(lhs) = self {
+//         //     rhs.or(lhs).clone()
+//         // } else {
+//         //     rhs.clone()
+//         // }
+//     }
+// }
+
+
+// impl<T: Clone> Merges for Option<T> {
+//     fn merge(&self, rhs: &Self) -> Self {
+//         rhs.as_ref().or(self.as_ref()).map(|f| f.clone())
+//     }
+// }
+
+#[mergable]
 #[derive(Deserialize, Clone)]
-struct FlexStyle {
-    // size: Option<f32>,
-// direction: Option<bool>,
-// wrap: Option<bool>,
+pub struct MarginStyle {
+    pub top: f32,
+    pub right: f32,
+    pub bottom: f32,
+    pub left: f32,
 }
 
-impl Merges for FlexStyle {
-    fn merge(&self, rhs: &Self) -> Self {
-        Self {}
-    }
-}
-
-impl Default for FlexStyle {
+impl Default for MarginStyle {
     fn default() -> Self {
-        Self {}
+        Self {
+            top: Some(0.),
+            right: Some(0.),
+            bottom: Some(0.),
+            left: Some(0.),
+        }
     }
 }
 
+#[mergable]
 #[derive(Deserialize, Clone)]
-struct Style {
-    border: Option<BorderStyle>,
-    color: Option<Color>,
-    background_color: Option<Color>,
-    flex: Option<FlexStyle>,
+pub struct Style {
+    pub border: BorderStyle,
+    pub color: Color,
+    pub margin: MarginStyle,
+    pub background_color: Color,
+    pub flex: FlexStyle,
 }
 
 impl Default for Style {
@@ -113,6 +215,7 @@ impl Default for Style {
             color: Some(String::from("#000000")),
             background_color: Some(String::from("#FFFFFF")),
             flex: Some(FlexStyle::default()),
+            margin: Some(MarginStyle::default()),
         }
     }
 }
@@ -124,6 +227,7 @@ impl Style {
             flex: self.flex.clone().unwrap().merge_optional(&rhs.flex),
             color: merge_clone(&self.color, &rhs.color),
             background_color: merge_clone(&self.background_color, &rhs.background_color),
+            margin: merge_clone(&self.margin, &rhs.margin),
         }
     }
 }
@@ -136,14 +240,14 @@ enum TextChild {
 }
 
 #[derive(Deserialize)]
-struct TextNode {
+pub struct TextNode {
     styles: Vec<String>,
     children: Vec<TextChild>,
 }
 
 #[derive(Deserialize)]
 #[serde(tag = "type")]
-enum Node {
+pub enum Node {
     StyledNode {
         styles: Vec<Style>,
         children: Vec<Node>,
@@ -153,14 +257,14 @@ enum Node {
 }
 
 #[derive(Deserialize)]
-struct FontInformation {}
+pub struct FontInformation {}
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
-struct PdfLayout {
-    fonts: Vec<FontInformation>,
-    styles: HashMap<String, Style>,
-    root: Node,
+pub struct PdfLayout {
+    pub fonts: Vec<FontInformation>,
+    pub styles: HashMap<String, Style>,
+    pub root: Node,
 }
 
 #[cfg(test)]
@@ -175,6 +279,12 @@ mod tests {
             "styles": {
                 "h1": {
                     "color": "#ABCDEF",
+                    "flex": {
+                        "direction": "Column"
+                    },
+                    "margin": {
+                        "bottom": 4
+                    },
                     "border": {
                         "width": 1,  
                         "color": "#ABCDEF",

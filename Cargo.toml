@@ -10,6 +10,8 @@ publish = false
 [features]
 trace_chrome = [ "tracing-chrome" ]
 
+[workspace]
+members = ["crates/*"]
 
 [dependencies]
 printpdf = "*"
@@ -22,6 +24,7 @@ stretch = "*"
 itertools = "*"
 serde = {version = "*", features = ["derive"]}
 serde_json = "*"
+optional-merge-derive = {path = "crates/optional-merge-derive"}
 
 # Optional Dependencies
 tracing-chrome = { version = "*", optional = true }

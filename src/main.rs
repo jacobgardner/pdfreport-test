@@ -15,6 +15,7 @@ mod text_layout;
 mod paginated_layout;
 mod styles;
 mod dom;
+mod block_layout;
 
 fn build_text() -> String {
     r#"Chapter 1: Your approach to Work

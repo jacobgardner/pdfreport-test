@@ -474,6 +474,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "87f3e037eac156d1775da914196f0f37741a274155e34a0b7e427c35d2a2ecb9"
 
 [[package]]
+name = "optional-merge-derive"
+version = "0.1.0"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
 name = "owned_ttf_parser"
 version = "0.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -487,6 +496,7 @@ name = "pdfreport"
 version = "0.1.0"
 dependencies = [
  "itertools",
+ "optional-merge-derive",
  "printpdf",
  "serde",
  "serde_json",
