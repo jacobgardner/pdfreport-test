@@ -129,6 +129,8 @@ impl<'a> PageWriter<'a> {
             //  takes a usize, but the svg pixels can be fractions so... we replicate that
             //  here
 
+            // TODO: Document/warn that we currently do NOT support text nodes in nested transformations
+            //  OR add support for it.
             // TODO: Extract px => pt conversion
             // TODO: Support other unit types OR throw an error if provided
             // TODO: Document/warn about unsupported attributes
