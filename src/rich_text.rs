@@ -2,7 +2,9 @@ use std::ops::Range;
 
 use printpdf::Pt;
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+use num_derive::FromPrimitive;
+
+#[derive(Debug, Clone, Copy, PartialEq, FromPrimitive)]
 pub enum FontWeight {
     Thin = 100,
     ExtraLight = 200,
@@ -13,6 +15,24 @@ pub enum FontWeight {
     Bold = 700,
     ExtraBold = 800,
     Black = 900,
+}
+
+impl From<&str> for FontWeight {
+    fn from(s: &str) -> Self {
+        match s.to_lowercase().as_str() {
+            "lighter" => FontWeight::Light,
+            "bold" => FontWeight::Bold,
+            "bolder" => FontWeight::ExtraBold,
+            "normal" => FontWeight::Regular,
+            other => {
+                if let Ok(num) = other.parse::<u32>() {
+                    num::FromPrimitive::from_u32(num).unwrap_or_default()
+                } else {
+                    FontWeight::Regular
+                }
+            }
+        }
+    }
 }
 
 impl Default for FontWeight {

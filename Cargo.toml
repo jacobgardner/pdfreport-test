@@ -14,7 +14,7 @@ trace_chrome = [ "tracing-chrome" ]
 members = ["crates/*"]
 
 [dependencies]
-printpdf = "*"
+printpdf = { version = "*", features = ["svg"] }
 # Leaving these dependencies as required because I don't feel like abstracting
 # the tracing layer right now
 tracing = { version = "*" }
@@ -25,6 +25,12 @@ itertools = "*"
 serde = {version = "*", features = ["derive"]}
 serde_json = "*"
 optional-merge-derive = {path = "crates/optional-merge-derive"}
+usvg = "*"
+roxmltree = "*"
+num = "*"
+num-traits = "*"
+num-derive = "*"
+color_processing = "*"
 
 # Optional Dependencies
 tracing-chrome = { version = "*", optional = true }

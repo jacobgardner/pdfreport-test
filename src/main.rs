@@ -17,6 +17,8 @@ mod styles;
 mod dom;
 mod block_layout;
 
+const SVG: &str = include_str!("../assets/svg-test.svg");
+
 fn build_text() -> String {
     r#"Chapter 1: Your approach to Work
 
@@ -101,7 +103,7 @@ fn main() {
     let layout_span = span!(Level::DEBUG, "Layout & Building PDF").entered();
 
 
-    let page_count = 2000;
+    let page_count = 1;
 
     for i in 0..page_count {
         let default_style = RichTextStyle {
@@ -154,6 +156,8 @@ fn main() {
                 &rich_text,
                 paragraph_metrics.line_metrics,
             );
+        
+        page_writer.draw_svg(Point::new(Mm(20.), Mm(280.)), &SVG);
 
         page_writer = pdf_writer.add_page();
     }
