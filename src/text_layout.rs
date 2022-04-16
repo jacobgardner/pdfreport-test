@@ -107,12 +107,16 @@ impl TextLayout {
             .get_line_metrics()
             .iter()
             .map(|metrics| {
+                println!("{:?}", metrics);
                 let metric = LineMetric {
                     start_index: metrics.start_index,
                     end_index: metrics.end_index,
                     height: Pt(metrics.height),
                     left: Pt(metrics.left),
+                    width: Pt(metrics.width),
                     ascent: Pt(metrics.ascent),
+                    descent: Pt(metrics.descent),
+                    baseline: Pt(metrics.baseline),
                 };
 
                 height += metrics.height;

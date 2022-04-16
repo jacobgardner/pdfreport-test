@@ -149,6 +149,7 @@ fn main() {
                     Mm(20.) + text_width.into(),
                     Mm(280.) - paragraph_metrics.height.into(),
                 ),
+                Some(Pt(5.))
             )
             .write_lines(
                 Point::new(Mm(20.), Mm(280.)),

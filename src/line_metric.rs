@@ -5,7 +5,10 @@ pub struct LineMetric {
     pub start_index: usize,
     pub end_index: usize,
     pub ascent: Pt,
+    pub descent: Pt,
+    pub baseline: Pt,
     pub height: Pt,
+    pub width: Pt,
     pub left: Pt,
 }
 

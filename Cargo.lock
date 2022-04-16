@@ -731,11 +731,13 @@ version = "0.1.0"
 dependencies = [
  "color_processing",
  "itertools",
+ "lazy_static",
  "num",
  "num-derive",
  "num-traits",
  "optional-merge-derive",
  "printpdf",
+ "regex",
  "roxmltree",
  "serde",
  "serde_json",

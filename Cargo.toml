@@ -31,6 +31,8 @@ num = "*"
 num-traits = "*"
 num-derive = "*"
 color_processing = "*"
+regex = "*"
+lazy_static = "*"
 
 # Optional Dependencies
 tracing-chrome = { version = "*", optional = true }

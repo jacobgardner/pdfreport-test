@@ -5,7 +5,6 @@
 
   <circle cx="36.5" cy="36.5" r="32" fill="none" stroke="#E2E4E9" stroke-width="6px"></circle>
 
-
   <path fill="none" stroke="#FFFFFF" stroke-dasharray="44.233623808000004, 201.0619264" d="M36.5 4.5 a 32 32 0 0 1 0 64
       a 32 32 0 0 1 0 -64 " stroke-width="9px" stroke-linecap="round"></path>
   <path id="poo" class="donutMetric__outerArc" fill="none" stroke="#52489C"
