@@ -229,6 +229,8 @@ impl<'a> PageWriter<'a> {
         let span = span!(Level::TRACE, "Drawing Rect");
         let _guard = span.enter();
         let current_layer = self.get_current_layer();
+        
+        let end = Point {x: end.x + Pt(3.), y: end.y - Pt(3.)};
 
         #[rustfmt::skip]
         let points = if let Some(border_radius) = border_radius {
