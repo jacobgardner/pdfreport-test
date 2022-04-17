@@ -206,7 +206,7 @@ impl<'a> PageWriter<'a> {
 
                 current_index = end_index;
 
-                let font_idx = find_font_index_by_style(current_style.weight, current_style.italic);
+                let font_idx = find_font_index_by_style(current_style.weight, current_style.is_italic);
                 let current_font = &self.writer.fonts[font_idx];
 
                 current_layer.set_font(current_font, current_style.font_size.0);

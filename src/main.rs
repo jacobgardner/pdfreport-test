@@ -109,7 +109,7 @@ fn main() {
         let default_style = RichTextStyle {
             font_size: Pt(14.),
             weight: rich_text::FontWeight::Regular,
-            italic: false,
+            is_italic: false,
             color: (0.267, 0.29, 0.353),
         };
 

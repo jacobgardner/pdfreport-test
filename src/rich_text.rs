@@ -71,7 +71,7 @@ impl RichTextStyleChanges {
 pub struct RichTextStyle {
     pub font_size: Pt,
     pub weight: FontWeight,
-    pub italic: bool,
+    pub is_italic: bool,
     pub color: (f32, f32, f32),
 }
 
@@ -184,7 +184,7 @@ impl<'a> Iterator for StyleIterator<'a> {
             }
 
             if let Some(italic) = style.italic {
-                next_style.italic = italic;
+                next_style.is_italic = italic;
             }
 
             if let Some(color) = style.color {

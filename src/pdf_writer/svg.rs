@@ -10,10 +10,21 @@ use crate::{
 
 use super::PageWriter;
 
+const SUPPORTED_TEXT_ATTRIBUTES: [&str; 9] = [
+    "x",
+    "y",
+    "font-weight",
+    "font-style",
+    "font-size",
+    "fill",
+    "text-anchor",
+    "font-family",
+    "dominant-baseline",
+];
+
 fn svg_to_pt(svg_unit: &str) -> Pt {
     lazy_static! {
-        static ref RE: Regex =
-            Regex::new(r"^(?i)(?P<quantity>[\.\d]+)(?P<units>\D+)?$").unwrap();
+        static ref RE: Regex = Regex::new(r"^(?i)(?P<quantity>[\.\d]+)(?P<units>\D+)?$").unwrap();
     }
 
     let caps = RE.captures(svg_unit).unwrap();
@@ -54,16 +65,25 @@ impl<'a> PageWriter<'a> {
 
         let doc = roxmltree::Document::parse(&svg_text).unwrap();
         for node in doc.descendants().filter(|n| n.tag_name().name() == "text") {
-            let t = node.tag_name();
-
             // The SVG units are in px by default, and we're assuming that here.
             //  We have to convert that to Pt which printpdf has a method for, but it
             //  takes a usize, but the svg pixels can be fractions so... we replicate that
             //  here
+            //
 
             // TODO: Document/warn that we currently do NOT support text nodes in nested transformations
             //  OR add support for it.
-            // TODO: Document/warn about unsupported attributes
+            for ancestor in node.ancestors() {}
+
+            let unsupported_attribute = node
+                .attributes()
+                .iter()
+                .find(|a| !SUPPORTED_TEXT_ATTRIBUTES.contains(&a.name().to_lowercase().as_str()));
+
+            if let Some(unsupported_attribute) = unsupported_attribute {
+                panic!("<text .../> attribute, {}, is not yet supported", unsupported_attribute.name());
+            }
+
             let x = svg_to_pt(node.attribute("x").unwrap_or("0"));
             let y = svg_to_pt(node.attribute("y").unwrap_or("0"));
             let weight = FontWeight::from(node.attribute("font-weight").unwrap_or("regular"));
@@ -76,14 +96,13 @@ impl<'a> PageWriter<'a> {
                     .get_rgba();
             let anchor = node.attribute("text-anchor").unwrap_or("start");
             let font_stack = node.attribute("font-family").unwrap_or("sans-serif");
+            let dominant_baseline = node.attribute("dominant-baseline").unwrap_or("auto");
 
             let preferred_fonts: Vec<_> = font_stack.split(",").map(|f| f.trim()).collect();
 
             println!("Font Stack: {:?}", preferred_fonts);
             // We want to find a font in the stack that matches up to a loaded skia/pdf typeface.
             //   If we don't find one, default to the first typeface, probably?
-
-            let is_centered = anchor.to_lowercase() == "middle";
 
             // Once we have the correct typeface found, we should be able to use Skia to get the line_metrics
             //  for the string and compute what we need to compute for center/end alignment and vertical alignment
@@ -100,7 +119,7 @@ impl<'a> PageWriter<'a> {
                 RichTextStyle {
                     font_size,
                     weight,
-                    italic: is_italic,
+                    is_italic,
                     color: (fill.0 as f32, fill.1 as f32, fill.2 as f32),
                 },
             );
@@ -111,12 +130,23 @@ impl<'a> PageWriter<'a> {
 
             let line_metric = paragraph.line_metrics.first().unwrap();
 
-            println!("{:?}", line_metric);
+            let x_offset = match anchor.to_lowercase().as_str() {
+                "start" => Pt(0.0),
+                "middle" => line_metric.width / 2.,
+                "end" => line_metric.width,
+                _ => panic!(""),
+            };
 
-            // current_layer.set_text_matrix(TextMatrix::Translate(start.x + Pt(x), start.y + Pt(y)));
+            let y_offset = match dominant_baseline.to_lowercase().as_str() {
+                "auto" => Pt(0.),
+                // TODO: This is wrong, but good enough for initial testing...
+                "middle" | "central" => (line_metric.ascent - line_metric.descent) / 2.,
+                baseline => panic!("{} as dominant-baseline is not yet supported", baseline),
+            };
+
             current_layer.set_text_matrix(TextMatrix::Translate(
-                start.x + x.into() - line_metric.width / 2.,
-                start.y + y.into() - ((line_metric.ascent - line_metric.descent) / 2.), // - ((line_metric.ascent - line_metric.baseline) / 2.),
+                start.x + x.into() - x_offset,
+                start.y + y.into() - y_offset,
             ));
 
             let font_idx = find_font_index_by_style(weight, is_italic);
@@ -184,12 +214,10 @@ mod tests {
         assert_eq!(svg_to_pt("2pc"), Pt(12.));
         assert_eq!(svg_to_pt("12pc"), Pt(72.));
     }
-    
-    
+
     #[test]
     #[should_panic(expected = "Unknown unit types rem")]
     fn test_unsupported_unit() {
-      svg_to_pt("5rem");
+        svg_to_pt("5rem");
     }
-    
 }

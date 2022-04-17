@@ -12,8 +12,8 @@
       a 32 32 0 0 1 0 -64 " stroke-width="6px" stroke-linecap="round"></path>
 
 
-  <text x="36.5" y="36.5" fill="#444A5A" text-anchor="middle" font-size="25"
-    font-family="Inter, Arial, Helvetica, sans-serif" font-weight="bold">
+  <text x="36.5" y="36.5" fill="#444A5A" text-anchor="middle" font-size="25" 
+    font-family="Inter, Arial, Helvetica, sans-serif" font-weight="bold" dominant-baseline="middle">
     45
   </text>
 </svg>

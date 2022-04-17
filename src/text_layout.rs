@@ -63,7 +63,7 @@ impl TextLayout {
         default_style.set_font_style(FontStyle::new(
             rich_text.default_style.weight.into(),
             Width::NORMAL,
-            if rich_text.default_style.italic {
+            if rich_text.default_style.is_italic {
                 Slant::Italic
             } else {
                 Slant::Upright
@@ -84,7 +84,7 @@ impl TextLayout {
             ts.set_font_style(FontStyle::new(
                 style.weight.into(),
                 Width::NORMAL,
-                if style.italic {
+                if style.is_italic {
                     Slant::Italic
                 } else {
                     Slant::Upright
