@@ -53,8 +53,6 @@ pub fn mergeable(input: TokenStream) -> TokenStream {
                 let is_nested = field.attrs.iter().any(|a| a.path.is_ident("nested"));
                 let name = field.clone().ident;
 
-                // println!("N: {}", name);
-
                 if is_nested {
                     quote! {
                         #name: Some(orig.#name.into())
@@ -77,8 +75,6 @@ pub fn mergeable(input: TokenStream) -> TokenStream {
             named_fields.named.iter().map(|field| {
                 let is_nested = field.attrs.iter().any(|a| a.path.is_ident("nested"));
                 let name = field.clone().ident;
-
-                // println!("N: {}", name);
 
                 if is_nested {
                     quote! {
@@ -133,8 +129,6 @@ pub fn mergeable(input: TokenStream) -> TokenStream {
 
     }
     .into();
-
-    // println!("{}", token_stream.to_string());
 
     token_stream
 }

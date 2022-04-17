@@ -12,7 +12,7 @@ mod math;
 mod pdf_writer;
 mod rich_text;
 mod text_layout;
-mod paginated_layout;
+// mod paginated_layout;
 mod styles;
 mod dom;
 mod block_layout;
@@ -76,7 +76,7 @@ on your screen size).
 Decision Making
 WHY THIS MATTERS
     "#
-    .replace("\n", " ")
+    .replace('\n', " ")
     .replace("  ", " ")
 }
 
@@ -158,7 +158,7 @@ fn main() {
                 paragraph_metrics.line_metrics,
             );
         
-        page_writer.draw_svg(Point::new(Mm(20.), Mm(280.)), &SVG);
+        page_writer.draw_svg(Point::new(Mm(20.), Mm(280.)), SVG);
 
         page_writer = pdf_writer.add_page();
     }

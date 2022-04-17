@@ -1,7 +1,6 @@
-use printpdf::DirectFontRef;
 use stretch::{geometry::Rect, style::*, Stretch};
 
-use crate::dom::{PdfLayout, MergeableStyle, Style};
+use crate::dom::{PdfLayout, Style};
 
 impl From<Style> for stretch::style::Style {
     fn from(s: Style) -> Self {
@@ -23,7 +22,8 @@ impl From<Style> for stretch::style::Style {
     }
 }
 
-pub fn layout_pdf(pdf: &PdfLayout) -> Result<(), stretch::Error> {
+#[allow(dead_code)]
+pub fn layout_pdf(_pdf: &PdfLayout) -> Result<(), stretch::Error> {
     let mut stretch = Stretch::new();
 
     let style_stack = vec![Style::default()];
@@ -31,7 +31,7 @@ pub fn layout_pdf(pdf: &PdfLayout) -> Result<(), stretch::Error> {
     let current_style = style_stack.last().unwrap().clone();
     let node = stretch.new_node(current_style.into(), vec![])?;
 
-    let l = stretch.layout(node)?;
+    let _layout = stretch.layout(node)?;
 
     Ok(())
 }

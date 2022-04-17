@@ -37,7 +37,7 @@ fn svg_to_pt(svg_unit: &str) -> Pt {
         "cm" => Mm(quantity * 10.0).into(),
         "pt" => Pt(quantity),
         "in" => Pt(quantity * 72.),
-        "pc" => Pt(quantity * 6.).into(),
+        "pc" => Pt(quantity * 6.),
         _ => panic!("Unknown unit types {units}"),
     }
 }
@@ -48,7 +48,7 @@ impl<'a> PageWriter<'a> {
         // let text_node = tree.node_by_id("text");
         let current_layer = self.get_current_layer();
 
-        let svg = Svg::parse(&svg_text).unwrap();
+        let svg = Svg::parse(svg_text).unwrap();
 
         let svg_ref = svg.into_xobject(&current_layer);
 
@@ -63,7 +63,7 @@ impl<'a> PageWriter<'a> {
             },
         );
 
-        let doc = roxmltree::Document::parse(&svg_text).unwrap();
+        let doc = roxmltree::Document::parse(svg_text).unwrap();
         for node in doc.descendants().filter(|n| n.tag_name().name() == "text") {
             // The SVG units are in px by default, and we're assuming that here.
             //  We have to convert that to Pt which printpdf has a method for, but it
@@ -73,7 +73,10 @@ impl<'a> PageWriter<'a> {
 
             // TODO: Document/warn that we currently do NOT support text nodes in nested transformations
             //  OR add support for it.
-            for ancestor in node.ancestors() {}
+            for _ancestor in node.ancestors() {
+                // Here check if any ancestors do transformations and warn about
+                // them OR augment the x/y below based on them
+            }
 
             let unsupported_attribute = node
                 .attributes()
@@ -98,7 +101,7 @@ impl<'a> PageWriter<'a> {
             let font_stack = node.attribute("font-family").unwrap_or("sans-serif");
             let dominant_baseline = node.attribute("dominant-baseline").unwrap_or("auto");
 
-            let preferred_fonts: Vec<_> = font_stack.split(",").map(|f| f.trim()).collect();
+            let preferred_fonts: Vec<_> = font_stack.split(',').map(|f| f.trim()).collect();
 
             println!("Font Stack: {:?}", preferred_fonts);
             // We want to find a font in the stack that matches up to a loaded skia/pdf typeface.
@@ -145,17 +148,17 @@ impl<'a> PageWriter<'a> {
             };
 
             current_layer.set_text_matrix(TextMatrix::Translate(
-                start.x + x.into() - x_offset,
-                start.y + y.into() - y_offset,
+                start.x + x - x_offset,
+                start.y + y - y_offset,
             ));
 
             let font_idx = find_font_index_by_style(weight, is_italic);
             let current_font = &self.writer.fonts[font_idx];
 
-            current_layer.set_font(current_font, Pt::from(font_size).0);
+            current_layer.set_font(current_font, font_size.0);
             current_layer.set_fill_color(Color::Rgb(Rgb::new(fill.0, fill.1, fill.2, None)));
 
-            PageWriter::write_text(&current_layer, &node_text, &layout.typeface);
+            PageWriter::write_text(&current_layer, node_text, &layout.typeface);
         }
 
         self

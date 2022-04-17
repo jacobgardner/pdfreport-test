@@ -1,7 +1,6 @@
 use optional_merge_derive::MergeOptional;
 
 use serde::Deserialize;
-use serde_json::Value;
 use std::collections::HashMap;
 
 type Color = String;
@@ -41,7 +40,7 @@ trait Merges: Sized + Clone {
 
     fn merge_optional(&self, rhs: &Option<Self>) -> Option<Self> {
         if let Some(op) = rhs {
-            Some(self.merge(&op))
+            Some(self.merge(op))
         } else {
             Some(self.clone())
         }
@@ -83,10 +82,6 @@ impl Default for BorderStyle {
             radius: BorderRadiusStyle::default(),
         }
     }
-}
-
-fn merge_clone<T: Clone>(lhs: &Option<T>, rhs: &Option<T>) -> Option<T> {
-    rhs.as_ref().or(lhs.as_ref()).map(|f| f.clone())
 }
 
 #[derive(Deserialize, Clone, Copy, PartialEq, Debug)]
@@ -159,15 +154,7 @@ impl Style {
 
         let merged: MergeableStyle = base.merge(rhs);
 
-        return merged.into();
-
-        // Style {
-        //     border: self.border.clone().merge_optional(&rhs.border),
-        //     flex: self.flex.clone().merge_optional(&rhs.flex),
-        //     color:  merge_clone(&self.color, &rhs.color),
-        //     background_color: merge_clone(&self.background_color, &rhs.background_color),
-        //     margin: merge_clone(&self.margin, &rhs.margin),
-        // }
+        merged.into()
     }
 }
 
@@ -180,19 +167,19 @@ enum TextChild {
 
 #[derive(Deserialize)]
 pub struct TextNode {
-    styles: Vec<String>,
-    children: Vec<TextChild>,
+    _styles: Vec<String>,
+    _children: Vec<TextChild>,
 }
 
 #[derive(Deserialize)]
 #[serde(tag = "type")]
 pub enum Node {
-    StyledNode {
+    Styled {
         styles: Vec<String>,
         children: Vec<Node>,
     },
     Text(TextNode),
-    ImageNode {},
+    Image {},
 }
 
 #[derive(Deserialize)]
@@ -250,9 +237,6 @@ mod tests {
             }
         }"##).unwrap();
 
-        // println!("{:?}", dom.other);
-        // assert_eq!(dom.other.len(), 0);
-
         assert_eq!(dom.fonts.len(), 0);
 
         let style = Style::default().merge_style(dom.styles.get("h1").unwrap());
@@ -265,7 +249,7 @@ mod tests {
         assert_eq!(style.border.radius.top_left, 0.);
         assert_eq!(style.border.radius.bottom_left, 0.);
 
-        if let Node::StyledNode { styles, children } = dom.root {
+        if let Node::Styled { styles, children } = dom.root {
             assert_eq!(styles.len(), 0);
             assert_eq!(children.len(), 1);
         } else {

@@ -16,10 +16,12 @@ impl BlockSpacing {
         }
     }
 
+    #[allow(dead_code)]
     pub fn width(&self) -> f32 {
         self.left + self.right
     }
 
+    #[allow(dead_code)]
     pub fn height(&self) -> f32 {
         self.top + self.bottom
     }
