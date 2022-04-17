@@ -3,7 +3,7 @@ use std::{fs::File, io::BufWriter, ops::Range};
 use printpdf::{
     calculate_points_for_circle, lopdf, Color, IndirectFontRef, Line, Mm, PdfDocument,
     PdfDocumentReference, PdfLayerIndex, PdfLayerReference, PdfPageIndex, Point, Pt, Rgb,
-    TextMatrix,
+    TextMatrix, PdfPageReference,
 };
 use skia_safe::Typeface;
 use tracing::{instrument, span, Level};
@@ -95,11 +95,15 @@ impl<'a> PageWriter<'a> {
             layer_index,
         }
     }
+    
+    fn get_current_page(&self) -> PdfPageReference {
+         self.writer
+            .doc
+            .get_page(self.page_index)       
+    }
 
     fn get_current_layer(&self) -> PdfLayerReference {
-        self.writer
-            .doc
-            .get_page(self.page_index)
+        self.get_current_page()
             .get_layer(self.layer_index)
     }
 
@@ -108,9 +112,14 @@ impl<'a> PageWriter<'a> {
         let _guard = span.enter();
         let current_layer = self.get_current_layer();
 
+        let start = Point {
+            x: start.x - Pt(3.0),
+            y: start.y + Pt(3.0),
+        };
+
         let end = Point {
-            x: end.x + Pt(3.),
-            y: end.y - Pt(3.),
+            x: end.x + Pt(3.0),
+            y: end.y - Pt(3.0),
         };
 
         #[rustfmt::skip]
@@ -144,6 +153,7 @@ impl<'a> PageWriter<'a> {
             }
         };
         
+        
         current_layer.set_fill_color(Color::Rgb(Rgb::new(0.8, 1., 0.8, None)));
         let line = Line {
             points,
@@ -152,8 +162,14 @@ impl<'a> PageWriter<'a> {
             has_stroke: true,
             is_clipping_path: false,
         };
+        
+
+        current_layer.save_graphics_state();
+        current_layer.set_outline_thickness(2.);
+        current_layer.set_outline_color(Color::Rgb(Rgb { r: 1.0, g: 0., b: 1., icc_profile: None }));
 
         current_layer.add_shape(line);
+        current_layer.restore_graphics_state();
 
         self
     }
