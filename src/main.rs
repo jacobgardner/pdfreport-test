@@ -149,7 +149,7 @@ fn main() {
                     Mm(20.) + text_width.into(),
                     Mm(280.) - paragraph_metrics.height.into(),
                 ),
-                Some(Pt(10.))
+                Some(Pt(5.))
             )
             .write_lines(
                 Point::new(Mm(20.), Mm(280.)),
@@ -158,7 +158,7 @@ fn main() {
                 paragraph_metrics.line_metrics,
             );
         
-        page_writer.draw_svg(Point::new(Mm(20.), Mm(280.)), SVG);
+        page_writer.draw_svg(Point::new(Mm(21.), Mm(270.)), SVG);
 
         page_writer = pdf_writer.add_page();
     }

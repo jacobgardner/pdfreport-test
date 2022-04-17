@@ -1,18 +1,18 @@
 <svg xmlns:xlink="http://www.w3.org/1999/xlink" role="img" aria-label="22" width="73" height="73" viewBox="0 0 73 73"
   xmlns="http://www.w3.org/2000/svg">
 
-  <circle class="donutMetric__innerCircle" cx="36.5" cy="36.5" r="25" fill="#D3D1E6"></circle>
+  <circle class="donutMetric__innerCircle" cx="36.5" cy="36.5" r="25" fill="#D3D1E6" />
 
-  <circle cx="36.5" cy="36.5" r="32" fill="none" stroke="#E2E4E9" stroke-width="6px"></circle>
+  <circle cx="36.5" cy="36.5" r="32" fill="none" stroke="#E2E4E9" stroke-width="6px" />
 
   <path fill="none" stroke="#FFFFFF" stroke-dasharray="44.233623808000004, 201.0619264" d="M36.5 4.5 a 32 32 0 0 1 0 64
-      a 32 32 0 0 1 0 -64 " stroke-width="9px" stroke-linecap="round"></path>
-  <path id="poo" class="donutMetric__outerArc" fill="none" stroke="#52489C"
+      a 32 32 0 0 1 0 -64 " stroke-width="9px" stroke-linecap="round" />
+  <path class="donutMetric__outerArc" fill="none" stroke="#52489C"
     stroke-dasharray="44.233623808000004, 201.0619264" d="M36.5 4.5 a 32 32 0 0 1 0 64
-      a 32 32 0 0 1 0 -64 " stroke-width="6px" stroke-linecap="round"></path>
+      a 32 32 0 0 1 0 -64 " stroke-width="6px" stroke-linecap="round" />
 
 
-  <text x="36.5" y="36.5" fill="#444A5A" text-anchor="middle" font-size="25" 
+  <text x="36.5" y="36.5" fill="#444A5A" text-anchor="middle" font-size="25"
     font-family="Inter, Arial, Helvetica, sans-serif" font-weight="bold" dominant-baseline="middle">
     45
   </text>

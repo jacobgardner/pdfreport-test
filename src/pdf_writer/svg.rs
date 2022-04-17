@@ -10,7 +10,8 @@ use crate::{
 
 use super::PageWriter;
 
-const SUPPORTED_TEXT_ATTRIBUTES: [&str; 9] = [
+const SUPPORTED_TEXT_ATTRIBUTES: [&str; 10] = [
+    "id",
     "x",
     "y",
     "font-weight",
