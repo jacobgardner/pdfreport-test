@@ -1,8 +1,9 @@
-use std::{fs::File, io::BufWriter};
+use std::{fs::File, io::BufWriter, ops::Range};
 
 use printpdf::{
-    lopdf, IndirectFontRef, Line, Mm, PdfDocument, PdfDocumentReference, PdfLayerIndex,
-    PdfLayerReference, PdfPageIndex, Point, Pt, Rgb, TextMatrix, calculate_points_for_circle, Color,
+    calculate_points_for_circle, lopdf, Color, IndirectFontRef, Line, Mm, PdfDocument,
+    PdfDocumentReference, PdfLayerIndex, PdfLayerReference, PdfPageIndex, Point, Pt, Rgb,
+    TextMatrix,
 };
 use skia_safe::Typeface;
 use tracing::{instrument, span, Level};
@@ -12,7 +13,7 @@ mod svg;
 use crate::{
     fonts::{find_font_index_by_style, FONTS},
     line_metric::LineMetric,
-    rich_text::{RichText},
+    rich_text::RichText,
 };
 
 pub struct PdfWriter {
@@ -22,10 +23,14 @@ pub struct PdfWriter {
     fonts: Vec<IndirectFontRef>,
 }
 
+const TOP_LEFT_CORNER: Range<usize> = 12..16;
+const TOP_RIGHT_CORNER: Range<usize> = 0..4;
+const BOTTOM_RIGHT_CORNER: Range<usize> = 4..8;
+const BOTTOM_LEFT_CORNER: Range<usize> = 8..12;
+
 impl PdfWriter {
     #[instrument(name = "Create PDF Context")]
     pub fn new() -> Self {
-        
         // A4 Page dimensions
         let dimensions = (Mm(210.), Mm(297.));
 
@@ -102,38 +107,43 @@ impl<'a> PageWriter<'a> {
         let span = span!(Level::TRACE, "Drawing Rect");
         let _guard = span.enter();
         let current_layer = self.get_current_layer();
-        
-        let end = Point {x: end.x + Pt(3.), y: end.y - Pt(3.)};
 
-        #[rustfmt::skip]
-        let points = if let Some(border_radius) = border_radius {
-            
-            // 4 points per corner & 2 points per edge
-            let mut points: Vec<(Point, bool)> = Vec::with_capacity(4 * 4 + 4 * 2);
-            
-            let circle_points = calculate_points_for_circle(border_radius, Pt(0.), Pt(0.));
-            
-            points.extend(circle_points[12..16].iter().map(|&(pt, b)| (Point { x: pt.x + border_radius + start.x, y: pt.y - border_radius + start.y}, b)));
-            points.push((Point { x: start.x + border_radius, y: start.y, }, false));
-            points.push((Point { x: end.x - border_radius, y: start.y, }, false));
-            points.extend(circle_points[0..4].iter().map(|&(pt, b)| (Point { x: pt.x - border_radius + end.x, y: pt.y - border_radius + start.y}, b)));
-            points.push((Point { x: end.x, y: start.y - border_radius, }, false));
-            points.push((Point { x: end.x, y: end.y + border_radius, }, false));
-            points.extend(circle_points[4..8].iter().map(|&(pt, b)| (Point { x: pt.x - border_radius + end.x, y: pt.y + border_radius + end.y}, b)));
-            points.push((Point { x: end.x - border_radius, y: end.y, }, false));
-            points.push((Point { x: start.x + border_radius, y: end.y , }, false));
-            points.extend(circle_points[8..12].iter().map(|&(pt, b)| (Point { x: pt.x + border_radius + start.x, y: pt.y + border_radius + end.y}, b)));
-            
-            points
-        } else {
-            vec![
-                (Point { x: start.x, y: start.y, }, false),
-                (Point { x: end.x,   y: start.y, }, false,),
-                (Point { x: end.x,   y: end.y },    false),
-                (Point { x: start.x, y: end.y, },   false,),
-            ]
+        let end = Point {
+            x: end.x + Pt(3.),
+            y: end.y - Pt(3.),
         };
 
+        #[rustfmt::skip]
+        let points = match border_radius {
+            Some(border_radius) if border_radius != Pt(0.) => {
+                // 4 points per corner & 2 points per edge
+                let mut points: Vec<(Point, bool)> = Vec::with_capacity(4 * 4 + 4 * 2);
+
+                let circle_points = calculate_points_for_circle(border_radius, Pt(0.), Pt(0.));
+
+                points.extend(circle_points[TOP_LEFT_CORNER].iter().map(|&(pt, b)| (Point { x: pt.x + border_radius + start.x, y: pt.y - border_radius + start.y}, b)));
+                points.push((Point { x: start.x + border_radius, y: start.y, }, false));
+                points.push((Point { x: end.x - border_radius, y: start.y, }, false));
+                points.extend(circle_points[TOP_RIGHT_CORNER].iter().map(|&(pt, b)| (Point { x: pt.x - border_radius + end.x, y: pt.y - border_radius + start.y}, b)));
+                points.push((Point { x: end.x, y: start.y - border_radius, }, false));
+                points.push((Point { x: end.x, y: end.y + border_radius, }, false));
+                points.extend(circle_points[BOTTOM_RIGHT_CORNER].iter().map(|&(pt, b)| (Point { x: pt.x - border_radius + end.x, y: pt.y + border_radius + end.y}, b)));
+                points.push((Point { x: end.x - border_radius, y: end.y, }, false));
+                points.push((Point { x: start.x + border_radius, y: end.y , }, false));
+                points.extend(circle_points[BOTTOM_LEFT_CORNER].iter().map(|&(pt, b)| (Point { x: pt.x + border_radius + start.x, y: pt.y + border_radius + end.y}, b)));
+
+                points               
+            },
+            _ => {
+                vec![
+                    (Point { x: start.x, y: start.y, }, false),
+                    (Point { x: end.x,   y: start.y, }, false),
+                    (Point { x: end.x,   y: end.y    }, false), 
+                    (Point { x: start.x, y: end.y,   }, false),
+                ]               
+            }
+        };
+        
         current_layer.set_fill_color(Color::Rgb(Rgb::new(0.8, 1., 0.8, None)));
         let line = Line {
             points,
@@ -206,7 +216,8 @@ impl<'a> PageWriter<'a> {
 
                 current_index = end_index;
 
-                let font_idx = find_font_index_by_style(current_style.weight, current_style.is_italic);
+                let font_idx =
+                    find_font_index_by_style(current_style.weight, current_style.is_italic);
                 let current_font = &self.writer.fonts[font_idx];
 
                 current_layer.set_font(current_font, current_style.font_size.0);
