@@ -33,7 +33,7 @@ impl<T: Merges + Clone> Merges for Option<T> {
     }
 }
 
-primitive_merge!(f32, String, Direction);
+primitive_merge!(f32, String, Direction, FlexWrap, FlexAlign);
 
 trait Merges: Sized + Clone {
     fn merge(&self, rhs: &Self) -> Self;
@@ -90,30 +90,58 @@ pub enum Direction {
     Row,
 }
 
+#[derive(Deserialize, Clone, Copy, PartialEq, Debug)]
+pub enum FlexWrap {
+    NoWrap,
+    Wrap,
+    WrapReverse,
+}
+
+#[derive(Deserialize, Clone, Copy, PartialEq, Debug)]
+pub enum FlexAlign {
+    Auto,
+    FlexStart,
+    FlexEnd,
+    Center,
+    Baseline,
+    Stretch,
+}
+
 #[derive(MergeOptional, Clone)]
 pub struct FlexStyle {
-    // size: Option<f32>,
     pub direction: Direction,
-    // wrap: Option<bool>,
+    pub wrap: FlexWrap,
+    pub align_items: FlexAlign,
+    pub align_self: FlexAlign,
+    pub grow: f32,
+    pub shrink: f32,
+    pub basis: String,
+    // TODO: Add other attributes as needed
 }
 
 impl Default for FlexStyle {
     fn default() -> Self {
         Self {
             direction: Direction::Column,
+            wrap: FlexWrap::NoWrap,
+            align_items: FlexAlign::Auto,
+            align_self: FlexAlign::Auto,
+            grow: 0.,
+            shrink: 1.,
+            basis: String::from("auto"),
         }
     }
 }
 
 #[derive(MergeOptional, Clone)]
-pub struct MarginStyle {
+pub struct EdgeStyle {
     pub top: f32,
     pub right: f32,
     pub bottom: f32,
     pub left: f32,
 }
 
-impl Default for MarginStyle {
+impl Default for EdgeStyle {
     fn default() -> Self {
         Self {
             top: 0.,
@@ -130,10 +158,14 @@ pub struct Style {
     pub border: BorderStyle,
     pub color: Color,
     #[nested]
-    pub margin: MarginStyle,
+    pub margin: EdgeStyle,
+    #[nested]
+    pub padding: EdgeStyle,
     pub background_color: Color,
     #[nested]
     pub flex: FlexStyle,
+    pub width: String,
+    pub height: String,
 }
 
 impl Default for Style {
@@ -143,7 +175,10 @@ impl Default for Style {
             color: String::from("#000000"),
             background_color: String::from("#FFFFFF"),
             flex: FlexStyle::default(),
-            margin: MarginStyle::default(),
+            margin: EdgeStyle::default(),
+            padding: EdgeStyle::default(),
+            width: String::from("undefined"),
+            height: String::from("undefined"),
         }
     }
 }
@@ -165,10 +200,17 @@ enum TextChild {
     TextNode(TextNode),
 }
 
+#[allow(dead_code)]
 #[derive(Deserialize)]
 pub struct TextNode {
-    _styles: Vec<String>,
-    _children: Vec<TextChild>,
+    styles: Vec<String>,
+    children: Vec<TextChild>,
+}
+
+#[allow(dead_code)]
+#[derive(Deserialize)]
+pub struct ImageNode {
+    content: String,
 }
 
 #[derive(Deserialize)]
@@ -179,7 +221,7 @@ pub enum Node {
         children: Vec<Node>,
     },
     Text(TextNode),
-    Image {},
+    Image(ImageNode),
 }
 
 #[derive(Deserialize)]
@@ -191,8 +233,6 @@ pub struct PdfLayout {
     pub fonts: Vec<FontInformation>,
     pub styles: HashMap<String, MergeableStyle>,
     pub root: Node,
-    // #[serde(flatten)]
-    // other: HashMap<String, Value>,
 }
 
 #[cfg(test)]
@@ -227,12 +267,15 @@ mod tests {
                 }
             },
             "root": {
-                "type": "StyledNode",
+                "type": "Styled",
                 "styles": [],
                 "children": [{
                     "type": "Text",
                     "styles": ["h1"],
                     "children": ["This is some header text ", {"styles": ["italic"], "children": ["italic text"]}] 
+                }, {
+                    "type": "Image",
+                    "content": "<svg xmlns:xlink=\"http://www.w3.org/1999/xlink\" role=\"img\" aria-label=\"22\" width=\"73\" height=\"73\" viewBox=\"0 0 73 73\" xmlns=\"http://www.w3.org/2000/svg\"><circle class=\"donutMetric__innerCircle\" cx=\"36.5\" cy=\"36.5\" r=\"25\" fill=\"#D3D1E6\" /></svg>"
                 }]
             }
         }"##).unwrap();
@@ -251,7 +294,19 @@ mod tests {
 
         if let Node::Styled { styles, children } = dom.root {
             assert_eq!(styles.len(), 0);
-            assert_eq!(children.len(), 1);
+            assert_eq!(children.len(), 2);
+
+            if let Node::Text(node) = &children[0] {
+                assert!(node.styles.contains(&String::from("h1")));
+            } else {
+                unreachable!();
+            }
+
+            if let Node::Image(node) = &children[1] {
+                assert!(node.content.contains("<svg"));
+            } else {
+                unreachable!();
+            }
         } else {
             unreachable!()
         }

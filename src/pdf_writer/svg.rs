@@ -1,11 +1,9 @@
-use lazy_static::lazy_static;
-use printpdf::{Color, Mm, Point, Pt, Rgb, Svg, SvgTransform, TextMatrix};
-use regex::Regex;
+use printpdf::{Color, Point, Pt, Rgb, Svg, SvgTransform, TextMatrix};
 
 use crate::{
     fonts::find_font_index_by_style,
     rich_text::{FontWeight, RichText, RichTextStyle},
-    text_layout::TextLayout,
+    text_layout::TextLayout, units::unit_to_pt,
 };
 
 use super::PageWriter;
@@ -23,25 +21,7 @@ const SUPPORTED_TEXT_ATTRIBUTES: [&str; 10] = [
     "dominant-baseline",
 ];
 
-fn svg_to_pt(svg_unit: &str) -> Pt {
-    lazy_static! {
-        static ref RE: Regex = Regex::new(r"^(?i)(?P<quantity>[\.\d]+)(?P<units>\D+)?$").unwrap();
-    }
 
-    let caps = RE.captures(svg_unit).unwrap();
-    let quantity: f64 = caps.name("quantity").unwrap().as_str().parse().unwrap();
-    let units = caps.name("units").map_or("px", |u| u.as_str());
-
-    match units.to_lowercase().as_str() {
-        "px" => Mm(quantity * (25.4 / 300.)).into(),
-        "mm" => Mm(quantity).into(),
-        "cm" => Mm(quantity * 10.0).into(),
-        "pt" => Pt(quantity),
-        "in" => Pt(quantity * 72.),
-        "pc" => Pt(quantity * 6.),
-        _ => panic!("Unknown unit types {units}"),
-    }
-}
 
 impl<'a> PageWriter<'a> {
     pub fn draw_svg(&self, start: Point, svg_text: &str) -> &Self {
@@ -88,12 +68,12 @@ impl<'a> PageWriter<'a> {
                 panic!("<text .../> attribute, {}, is not yet supported", unsupported_attribute.name());
             }
 
-            let x = svg_to_pt(node.attribute("x").unwrap_or("0"));
-            let y = svg_to_pt(node.attribute("y").unwrap_or("0"));
+            let x = unit_to_pt(node.attribute("x").unwrap_or("0"));
+            let y = unit_to_pt(node.attribute("y").unwrap_or("0"));
             let weight = FontWeight::from(node.attribute("font-weight").unwrap_or("regular"));
             let font_style = node.attribute("font-style").unwrap_or("normal");
             let is_italic = font_style.to_lowercase() == "italic";
-            let font_size = svg_to_pt(node.attribute("font-size").unwrap_or("12"));
+            let font_size = unit_to_pt(node.attribute("font-size").unwrap_or("12"));
             let fill =
                 color_processing::Color::new_string(node.attribute("fill").unwrap_or("#000000"))
                     .unwrap()
@@ -173,55 +153,55 @@ mod tests {
     #[test]
     fn test_svg_to_pt_px() {
         // pixels * 72 / DPI = pt
-        assert_eq!(svg_to_pt("50"), Pt(12.0));
-        assert_eq!(svg_to_pt("50px"), Pt(12.0));
+        assert_eq!(unit_to_pt("50"), Pt(12.0));
+        assert_eq!(unit_to_pt("50px"), Pt(12.0));
 
-        assert_eq!(svg_to_pt("100"), Pt(24.0));
-        assert_eq!(svg_to_pt("100px"), Pt(24.0));
+        assert_eq!(unit_to_pt("100"), Pt(24.0));
+        assert_eq!(unit_to_pt("100px"), Pt(24.0));
     }
 
     #[test]
     fn test_svg_to_pt_mm() {
         // Taken from a lookup table
-        assert_eq!(svg_to_pt("50mm"), Pt(141.7322834646));
-        assert_eq!(svg_to_pt("20mm"), Pt(56.6929133858));
+        assert_eq!(unit_to_pt("50mm"), Pt(141.7322834646));
+        assert_eq!(unit_to_pt("20mm"), Pt(56.6929133858));
     }
 
     #[test]
     fn test_svg_to_pt_cm() {
         // Taken from a lookup table
-        assert_eq!(svg_to_pt("5cm"), Pt(141.7322834646));
-        assert_eq!(svg_to_pt("2cm"), Pt(56.6929133858));
+        assert_eq!(unit_to_pt("5cm"), Pt(141.7322834646));
+        assert_eq!(unit_to_pt("2cm"), Pt(56.6929133858));
     }
 
     #[test]
     fn test_svg_to_pt_pt() {
         // 1:1
-        assert_eq!(svg_to_pt("5pt"), Pt(5.));
-        assert_eq!(svg_to_pt("2pt"), Pt(2.));
-        assert_eq!(svg_to_pt("12pt"), Pt(12.));
-        assert_eq!(svg_to_pt("12.5pt"), Pt(12.5));
+        assert_eq!(unit_to_pt("5pt"), Pt(5.));
+        assert_eq!(unit_to_pt("2pt"), Pt(2.));
+        assert_eq!(unit_to_pt("12pt"), Pt(12.));
+        assert_eq!(unit_to_pt("12.5pt"), Pt(12.5));
     }
 
     #[test]
     fn test_svg_to_pt_in() {
         // 1:72
-        assert_eq!(svg_to_pt("5in"), Pt(360.));
-        assert_eq!(svg_to_pt("2in"), Pt(144.));
-        assert_eq!(svg_to_pt("12in"), Pt(864.));
+        assert_eq!(unit_to_pt("5in"), Pt(360.));
+        assert_eq!(unit_to_pt("2in"), Pt(144.));
+        assert_eq!(unit_to_pt("12in"), Pt(864.));
     }
 
     #[test]
     fn test_svg_to_pt_pc() {
         // 1:6
-        assert_eq!(svg_to_pt("5pc"), Pt(30.));
-        assert_eq!(svg_to_pt("2pc"), Pt(12.));
-        assert_eq!(svg_to_pt("12pc"), Pt(72.));
+        assert_eq!(unit_to_pt("5pc"), Pt(30.));
+        assert_eq!(unit_to_pt("2pc"), Pt(12.));
+        assert_eq!(unit_to_pt("12pc"), Pt(72.));
     }
 
     #[test]
     #[should_panic(expected = "Unknown unit types rem")]
     fn test_unsupported_unit() {
-        svg_to_pt("5rem");
+        unit_to_pt("5rem");
     }
 }

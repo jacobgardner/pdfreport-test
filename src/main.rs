@@ -16,6 +16,7 @@ mod text_layout;
 mod styles;
 mod dom;
 mod block_layout;
+mod units;
 
 const SVG: &str = include_str!("../assets/svg-test.svg");
 
