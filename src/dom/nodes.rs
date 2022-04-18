@@ -31,3 +31,5 @@ pub enum Node {
     Text(TextNode),
     Image(ImageNode),
 }
+
+// pub fn traverse_nodes
