@@ -5,16 +5,16 @@ use stretch::{
 
 use crate::{
     dom::{FlexAlign, Style},
-    units::{percent_to_num, unit_to_pt, UnitParseError},
+    units::{percent_to_num, unit_to_pt, MeasurementParseError},
 };
 
-fn string_to_dim(s: &str) -> Result<Dimension, UnitParseError> {
+fn string_to_dim(s: &str) -> Result<Dimension, MeasurementParseError> {
     Ok(match s.to_lowercase().as_str() {
         "undefined" => Dimension::Undefined,
         "auto" => Dimension::Auto,
         s => {
             if s.contains('%') {
-                Dimension::Percent(percent_to_num(s) as f32)
+                Dimension::Percent(percent_to_num(s)? as f32)
             } else {
                 let pt = unit_to_pt(s)?;
 

@@ -14,6 +14,7 @@ mod math;
 mod pdf_writer;
 mod rich_text;
 mod text_layout;
+mod error;
 // mod paginated_layout;
 mod block_layout;
 mod dom;

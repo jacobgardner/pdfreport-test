@@ -4,9 +4,9 @@ use regex::Regex;
 use thiserror::Error;
 
 #[derive(Error, Debug)]
-pub enum UnitParseError {
+pub enum MeasurementParseError {
     #[error(
-        "Malformed source string, \"{source_str}\", expected a number or a number followed by a unit."
+        "Malformed source string, \"{source_str}\", expected a number or a number followed by an optional unit or percentage."
     )]
     MalformedSource { source_str: String },
     #[error("Unsupported unit type, \"{attached_unit}\"")]
@@ -15,23 +15,23 @@ pub enum UnitParseError {
     UnparsableQuantity { quantity_str: String },
 }
 
-pub fn unit_to_pt(svg_unit: &str) -> Result<Pt, UnitParseError> {
+pub fn unit_to_pt(svg_unit: &str) -> Result<Pt, MeasurementParseError> {
     lazy_static! {
         static ref RE: Regex = Regex::new(r"^(?i)(?P<quantity>[\.\d]+)(?P<units>\D+)?$")
             .expect("Regex should have been tested before production");
     }
 
-    let capture_groups = RE
-        .captures(svg_unit)
-        .ok_or_else(|| UnitParseError::MalformedSource {
-            source_str: String::from(svg_unit),
-        })?;
+    let capture_groups =
+        RE.captures(svg_unit)
+            .ok_or_else(|| MeasurementParseError::MalformedSource {
+                source_str: String::from(svg_unit),
+            })?;
     let quantity: f64 = capture_groups
         .name("quantity")
         .expect("Since the regex passed, we should have a quantity group.")
         .as_str()
         .parse()
-        .map_err(|_| UnitParseError::UnparsableQuantity {
+        .map_err(|_| MeasurementParseError::UnparsableQuantity {
             quantity_str: String::from(capture_groups.name("quantity").unwrap().as_str()),
         })?;
     let units = capture_groups.name("units").map_or("px", |u| u.as_str());
@@ -44,27 +44,33 @@ pub fn unit_to_pt(svg_unit: &str) -> Result<Pt, UnitParseError> {
         "in" => Pt(quantity * 72.),
         "pc" => Pt(quantity * 6.),
         unit => {
-            return Err(UnitParseError::UnsupportedUnit {
+            return Err(MeasurementParseError::UnsupportedUnit {
                 attached_unit: String::from(unit),
             })
         }
     })
 }
 
-pub fn percent_to_num(percent: &str) -> f64 {
+pub fn percent_to_num(percent: &str) -> Result<f64, MeasurementParseError> {
     lazy_static! {
         static ref RE: Regex = Regex::new(r"^(?i)(?P<quantity>[\.\d]+)%$").unwrap();
     }
 
-    let capture_groups = RE.captures(percent).unwrap();
+    let capture_groups =
+        RE.captures(percent)
+            .ok_or_else(|| MeasurementParseError::MalformedSource {
+                source_str: String::from(percent),
+            })?;
     let quantity: f64 = capture_groups
         .name("quantity")
-        .unwrap()
+        .expect("Since the regex passed, we should have a quantity group.")
         .as_str()
         .parse()
-        .unwrap();
+        .map_err(|_| MeasurementParseError::UnparsableQuantity {
+            quantity_str: String::from(capture_groups.name("quantity").unwrap().as_str()),
+        })?;
 
-    return quantity;
+    Ok(quantity)
 }
 
 #[cfg(test)]
@@ -72,7 +78,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_svg_to_pt_px() -> Result<(), UnitParseError> {
+    fn test_svg_to_pt_px() -> Result<(), MeasurementParseError> {
         // pixels * 72 / DPI = pt
         assert_eq!(unit_to_pt("50")?, Pt(12.0));
         assert_eq!(unit_to_pt("50px")?, Pt(12.0));
@@ -84,7 +90,7 @@ mod tests {
     }
 
     #[test]
-    fn test_svg_to_pt_mm() -> Result<(), UnitParseError> {
+    fn test_svg_to_pt_mm() -> Result<(), MeasurementParseError> {
         // Taken from a lookup table
         assert_eq!(unit_to_pt("50mm")?, Pt(141.7322834646));
         assert_eq!(unit_to_pt("20mm")?, Pt(56.6929133858));
@@ -93,7 +99,7 @@ mod tests {
     }
 
     #[test]
-    fn test_svg_to_pt_cm() -> Result<(), UnitParseError> {
+    fn test_svg_to_pt_cm() -> Result<(), MeasurementParseError> {
         // Taken from a lookup table
         assert_eq!(unit_to_pt("5cm")?, Pt(141.7322834646));
         assert_eq!(unit_to_pt("2cm")?, Pt(56.6929133858));
@@ -102,7 +108,7 @@ mod tests {
     }
 
     #[test]
-    fn test_svg_to_pt_pt() -> Result<(), UnitParseError> {
+    fn test_svg_to_pt_pt() -> Result<(), MeasurementParseError> {
         // 1:1
         assert_eq!(unit_to_pt("5pt")?, Pt(5.));
         assert_eq!(unit_to_pt("2pt")?, Pt(2.));
@@ -113,7 +119,7 @@ mod tests {
     }
 
     #[test]
-    fn test_svg_to_pt_in() -> Result<(), UnitParseError> {
+    fn test_svg_to_pt_in() -> Result<(), MeasurementParseError> {
         // 1:72
         assert_eq!(unit_to_pt("5in")?, Pt(360.));
         assert_eq!(unit_to_pt("2in")?, Pt(144.));
@@ -123,7 +129,7 @@ mod tests {
     }
 
     #[test]
-    fn test_svg_to_pt_pc() -> Result<(), UnitParseError> {
+    fn test_svg_to_pt_pc() -> Result<(), MeasurementParseError> {
         // 1:6
         assert_eq!(unit_to_pt("5pc")?, Pt(30.));
         assert_eq!(unit_to_pt("2pc")?, Pt(12.));
@@ -133,20 +139,20 @@ mod tests {
     }
 
     #[test]
-    fn test_unsupported_unit() -> Result<(), UnitParseError> {
+    fn test_unsupported_unit() -> Result<(), MeasurementParseError> {
         assert!(matches!(
             unit_to_pt("5rem"),
-            Err(UnitParseError::UnsupportedUnit { .. })
+            Err(MeasurementParseError::UnsupportedUnit { .. })
         ));
 
         assert!(matches!(
             unit_to_pt("5.5.5px"),
-            Err(UnitParseError::UnparsableQuantity { .. })
+            Err(MeasurementParseError::UnparsableQuantity { .. })
         ));
 
         assert!(matches!(
             unit_to_pt("px"),
-            Err(UnitParseError::MalformedSource { .. })
+            Err(MeasurementParseError::MalformedSource { .. })
         ));
 
         Ok(())
