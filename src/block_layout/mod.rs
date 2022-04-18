@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use stretch::{geometry::Size, style::Dimension, Stretch};
+use stretch::{geometry::Size, Stretch, number::Number};
 
 use crate::{
     dom::{MergeableStyle, Node, PdfDom, Style},
@@ -8,6 +8,8 @@ use crate::{
 };
 
 mod flex_style;
+
+
 
 fn build_layout_nodes(
     stretch: &mut Stretch,
@@ -54,7 +56,7 @@ fn build_layout_nodes(
                         .ok_or_else(|| BadPdfLayout::UnmatchedStyle {
                             style_name: style_name.clone(),
                         })?;
-            
+
                 println!("Mergable: {:?}", mergeable_style);
 
                 updated_style = updated_style.merge_style(mergeable_style);
@@ -63,11 +65,30 @@ fn build_layout_nodes(
             let stretch_style = stretch::style::Style::try_from(updated_style)?;
             println!("{:?}", stretch_style);
 
-            let child_node = stretch.new_node(stretch_style, vec![])?;
+            // We would want to pass in a function called something like:
+            //  compute_text_size which takes in the dom node, current style,
+            //  etc. and returns the desired closure, if we can
+            let child_node = stretch.new_leaf(
+                stretch_style,
+                Box::new(|size| {
+                    Ok(Size {
+                        width: 50.,
+                        height: 50.,
+                    })
+                }),
+            )?;
             stretch.add_child(current_layout_node, child_node)?;
         }
         Node::Image(_image_node) => {
-            let child_node = stretch.new_node(Style::default().try_into()?, vec![])?;
+            let child_node = stretch.new_leaf(
+                Style::default().try_into()?,
+                Box::new(|size| {
+                    Ok(Size {
+                        width: 50.,
+                        height: 50.,
+                    })
+                }),
+            )?;
             stretch.add_child(current_layout_node, child_node)?;
         }
     }
@@ -76,10 +97,6 @@ fn build_layout_nodes(
 }
 
 pub fn compute_pdf_layout(pdf_layout: &PdfDom) -> Result<(), Box<dyn std::error::Error>> {
-    // TODO: Right now the root node of stretch is a generic node that doesn't
-    // have a DOM equivalent. We may want to change that so that the stretch
-    // root node is 1:1 with the dom root node if we can
-
     let mut stretch = Stretch::new();
 
     let mut style_stack = vec![Style::default()];
@@ -107,8 +124,10 @@ pub fn compute_pdf_layout(pdf_layout: &PdfDom) -> Result<(), Box<dyn std::error:
         root_node,
     )?;
 
-    // pdf_layout.root
-    stretch.compute_layout(node, Size::undefined())?;
+    stretch.compute_layout(node, Size {
+        width: Number::Defined(8.5 * 72.), // 8.5 inches
+        height: Number::Undefined
+    })?;
 
     let layout = stretch.layout(node)?;
 

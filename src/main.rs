@@ -111,8 +111,6 @@ fn main() {
             "fonts": [],
             "styles": {
                 "h1": {
-                    "width": "50px",
-                    "height": "50px",
                     "color": "#ABCDEF",
                     "flex": {
                         "direction": "Column"
