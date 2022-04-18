@@ -8,13 +8,13 @@ use rich_text::{RichText, RichTextStyle, RichTextStyleChanges};
 use text_layout::TextLayout;
 use tracing::{span, Level};
 
+mod error;
 mod fonts;
 mod line_metric;
 mod math;
 mod pdf_writer;
 mod rich_text;
 mod text_layout;
-mod error;
 // mod paginated_layout;
 mod block_layout;
 mod dom;
@@ -108,14 +108,48 @@ fn main() {
 
     let pdf_layout: PdfDom = serde_json::from_str(
         r##"{
-        "fonts": [],
-        "styles": {},
-        "root": {
-            "type": "Styled",
-            "styles": [],
-            "children": []
-        }
-    }"##,
+            "fonts": [],
+            "styles": {
+                "h1": {
+                    "width": "50px",
+                    "height": "50px",
+                    "color": "#ABCDEF",
+                    "flex": {
+                        "direction": "Column"
+                    },
+                    "margin": {
+                        "bottom": 4
+                    },
+                    "padding": {
+                        "left": 40,
+                        "right": 40
+                    },
+                    "border": {
+                        "width": 1,  
+                        "color": "#ABCDEF",
+                        "radius": {
+                            "topRight": 5,
+                            "bottomRight": 5
+                        }
+                    }
+                },
+                "italic": {
+                     
+                }
+            },
+            "root": {
+                "type": "Styled",
+                "styles": [],
+                "children": [{
+                    "type": "Text",
+                    "styles": ["h1"],
+                    "children": ["This is some header text ", {"styles": ["italic"], "children": ["italic text"]}] 
+                }, {
+                    "type": "Image",
+                    "content": "<svg xmlns:xlink=\"http://www.w3.org/1999/xlink\" role=\"img\" aria-label=\"22\" width=\"73\" height=\"73\" viewBox=\"0 0 73 73\" xmlns=\"http://www.w3.org/2000/svg\"><circle class=\"donutMetric__innerCircle\" cx=\"36.5\" cy=\"36.5\" r=\"25\" fill=\"#D3D1E6\" /></svg>"
+                }]
+            }
+        }"##,
     )
     .unwrap();
 
@@ -176,7 +210,9 @@ fn main() {
                 paragraph_metrics.line_metrics,
             );
 
-        page_writer.draw_svg(Point::new(Mm(21.), Mm(270.)), SVG).unwrap();
+        page_writer
+            .draw_svg(Point::new(Mm(21.), Mm(270.)), SVG)
+            .unwrap();
 
         page_writer = pdf_writer.add_page();
     }
