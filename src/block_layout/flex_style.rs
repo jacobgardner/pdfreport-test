@@ -4,7 +4,8 @@ use stretch::{
 };
 
 use crate::{
-    dom::{FlexAlign, Style},
+    dom::style::{Direction, FlexAlign},
+    dom::Style,
     units::{percent_to_num, unit_to_pt, MeasurementParseError},
 };
 
@@ -25,12 +26,12 @@ fn string_to_dim(s: &str) -> Result<Dimension, MeasurementParseError> {
 }
 
 impl TryFrom<Style> for stretch::style::Style {
-  type Error = Box<dyn std::error::Error>;
-// impl From<Style> for stretch::style::Style {
+    type Error = Box<dyn std::error::Error>;
+    // impl From<Style> for stretch::style::Style {
     fn try_from(s: Style) -> Result<Self, Self::Error> {
         Ok(Self {
             display: Display::Flex,
-            flex_direction: if s.flex.direction == crate::dom::Direction::Row {
+            flex_direction: if s.flex.direction == Direction::Row {
                 FlexDirection::Row
             } else {
                 FlexDirection::Column

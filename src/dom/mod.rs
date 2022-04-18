@@ -3,8 +3,8 @@
 use serde::Deserialize;
 use std::collections::HashMap;
 
-mod nodes;
-mod style;
+pub mod nodes;
+pub mod style;
 
 pub use nodes::Node;
 pub use style::{MergeableStyle, Style};

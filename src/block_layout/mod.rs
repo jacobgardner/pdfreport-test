@@ -4,7 +4,7 @@ use crate::dom::{PdfDom, Style};
 
 mod flex_style;
 
-pub fn compute_pdf_layout(pdf_layout: &PdfDom) -> Result<(), Box<dyn std::error::Error>> {
+pub fn compute_pdf_layout(_pdf_layout: &PdfDom) -> Result<(), Box<dyn std::error::Error>> {
     let mut stretch = Stretch::new();
 
     let style_stack = vec![Style::default()];

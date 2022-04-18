@@ -2,7 +2,7 @@ use serde::Deserialize;
 
 #[derive(Deserialize, Debug)]
 #[serde(untagged)]
-enum TextChild {
+pub enum TextChild {
     Content(String),
     TextNode(TextNode),
 }
@@ -20,8 +20,8 @@ pub struct ImageNode {
 
 #[derive(Deserialize, Debug)]
 pub struct StyledNode {
-    styles: Vec<String>,
-    children: Vec<Node>,
+    pub styles: Vec<String>,
+    pub children: Vec<Node>,
 }
 
 #[derive(Deserialize, Debug)]
