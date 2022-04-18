@@ -33,6 +33,7 @@ num-derive = "*"
 color_processing = "*"
 regex = "*"
 lazy_static = "*"
+thiserror = "*"
 
 # Optional Dependencies
 tracing-chrome = { version = "*", optional = true }

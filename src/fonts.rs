@@ -96,6 +96,8 @@ pub const FONTS: &[FontData] = &[
     },
 ];
 
+// TODO: Replace with a resource manager that loads fonts from URLs and caches them
+
 pub fn find_font_index_by_style(weight: FontWeight, italic: bool) -> usize {
     FONTS
         .iter()

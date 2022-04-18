@@ -1,5 +1,7 @@
 // Compute layout -> Draw Shit -> Draw Text -> Profit
 
+use block_layout::layout_pdf;
+use dom::PdfLayout;
 use pdf_writer::PdfWriter;
 use printpdf::{Mm, Point, Pt};
 use rich_text::{RichText, RichTextStyle, RichTextStyleChanges};
@@ -13,9 +15,9 @@ mod pdf_writer;
 mod rich_text;
 mod text_layout;
 // mod paginated_layout;
-mod styles;
-mod dom;
 mod block_layout;
+mod dom;
+mod styles;
 mod units;
 
 const SVG: &str = include_str!("../assets/svg-test.svg");
@@ -103,6 +105,20 @@ fn main() {
 
     let layout_span = span!(Level::DEBUG, "Layout & Building PDF").entered();
 
+    let pdf_layout: PdfLayout = serde_json::from_str(
+        r##"{
+        "fonts": [],
+        "styles": {},
+        "root": {
+            "type": "Styled",
+            "styles": [],
+            "children": []
+        }
+    }"##,
+    )
+    .unwrap();
+
+    layout_pdf(&pdf_layout).unwrap();
 
     let page_count = 1;
 
@@ -150,7 +166,7 @@ fn main() {
                     Mm(20.) + text_width.into(),
                     Mm(280.) - paragraph_metrics.height.into(),
                 ),
-                Some(Pt(5.))
+                Some(Pt(5.)),
             )
             .write_lines(
                 Point::new(Mm(20.), Mm(280.)),
@@ -158,8 +174,8 @@ fn main() {
                 &rich_text,
                 paragraph_metrics.line_metrics,
             );
-        
-        page_writer.draw_svg(Point::new(Mm(21.), Mm(270.)), SVG);
+
+        page_writer.draw_svg(Point::new(Mm(21.), Mm(270.)), SVG).unwrap();
 
         page_writer = pdf_writer.add_page();
     }

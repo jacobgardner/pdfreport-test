@@ -1,33 +1,34 @@
 use stretch::{
     geometry::{Rect, Size},
     style::*,
-    Stretch,
 };
 
 use crate::{
-    dom::{FlexAlign, PdfLayout, Style},
-    units::{percent_to_num, unit_to_pt},
+    dom::{FlexAlign, Style},
+    units::{percent_to_num, unit_to_pt, UnitParseError},
 };
 
-fn string_to_dim(s: &str) -> Dimension {
-    match s.to_lowercase().as_str() {
+fn string_to_dim(s: &str) -> Result<Dimension, UnitParseError> {
+    Ok(match s.to_lowercase().as_str() {
         "undefined" => Dimension::Undefined,
         "auto" => Dimension::Auto,
         s => {
             if s.contains('%') {
                 Dimension::Percent(percent_to_num(s) as f32)
             } else {
-                let pt = unit_to_pt(s);
+                let pt = unit_to_pt(s)?;
 
                 Dimension::Points(pt.0 as f32)
             }
         }
-    }
+    })
 }
 
-impl From<Style> for stretch::style::Style {
-    fn from(s: Style) -> Self {
-        Self {
+impl TryFrom<Style> for stretch::style::Style {
+  type Error = Box<dyn std::error::Error>;
+// impl From<Style> for stretch::style::Style {
+    fn try_from(s: Style) -> Result<Self, Self::Error> {
+        Ok(Self {
             display: Display::Flex,
             flex_direction: if s.flex.direction == crate::dom::Direction::Row {
                 FlexDirection::Row
@@ -68,27 +69,13 @@ impl From<Style> for stretch::style::Style {
                 start: Dimension::Points(s.border.width),
             },
             size: Size {
-                width: string_to_dim(&s.width),
-                height: string_to_dim(&s.height),
+                width: string_to_dim(&s.width)?,
+                height: string_to_dim(&s.height)?,
             },
             flex_grow: s.flex.grow,
             flex_shrink: s.flex.shrink,
-            flex_basis: string_to_dim(&s.flex.basis),
+            flex_basis: string_to_dim(&s.flex.basis)?,
             ..Default::default()
-        }
+        })
     }
-}
-
-#[allow(dead_code)]
-pub fn layout_pdf(_pdf: &PdfLayout) -> Result<(), stretch::Error> {
-    let mut stretch = Stretch::new();
-
-    let style_stack = vec![Style::default()];
-
-    let current_style = style_stack.last().unwrap().clone();
-    let node = stretch.new_node(current_style.into(), vec![])?;
-
-    let _layout = stretch.layout(node)?;
-
-    Ok(())
 }

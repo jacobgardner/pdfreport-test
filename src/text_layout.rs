@@ -32,9 +32,7 @@ impl TextLayout {
         let mut typeface: Option<Typeface> = None;
 
         for font in FONTS {
-            // Safe because all the font dat
-            // a is 'static
-            // They probably could have enforced this with a type to be safe...
+            // Safe because all the font data is 'static for now
             unsafe {
                 let d = Data::new_bytes(font.bytes);
                 let t = Typeface::from_data(d, None);
