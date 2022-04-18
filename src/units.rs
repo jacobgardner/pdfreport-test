@@ -78,6 +78,30 @@ mod tests {
     use super::*;
 
     #[test]
+    fn test_percent_conversion() -> Result<(), MeasurementParseError> {
+        assert_eq!(percent_to_num("0%")?, 0.);
+        assert_eq!(percent_to_num("100%")?, 100.);
+        assert_eq!(percent_to_num("54.1%")?, 54.1);
+
+        assert!(matches!(
+            percent_to_num("55px"),
+            Err(MeasurementParseError::MalformedSource { .. })
+        ));
+
+        assert!(matches!(
+            percent_to_num("12"),
+            Err(MeasurementParseError::MalformedSource { .. })
+        ));
+
+        assert!(matches!(
+            percent_to_num("12.1.3%"),
+            Err(MeasurementParseError::UnparsableQuantity { .. })
+        ));
+
+        Ok(())
+    }
+
+    #[test]
     fn test_svg_to_pt_px() -> Result<(), MeasurementParseError> {
         // pixels * 72 / DPI = pt
         assert_eq!(unit_to_pt("50")?, Pt(12.0));
