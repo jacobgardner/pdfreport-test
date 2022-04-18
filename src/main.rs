@@ -1,7 +1,7 @@
 // Compute layout -> Draw Shit -> Draw Text -> Profit
 
-use block_layout::layout_pdf;
-use dom::PdfLayout;
+use block_layout::compute_pdf_layout;
+use dom::PdfDom;
 use pdf_writer::PdfWriter;
 use printpdf::{Mm, Point, Pt};
 use rich_text::{RichText, RichTextStyle, RichTextStyleChanges};
@@ -106,7 +106,7 @@ fn main() {
 
     let layout_span = span!(Level::DEBUG, "Layout & Building PDF").entered();
 
-    let pdf_layout: PdfLayout = serde_json::from_str(
+    let pdf_layout: PdfDom = serde_json::from_str(
         r##"{
         "fonts": [],
         "styles": {},
@@ -119,7 +119,7 @@ fn main() {
     )
     .unwrap();
 
-    layout_pdf(&pdf_layout).unwrap();
+    compute_pdf_layout(&pdf_layout).unwrap();
 
     let page_count = 1;
 
