@@ -3,7 +3,8 @@ use printpdf::{Color, Point, Pt, Rgb, Svg, SvgTransform, TextMatrix};
 use crate::{
     fonts::find_font_index_by_style,
     rich_text::{FontWeight, RichText, RichTextStyle},
-    text_layout::TextLayout, units::unit_to_pt,
+    text_layout::TextLayout,
+    units::unit_to_pt,
 };
 
 use super::PageWriter;
@@ -21,10 +22,12 @@ const SUPPORTED_TEXT_ATTRIBUTES: [&str; 10] = [
     "dominant-baseline",
 ];
 
-
-
 impl<'a> PageWriter<'a> {
-    pub fn draw_svg(&self, start: Point, svg_text: &str) -> Result<&Self, Box<dyn std::error::Error>> {
+    pub fn draw_svg(
+        &self,
+        start: Point,
+        svg_text: &str,
+    ) -> Result<&Self, Box<dyn std::error::Error>> {
         // let string_to_path_svg = tree.to_string(&usvg::XmlOptions::default());
         // let text_node = tree.node_by_id("text");
         let current_layer = self.get_current_layer();
@@ -65,7 +68,10 @@ impl<'a> PageWriter<'a> {
                 .find(|a| !SUPPORTED_TEXT_ATTRIBUTES.contains(&a.name().to_lowercase().as_str()));
 
             if let Some(unsupported_attribute) = unsupported_attribute {
-                panic!("<text .../> attribute, {}, is not yet supported", unsupported_attribute.name());
+                panic!(
+                    "<text .../> attribute, {}, is not yet supported",
+                    unsupported_attribute.name()
+                );
             }
 
             let x = unit_to_pt(node.attribute("x").unwrap_or("0"))?;
@@ -145,4 +151,3 @@ impl<'a> PageWriter<'a> {
         Ok(self)
     }
 }
-

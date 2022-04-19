@@ -82,7 +82,6 @@ impl Default for BorderStyle {
     }
 }
 
-
 #[derive(Deserialize, Clone, Copy, PartialEq, Debug)]
 pub enum Direction {
     Column,

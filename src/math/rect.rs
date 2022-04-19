@@ -1,6 +1,3 @@
-
 // TODO: Implement me
 #[allow(dead_code)]
-pub struct Rect {
-
-}
+pub struct Rect {}

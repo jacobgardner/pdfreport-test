@@ -1,10 +1,11 @@
 // Compute layout -> Draw Shit -> Draw Text -> Profit
 
-use block_layout::compute_pdf_layout;
+use block_layout::{BlockLayout, TextComputeFn};
 use dom::PdfDom;
 use pdf_writer::PdfWriter;
 use printpdf::{Mm, Point, Pt};
 use rich_text::{RichText, RichTextStyle, RichTextStyleChanges};
+use stretch::geometry::Size;
 use text_layout::TextLayout;
 use tracing::{span, Level};
 
@@ -151,7 +152,26 @@ fn main() {
     )
     .unwrap();
 
-    compute_pdf_layout(&pdf_layout).unwrap();
+    // let layout = BlockLayout::compute_layout(
+    //     &pdf_layout,
+    //     Box::from(|node| {
+    //         Box::from(|sz| {
+    //             Ok(Size {
+    //                 width: 5.,
+    //                 height: 5.,
+    //             })
+    //         })
+    //     }),
+    //     Box::from(|node| {
+    //         Box::from(|sz| {
+    //             Ok(Size {
+    //                 width: 5.,
+    //                 height: 5.,
+    //             })
+    //         })
+    //     }),
+    // )
+    // .unwrap();
 
     let page_count = 1;
 

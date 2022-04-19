@@ -2,8 +2,8 @@ use std::{fs::File, io::BufWriter, ops::Range};
 
 use printpdf::{
     calculate_points_for_circle, lopdf, Color, IndirectFontRef, Line, Mm, PdfDocument,
-    PdfDocumentReference, PdfLayerIndex, PdfLayerReference, PdfPageIndex, Point, Pt, Rgb,
-    TextMatrix, PdfPageReference,
+    PdfDocumentReference, PdfLayerIndex, PdfLayerReference, PdfPageIndex, PdfPageReference, Point,
+    Pt, Rgb, TextMatrix,
 };
 use skia_safe::Typeface;
 use tracing::{instrument, span, Level};
@@ -95,16 +95,13 @@ impl<'a> PageWriter<'a> {
             layer_index,
         }
     }
-    
+
     fn get_current_page(&self) -> PdfPageReference {
-         self.writer
-            .doc
-            .get_page(self.page_index)       
+        self.writer.doc.get_page(self.page_index)
     }
 
     fn get_current_layer(&self) -> PdfLayerReference {
-        self.get_current_page()
-            .get_layer(self.layer_index)
+        self.get_current_page().get_layer(self.layer_index)
     }
 
     pub fn draw_rect(&self, start: Point, end: Point, border_radius: Option<Pt>) -> &Self {
@@ -141,19 +138,18 @@ impl<'a> PageWriter<'a> {
                 points.push((Point { x: start.x + border_radius, y: end.y , }, false));
                 points.extend(circle_points[BOTTOM_LEFT_CORNER].iter().map(|&(pt, b)| (Point { x: pt.x + border_radius + start.x, y: pt.y + border_radius + end.y}, b)));
 
-                points               
+                points
             },
             _ => {
                 vec![
                     (Point { x: start.x, y: start.y, }, false),
                     (Point { x: end.x,   y: start.y, }, false),
-                    (Point { x: end.x,   y: end.y    }, false), 
+                    (Point { x: end.x,   y: end.y    }, false),
                     (Point { x: start.x, y: end.y,   }, false),
-                ]               
+                ]
             }
         };
-        
-        
+
         current_layer.set_fill_color(Color::Rgb(Rgb::new(0.8, 1., 0.8, None)));
         let line = Line {
             points,
@@ -162,11 +158,15 @@ impl<'a> PageWriter<'a> {
             has_stroke: true,
             is_clipping_path: false,
         };
-        
 
         current_layer.save_graphics_state();
         current_layer.set_outline_thickness(2.);
-        current_layer.set_outline_color(Color::Rgb(Rgb { r: 1.0, g: 0., b: 1., icc_profile: None }));
+        current_layer.set_outline_color(Color::Rgb(Rgb {
+            r: 1.0,
+            g: 0.,
+            b: 1.,
+            icc_profile: None,
+        }));
 
         current_layer.add_shape(line);
         current_layer.restore_graphics_state();
