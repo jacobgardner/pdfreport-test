@@ -157,6 +157,8 @@ fn main() {
 
     assemble_pdf::assemble_pdf(&pdf_layout).unwrap();
     
+    println!("Done assembling...");
+    
     return;
 
     {

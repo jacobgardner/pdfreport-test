@@ -1,3 +1,5 @@
+use std::{cell::RefCell, rc::Rc};
+
 use stretch2 as stretch;
 
 use stretch::{node::MeasureFunc, prelude::*};
@@ -8,11 +10,32 @@ use crate::{
     error::BadPdfLayout,
 };
 
+struct DropMe {}
+
+impl DropMe {
+    pub fn yo(&self) {
+        println!("Yo!");
+    }
+}
+
+impl Drop for DropMe {
+    fn drop(&mut self) {
+        println!("Drop it like it's hot!");
+    }
+}
+
 pub fn assemble_pdf(pdf_layout: &PdfDom) -> Result<(), BadPdfLayout> {
-    let text_compute: TextComputeFn = Box::new(|text_node: &TextNode| {
+    // Demonstration of the ability to have an item with a non-static lifetime
+    //  doing stuff in a static lifetime
+    let droppy = Rc::new(RefCell::new(DropMe {}));
+    let mut old_droppy = Rc::clone(&droppy);
+
+    let text_compute: TextComputeFn = Box::new(move |text_node: &TextNode| {
         let text_node = text_node.clone();
+        let droppy = { Rc::clone(&droppy) };
         MeasureFunc::Boxed(Box::new(move |_sz| {
-            println!("{:?}", text_node.styles);
+            // TODO: Replace with real text size calculation
+            droppy.borrow().yo();
             Size {
                 width: 32.,
                 height: 32.,
@@ -20,7 +43,10 @@ pub fn assemble_pdf(pdf_layout: &PdfDom) -> Result<(), BadPdfLayout> {
         }))
     });
 
+    old_droppy.borrow().yo();
+
     let image_compute: ImageComputeFn = Box::new(|_image_node| {
+        // TODO: Replace with real image size calculation
         MeasureFunc::Raw(move |_sz| Size {
             width: 32.,
             height: 32.,
@@ -29,11 +55,10 @@ pub fn assemble_pdf(pdf_layout: &PdfDom) -> Result<(), BadPdfLayout> {
 
     let layout = BlockLayout::build_layout(pdf_layout, text_compute, image_compute)?;
 
-    
     for node in layout.draw_order() {
         let style = layout.get_style(node);
         let dom_node = layout.get_dom_node(node);
-        
+
         println!("Node: {node:?}");
         println!("Style: {style:?}");
         println!("Dom: {dom_node:?}");

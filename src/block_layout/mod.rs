@@ -206,6 +206,8 @@ impl<'a> BlockLayout<'a> {
 
         self.node_draw_order.insert(DrawOrder {
             depth,
+            // If we add z-index to style, we should be able to update it here
+            // and it just work
             z_order: 0,
             node: child_node,
         });
