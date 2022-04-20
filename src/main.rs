@@ -154,6 +154,11 @@ fn main() {
     )
     .unwrap();
 
+
+    assemble_pdf::assemble_pdf(&pdf_layout).unwrap();
+    
+    return;
+
     {
         let text_compute: TextComputeFn = Box::new(|text_node: &TextNode| {
             let text_node = text_node.clone();

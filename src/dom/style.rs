@@ -45,7 +45,7 @@ trait Merges: Sized + Clone {
     }
 }
 
-#[derive(MergeOptional, Clone)]
+#[derive(MergeOptional, Clone, Debug)]
 pub struct BorderRadiusStyle {
     pub top_right: f32,
     pub bottom_right: f32,
@@ -64,7 +64,7 @@ impl Default for BorderRadiusStyle {
     }
 }
 
-#[derive(MergeOptional, Clone)]
+#[derive(MergeOptional, Clone, Debug)]
 pub struct BorderStyle {
     pub width: f32,
     pub color: Color,
@@ -105,7 +105,7 @@ pub enum FlexAlign {
     Stretch,
 }
 
-#[derive(MergeOptional, Clone)]
+#[derive(MergeOptional, Clone, Debug)]
 pub struct FlexStyle {
     pub direction: Direction,
     pub wrap: FlexWrap,
@@ -131,7 +131,7 @@ impl Default for FlexStyle {
     }
 }
 
-#[derive(MergeOptional, Clone)]
+#[derive(MergeOptional, Clone, Debug)]
 pub struct EdgeStyle {
     pub top: f32,
     pub right: f32,
@@ -150,7 +150,7 @@ impl Default for EdgeStyle {
     }
 }
 
-#[derive(MergeOptional, Clone)]
+#[derive(MergeOptional, Clone, Debug)]
 pub struct Style {
     #[nested]
     pub border: BorderStyle,

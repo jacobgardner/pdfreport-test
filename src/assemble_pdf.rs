@@ -29,6 +29,16 @@ pub fn assemble_pdf(pdf_layout: &PdfDom) -> Result<(), BadPdfLayout> {
 
     let layout = BlockLayout::build_layout(pdf_layout, text_compute, image_compute)?;
 
+    
+    for node in layout.draw_order() {
+        let style = layout.get_style(node);
+        let dom_node = layout.get_dom_node(node);
+        
+        println!("Node: {node:?}");
+        println!("Style: {style:?}");
+        println!("Dom: {dom_node:?}");
+        // println!("{:?}", layout.layout_style_map());
+    }
     // let layout_to_style_nodes: HashMap<Node, Style> = HashMap::new();
     // let layout_to_dom_nodes: HashMap<Node, &DomNode> = HashMap::new();
 
