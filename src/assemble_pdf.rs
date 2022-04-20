@@ -19,8 +19,12 @@ pub fn assemble_pdf(pdf_layout: &PdfDom) -> Result<(), BadPdfLayout> {
     let pdf_writer = Rc::new(RefCell::new(PdfWriter::new()));
 
     let shared_pdf_writer = pdf_writer.clone();
+    // We have to use move here twice so each closure gets ownership of the Rc and can
+    // manage its lifetime
     let text_compute: TextComputeFn = Box::new(move |text_node: &TextNode| {
         let text_node = text_node.clone();
+
+        // There may be a better way to do this
         let pdf_writer = { Rc::clone(&shared_pdf_writer) };
         MeasureFunc::Boxed(Box::new(move |_sz| {
             // TODO: Replace with real text size calculation
