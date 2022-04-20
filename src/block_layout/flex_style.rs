@@ -1,7 +1,9 @@
-use stretch::{
+use stretch2::{
     geometry::{Rect, Size},
     style::*,
 };
+
+use stretch2 as stretch;
 
 use crate::{
     dom::style::{Direction, FlexAlign},
@@ -26,7 +28,7 @@ fn string_to_dim(s: &str) -> Result<Dimension, MeasurementParseError> {
 }
 
 impl TryFrom<Style> for stretch::style::Style {
-    type Error = Box<dyn std::error::Error>;
+    type Error = MeasurementParseError;
     // impl From<Style> for stretch::style::Style {
     fn try_from(s: Style) -> Result<Self, Self::Error> {
         Ok(Self {

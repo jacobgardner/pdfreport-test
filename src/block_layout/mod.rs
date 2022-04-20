@@ -1,55 +1,62 @@
 use std::collections::HashMap;
 
-use stretch::{geometry::Size, node::MeasureFunc, number::Number, Stretch};
+use stretch::node::MeasureFunc;
+use stretch2 as stretch;
+use stretch2::prelude::*;
 
 use crate::{
     dom::{
         nodes::{ImageNode, TextNode},
-        MergeableStyle, Node, PdfDom, Style,
+        DomNode, MergeableStyle, PdfDom, Style,
     },
     error::BadPdfLayout,
 };
 
 mod flex_style;
 
-pub type TextComputeFn = Box<dyn FnMut(&TextNode) -> MeasureFunc>;
-pub type ImageComputeFn = Box<dyn FnMut(&ImageNode) -> MeasureFunc>;
+pub type TextComputeFn<'a> = Box<dyn Fn(&'a TextNode) -> MeasureFunc>;
+pub type ImageComputeFn<'a> = Box<dyn Fn(&'a ImageNode) -> MeasureFunc>;
 
 pub struct BlockLayout<'a> {
     pdf_dom: &'a PdfDom,
     stretch: Stretch,
-    text_node_compute: TextComputeFn,
-    image_node_compute: ImageComputeFn,
-    // _error_type: PhantomData<E>,
+    text_node_compute: TextComputeFn<'a>,
+    image_node_compute: ImageComputeFn<'a>,
+
+    layout_node_map: HashMap<Node, &'a DomNode>, // _error_type: PhantomData<E>,
 }
 
 impl<'a> BlockLayout<'a> {
-    pub fn compute_layout(
+    pub fn build_layout(
         pdf_dom: &'a PdfDom,
-        text_compute: TextComputeFn,
-        image_compute: ImageComputeFn,
-    ) -> Result<Self, Box<dyn std::error::Error>> {
+        text_compute: TextComputeFn<'a>,
+        image_compute: ImageComputeFn<'a>,
+    ) -> Result<Self, BadPdfLayout> {
         let mut layout = Self {
             pdf_dom,
             stretch: Stretch::new(),
             text_node_compute: text_compute,
             image_node_compute: image_compute,
+            layout_node_map: HashMap::new(),
         };
 
         let mut style_stack = vec![Style::default()];
 
         let current_style = style_stack.last().unwrap().clone();
-        let node = layout.stretch.new_node(
-            stretch::style::Style {
-                // size: Size {
-                //     // TODO: This is arbitrary. Should match the width of the page
-                //     width: Dimension::Points(100.),
-                //     height: Dimension::Undefined,
-                // },
-                ..current_style.try_into()?
-            },
-            vec![],
-        )?;
+        let node = layout
+            .stretch
+            .new_node(
+                stretch::style::Style {
+                    // size: Size {
+                    //     // TODO: This is arbitrary. Should match the width of the page
+                    //     width: Dimension::Points(100.),
+                    //     height: Dimension::Undefined,
+                    // },
+                    ..current_style.try_into()?
+                },
+                &[],
+            )
+            .expect("This should only be able to error if children are added.");
 
         let root_node = &pdf_dom.root;
 
@@ -78,10 +85,10 @@ impl<'a> BlockLayout<'a> {
         &mut self,
         style_stack: &mut Vec<Style>,
         current_layout_node: stretch::node::Node,
-        current_pdf_node: &'a Node,
-    ) -> Result<(), Box<dyn std::error::Error>> {
+        current_pdf_node: &'a DomNode,
+    ) -> Result<(), BadPdfLayout> {
         match current_pdf_node {
-            Node::Styled(styled_node) => {
+            DomNode::Styled(styled_node) => {
                 let mut updated_style = style_stack
                     .last()
                     .expect("There should always be at least one style on the stack here.")
@@ -97,14 +104,14 @@ impl<'a> BlockLayout<'a> {
                     updated_style = updated_style.merge_style(mergeable_style);
                 }
 
-                let child_node = self.stretch.new_node(updated_style.try_into()?, vec![])?;
+                let child_node = self.stretch.new_node(updated_style.try_into()?, &[])?;
                 self.stretch.add_child(current_layout_node, child_node)?;
 
                 for child in &styled_node.children {
                     self.build_layout_nodes(style_stack, child_node, child)?
                 }
             }
-            Node::Text(text_node) => {
+            DomNode::Text(text_node) => {
                 let mut updated_style = style_stack
                     .last()
                     .expect("There should always be at least one style on the stack here.")
@@ -117,37 +124,27 @@ impl<'a> BlockLayout<'a> {
                         }
                     })?;
 
-                    println!("Mergable: {:?}", mergeable_style);
+                    // println!("Mergable: {:?}", mergeable_style);
 
                     updated_style = updated_style.merge_style(mergeable_style);
                 }
 
                 let stretch_style = stretch::style::Style::try_from(updated_style)?;
-                println!("{:?}", stretch_style);
-
-                let mut node_sizer: TextComputeFn = Box::new(|text_node| {
-                    Box::new(|sz| {
-                        Ok(Size {
-                            width: 32.,
-                            height: 32.,
-                        })
-                    })
-                });
 
                 // We would want to pass in a function called something like:
                 //  compute_text_size which takes in the dom node, current style,
                 //  etc. and returns the desired closure, if we can
                 let child_node = self
                     .stretch
-                    .new_leaf(stretch_style, node_sizer(&text_node))?;
+                    .new_leaf(stretch_style, (self.text_node_compute)(text_node))?;
                 self.stretch.add_child(current_layout_node, child_node)?;
             }
-            Node::Image(image_node) => {
-                let child_node = self.stretch.new_leaf(
-                    Style::default().try_into()?,
-                    (self.image_node_compute)(image_node),
-                )?;
-                self.stretch.add_child(current_layout_node, child_node)?;
+            DomNode::Image(image_node) => {
+                // let child_node = self.stretch.new_leaf(
+                //     Style::default().try_into()?,
+                //     (self.image_node_compute)(image_node),
+                // )?;
+                // self.stretch.add_child(current_layout_node, child_node)?;
             }
         }
 

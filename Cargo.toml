@@ -20,7 +20,7 @@ printpdf = { version = "*", features = ["svg"] }
 tracing = { version = "*" }
 tracing-subscriber = { version = "*", features = ["std", "fmt"] }
 skia-safe = { version = "*", features = ["textlayout"] }
-stretch = "*"
+stretch2 = "*"
 itertools = "*"
 serde = {version = "*", features = ["derive"]}
 serde_json = "*"

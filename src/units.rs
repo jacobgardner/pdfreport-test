@@ -15,6 +15,7 @@ pub enum MeasurementParseError {
     UnparsableQuantity { quantity_str: String },
 }
 
+
 pub fn unit_to_pt(svg_unit: &str) -> Result<Pt, MeasurementParseError> {
     lazy_static! {
         static ref RE: Regex = Regex::new(r"^(?i)(?P<quantity>[\.\d]+)(?P<units>\D+)?$")

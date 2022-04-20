@@ -1,11 +1,12 @@
 // Compute layout -> Draw Shit -> Draw Text -> Profit
 
-use block_layout::{BlockLayout, TextComputeFn};
-use dom::PdfDom;
+use block_layout::{BlockLayout, ImageComputeFn, TextComputeFn};
+use dom::{PdfDom, nodes::TextNode};
 use pdf_writer::PdfWriter;
 use printpdf::{Mm, Point, Pt};
 use rich_text::{RichText, RichTextStyle, RichTextStyleChanges};
-use stretch::geometry::Size;
+use stretch2::node::MeasureFunc;
+use stretch2::prelude::*;
 use text_layout::TextLayout;
 use tracing::{span, Level};
 
@@ -16,11 +17,13 @@ mod math;
 mod pdf_writer;
 mod rich_text;
 mod text_layout;
+mod assemble_pdf;
 // mod paginated_layout;
 mod block_layout;
 mod dom;
 mod styles;
 mod units;
+
 
 const SVG: &str = include_str!("../assets/svg-test.svg");
 
@@ -152,26 +155,30 @@ fn main() {
     )
     .unwrap();
 
-    // let layout = BlockLayout::compute_layout(
-    //     &pdf_layout,
-    //     Box::from(|node| {
-    //         Box::from(|sz| {
-    //             Ok(Size {
-    //                 width: 5.,
-    //                 height: 5.,
-    //             })
-    //         })
-    //     }),
-    //     Box::from(|node| {
-    //         Box::from(|sz| {
-    //             Ok(Size {
-    //                 width: 5.,
-    //                 height: 5.,
-    //             })
-    //         })
-    //     }),
-    // )
-    // .unwrap();
+    {
+        let text_compute: TextComputeFn = Box::new(|text_node: &TextNode| {
+            let text_node = text_node.clone();
+            MeasureFunc::Boxed(Box::new(move |_sz| {
+                println!("{:?}", text_node.styles);
+                Size {
+                    width: 32.,
+                    height: 32.,
+                }
+            }))
+        });
+
+        let image_compute: ImageComputeFn = Box::new(|_image_node| {
+            MeasureFunc::Raw(move |_sz| {
+                Size {
+                    width: 32.,
+                    height: 32.,
+                }
+            })
+        });
+
+        let _layout =
+            BlockLayout::build_layout(&pdf_layout, text_compute, image_compute).unwrap();
+    }
 
     let page_count = 1;
 

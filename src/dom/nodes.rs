@@ -1,13 +1,13 @@
-use serde::Deserialize;
+use serde::{Deserialize, Deserializer};
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 #[serde(untagged)]
 pub enum TextChild {
     Content(String),
     TextNode(TextNode),
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 pub struct TextNode {
     pub styles: Vec<String>,
     pub children: Vec<TextChild>,
@@ -21,15 +21,13 @@ pub struct ImageNode {
 #[derive(Deserialize, Debug)]
 pub struct StyledNode {
     pub styles: Vec<String>,
-    pub children: Vec<Node>,
+    pub children: Vec<DomNode>,
 }
 
 #[derive(Deserialize, Debug)]
 #[serde(tag = "type")]
-pub enum Node {
+pub enum DomNode {
     Styled(StyledNode),
     Text(TextNode),
     Image(ImageNode),
 }
-
-// pub fn traverse_nodes

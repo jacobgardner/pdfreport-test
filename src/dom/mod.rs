@@ -6,7 +6,7 @@ use std::collections::HashMap;
 pub mod nodes;
 pub mod style;
 
-pub use nodes::Node;
+pub use nodes::DomNode;
 pub use style::{MergeableStyle, Style};
 
 #[derive(Deserialize)]
@@ -17,7 +17,7 @@ pub struct FontInformation {}
 pub struct PdfDom {
     pub fonts: Vec<FontInformation>,
     pub styles: HashMap<String, MergeableStyle>,
-    pub root: Node,
+    pub root: DomNode,
 }
 
 #[cfg(test)]
@@ -77,17 +77,17 @@ mod tests {
         assert_eq!(style.border.radius.top_left, 0.);
         assert_eq!(style.border.radius.bottom_left, 0.);
 
-        if let Node::Styled(nodes::StyledNode { styles, children }) = dom.root {
+        if let DomNode::Styled(nodes::StyledNode { styles, children }) = dom.root {
             assert_eq!(styles.len(), 0);
             assert_eq!(children.len(), 2);
 
-            if let Node::Text(node) = &children[0] {
+            if let DomNode::Text(node) = &children[0] {
                 assert!(node.styles.contains(&String::from("h1")));
             } else {
                 unreachable!();
             }
 
-            if let Node::Image(node) = &children[1] {
+            if let DomNode::Image(node) = &children[1] {
                 assert!(node.content.contains("<svg"));
             } else {
                 unreachable!();
