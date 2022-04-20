@@ -5,21 +5,19 @@ use crate::units::MeasurementParseError;
 #[derive(Error, Debug)]
 pub enum BadPdfLayout {
     #[error("Could not find style, {style_name}, in stylesheet. Style names are case-sensitive.")]
-    UnmatchedStyle {
-        style_name: String,
-    },
+    UnmatchedStyle { style_name: String },
 
     #[error("Unable to parse underlying pdf: {source}")]
     MeasurementParseError {
         #[from]
         source: MeasurementParseError,
     },
-    
+
     #[error("Error computing the flex layout: {source}")]
     LayoutComputationError {
         #[from]
-        source: stretch2::Error
-    }
+        source: stretch2::Error,
+    },
 }
 
 // impl From<MeasurementParseError> for BadPdfLayout {

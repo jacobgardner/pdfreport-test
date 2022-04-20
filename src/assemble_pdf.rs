@@ -1,12 +1,10 @@
-use std::collections::HashMap;
-
 use stretch2 as stretch;
 
 use stretch::{node::MeasureFunc, prelude::*};
 
 use crate::{
     block_layout::{BlockLayout, ImageComputeFn, TextComputeFn},
-    dom::{nodes::TextNode, DomNode, PdfDom, Style},
+    dom::{nodes::TextNode, PdfDom},
     error::BadPdfLayout,
 };
 
@@ -31,8 +29,8 @@ pub fn assemble_pdf(pdf_layout: &PdfDom) -> Result<(), BadPdfLayout> {
 
     let layout = BlockLayout::build_layout(pdf_layout, text_compute, image_compute)?;
 
-    let layout_to_style_nodes: HashMap<Node, Style> = HashMap::new();
-    let layout_to_dom_nodes: HashMap<Node, &DomNode> = HashMap::new();
+    // let layout_to_style_nodes: HashMap<Node, Style> = HashMap::new();
+    // let layout_to_dom_nodes: HashMap<Node, &DomNode> = HashMap::new();
 
     Ok(())
 }

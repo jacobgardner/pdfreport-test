@@ -1,4 +1,4 @@
-use serde::{Deserialize, Deserializer};
+use serde::Deserialize;
 
 #[derive(Deserialize, Debug, Clone)]
 #[serde(untagged)]
@@ -15,6 +15,7 @@ pub struct TextNode {
 
 #[derive(Deserialize, Debug)]
 pub struct ImageNode {
+    pub styles: Vec<String>,
     pub content: String,
 }
 
@@ -30,4 +31,14 @@ pub enum DomNode {
     Styled(StyledNode),
     Text(TextNode),
     Image(ImageNode),
+}
+
+impl DomNode {
+    pub fn styles(&self) -> &Vec<String> {
+        match self {
+            DomNode::Styled(node) => &node.styles,
+            DomNode::Text(node) => &node.styles,
+            DomNode::Image(node) => &node.styles,
+        }
+    }
 }

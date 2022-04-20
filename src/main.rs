@@ -1,7 +1,7 @@
 // Compute layout -> Draw Shit -> Draw Text -> Profit
 
 use block_layout::{BlockLayout, ImageComputeFn, TextComputeFn};
-use dom::{PdfDom, nodes::TextNode};
+use dom::{nodes::TextNode, PdfDom};
 use pdf_writer::PdfWriter;
 use printpdf::{Mm, Point, Pt};
 use rich_text::{RichText, RichTextStyle, RichTextStyleChanges};
@@ -10,6 +10,7 @@ use stretch2::prelude::*;
 use text_layout::TextLayout;
 use tracing::{span, Level};
 
+mod assemble_pdf;
 mod error;
 mod fonts;
 mod line_metric;
@@ -17,13 +18,11 @@ mod math;
 mod pdf_writer;
 mod rich_text;
 mod text_layout;
-mod assemble_pdf;
 // mod paginated_layout;
 mod block_layout;
 mod dom;
 mod styles;
 mod units;
-
 
 const SVG: &str = include_str!("../assets/svg-test.svg");
 
@@ -168,16 +167,13 @@ fn main() {
         });
 
         let image_compute: ImageComputeFn = Box::new(|_image_node| {
-            MeasureFunc::Raw(move |_sz| {
-                Size {
-                    width: 32.,
-                    height: 32.,
-                }
+            MeasureFunc::Raw(move |_sz| Size {
+                width: 32.,
+                height: 32.,
             })
         });
 
-        let _layout =
-            BlockLayout::build_layout(&pdf_layout, text_compute, image_compute).unwrap();
+        let _layout = BlockLayout::build_layout(&pdf_layout, text_compute, image_compute).unwrap();
     }
 
     let page_count = 1;

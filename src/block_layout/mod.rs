@@ -22,8 +22,8 @@ pub struct BlockLayout<'a> {
     stretch: Stretch,
     text_node_compute: TextComputeFn<'a>,
     image_node_compute: ImageComputeFn<'a>,
-
-    layout_node_map: HashMap<Node, &'a DomNode>, // _error_type: PhantomData<E>,
+    layout_node_map: HashMap<Node, &'a DomNode>,
+    layout_style_map: HashMap<Node, Style>,
 }
 
 impl<'a> BlockLayout<'a> {
@@ -38,33 +38,25 @@ impl<'a> BlockLayout<'a> {
             text_node_compute: text_compute,
             image_node_compute: image_compute,
             layout_node_map: HashMap::new(),
+            layout_style_map: HashMap::new(),
         };
 
-        let mut style_stack = vec![Style::default()];
+        // let mut style_stack = vec![Style::default()];
 
-        let current_style = style_stack.last().unwrap().clone();
+        let current_style = Style::default();
         let node = layout
             .stretch
-            .new_node(
-                stretch::style::Style {
-                    // size: Size {
-                    //     // TODO: This is arbitrary. Should match the width of the page
-                    //     width: Dimension::Points(100.),
-                    //     height: Dimension::Undefined,
-                    // },
-                    ..current_style.try_into()?
-                },
-                &[],
-            )
+            .new_node(current_style.clone().try_into()?, &[])
             .expect("This should only be able to error if children are added.");
 
         let root_node = &pdf_dom.root;
 
-        layout.build_layout_nodes(&mut style_stack, node, root_node)?;
+        layout.build_layout_nodes(current_style, node, root_node)?;
 
         layout.stretch.compute_layout(
             node,
             Size {
+                // TODO: Remove magic numbers
                 width: Number::Defined(8.5 * 72.), // 8.5 inches
                 height: Number::Undefined,
             },
@@ -83,53 +75,56 @@ impl<'a> BlockLayout<'a> {
 
     fn build_layout_nodes(
         &mut self,
-        style_stack: &mut Vec<Style>,
+        mut current_style: Style,
+        // mut style_stack: Vec<Style>,
         current_layout_node: stretch::node::Node,
         current_pdf_node: &'a DomNode,
     ) -> Result<(), BadPdfLayout> {
-        match current_pdf_node {
-            DomNode::Styled(styled_node) => {
-                let mut updated_style = style_stack
-                    .last()
-                    .expect("There should always be at least one style on the stack here.")
-                    .clone();
+        // let mut current_style = style_stack
+        //     .last()
+        //     .expect("There should always be at least one style on the stack here.")
+        //     .clone();
 
-                for style_name in &styled_node.styles {
-                    let mergeable_style = self.styles().get(style_name).ok_or_else(|| {
-                        BadPdfLayout::UnmatchedStyle {
-                            style_name: style_name.clone(),
-                        }
+        let prev_node = self
+            .layout_style_map
+            .insert(current_layout_node, current_style.clone());
+        assert!(
+            prev_node.is_none(),
+            "Layout engine should guarantee all nodes are unique"
+        );
+
+        let prev_node = self
+            .layout_node_map
+            .insert(current_layout_node, current_pdf_node);
+        assert!(
+            prev_node.is_none(),
+            "Layout engine should guarantee all nodes are unique"
+        );
+
+        for style_name in current_pdf_node.styles() {
+            let mergeable_style =
+                self.styles()
+                    .get(style_name)
+                    .ok_or_else(|| BadPdfLayout::UnmatchedStyle {
+                        style_name: style_name.clone(),
                     })?;
 
-                    updated_style = updated_style.merge_style(mergeable_style);
-                }
+            current_style = current_style.merge_style(mergeable_style);
+        }
 
-                let child_node = self.stretch.new_node(updated_style.try_into()?, &[])?;
+        match current_pdf_node {
+            DomNode::Styled(styled_node) => {
+                let child_node = self
+                    .stretch
+                    .new_node(current_style.clone().try_into()?, &[])?;
                 self.stretch.add_child(current_layout_node, child_node)?;
 
                 for child in &styled_node.children {
-                    self.build_layout_nodes(style_stack, child_node, child)?
+                    self.build_layout_nodes(current_style.clone(), child_node, child)?
                 }
             }
             DomNode::Text(text_node) => {
-                let mut updated_style = style_stack
-                    .last()
-                    .expect("There should always be at least one style on the stack here.")
-                    .clone();
-
-                for style_name in &text_node.styles {
-                    let mergeable_style = self.styles().get(style_name).ok_or_else(|| {
-                        BadPdfLayout::UnmatchedStyle {
-                            style_name: style_name.clone(),
-                        }
-                    })?;
-
-                    // println!("Mergable: {:?}", mergeable_style);
-
-                    updated_style = updated_style.merge_style(mergeable_style);
-                }
-
-                let stretch_style = stretch::style::Style::try_from(updated_style)?;
+                let stretch_style = stretch::style::Style::try_from(current_style)?;
 
                 // We would want to pass in a function called something like:
                 //  compute_text_size which takes in the dom node, current style,
