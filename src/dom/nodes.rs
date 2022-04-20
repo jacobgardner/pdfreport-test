@@ -9,21 +9,21 @@ pub enum TextChild {
 
 #[derive(Deserialize, Debug, Clone)]
 pub struct TextNode {
-    #[serde(default="styles_list")]
+    #[serde(default = "styles_list")]
     pub styles: Vec<String>,
     pub children: Vec<TextChild>,
 }
 
 #[derive(Deserialize, Debug)]
 pub struct ImageNode {
-    #[serde(default="styles_list")]
+    #[serde(default = "styles_list")]
     pub styles: Vec<String>,
     pub content: String,
 }
 
 #[derive(Deserialize, Debug)]
 pub struct StyledNode {
-    #[serde(default="styles_list")]
+    #[serde(default = "styles_list")]
     pub styles: Vec<String>,
     pub children: Vec<DomNode>,
 }

@@ -134,19 +134,24 @@ impl<'a> BlockLayout<'a> {
         &self.pdf_dom.styles
     }
 
-
-    // There may be a way to ensure that the node passed in came from 
+    // There may be a way to ensure that the node passed in came from
     //  this structure to make the expect even safer
     pub fn get_style(&self, node: Node) -> &Style {
-        self.layout_style_map.get(&node).expect("The provided node should have come from this layout")
+        self.layout_style_map
+            .get(&node)
+            .expect("The provided node should have come from this layout")
     }
 
     pub fn get_dom_node(&self, node: Node) -> &DomNode {
-        self.layout_node_map.get(&node).expect("The provided node should have come from this layout")
+        self.layout_node_map
+            .get(&node)
+            .expect("The provided node should have come from this layout")
     }
 
-    pub fn draw_order(&self) -> impl Iterator<Item=Node>  + '_ {
-        self.node_draw_order.iter().map(|draw_order_node| draw_order_node.node)
+    pub fn draw_order(&self) -> impl Iterator<Item = Node> + '_ {
+        self.node_draw_order
+            .iter()
+            .map(|draw_order_node| draw_order_node.node)
     }
 
     // pub fn layout_style_map(&self) -> &HashMap<Node, Style> {

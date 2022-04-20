@@ -154,11 +154,10 @@ fn main() {
     )
     .unwrap();
 
-
     assemble_pdf::assemble_pdf(&pdf_layout).unwrap();
-    
+
     println!("Done assembling...");
-    
+
     return;
 
     {
