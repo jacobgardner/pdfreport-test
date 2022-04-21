@@ -5,8 +5,7 @@ use printpdf::{
     PdfDocumentReference, PdfLayerIndex, PdfLayerReference, PdfPageIndex, PdfPageReference, Point,
     Pt, Rgb, TextMatrix,
 };
-use skia_safe::Typeface;
-use tracing::{instrument, span, Level};
+use tracing::{span, Level};
 
 mod svg;
 
@@ -23,11 +22,17 @@ struct FontKey {
     style: FontStyle,
 }
 
-pub struct PdfWriter {
+pub struct PdfWriter<T: GlyphLookup> {
     dimensions: (Mm, Mm),
     doc: PdfDocumentReference,
     pages: Vec<(PdfPageIndex, PdfLayerIndex)>,
     font_families: HashMap<String, HashMap<FontKey, IndirectFontRef>>, // fonts: Vec<IndirectFontRef>,
+    // TODO: replace with generic that implement a trait for just the thing we need
+    layout_fonts: T,
+}
+
+pub trait GlyphLookup {
+    fn get_glyph_ids(&self, line: &str, font_lookup: &FontLookup) -> Vec<u16>;
 }
 
 const TOP_LEFT_CORNER: Range<usize> = 12..16;
@@ -35,9 +40,8 @@ const TOP_RIGHT_CORNER: Range<usize> = 0..4;
 const BOTTOM_RIGHT_CORNER: Range<usize> = 4..8;
 const BOTTOM_LEFT_CORNER: Range<usize> = 8..12;
 
-impl PdfWriter {
-    #[instrument(name = "Create PDF Context")]
-    pub fn new(font_manager: &FontManager) -> Self {
+impl<T: GlyphLookup> PdfWriter<T> {
+    pub fn new(font_manager: &FontManager, layout_fonts: T) -> Self {
         // A4 Page dimensions
         let dimensions = (Mm(210.), Mm(297.));
 
@@ -46,8 +50,8 @@ impl PdfWriter {
         let (doc, page1, layer1) =
             PdfDocument::new("Test Report", dimensions.0, dimensions.1, "Layer 1");
 
-        for (family_name, font_family) in font_manager.families.iter() {
-            let font_family_fonts = HashMap::new();
+        for (_family_name, font_family) in font_manager.families.iter() {
+            let mut font_family_fonts = HashMap::new();
 
             for font in font_family.fonts.iter() {
                 let indirect_font_ref = doc.add_external_font((*font.bytes).as_ref()).unwrap();
@@ -67,10 +71,11 @@ impl PdfWriter {
             doc,
             pages: vec![(page1, layer1)],
             font_families,
+            layout_fonts,
         }
     }
 
-    pub fn add_page(&mut self) -> PageWriter {
+    pub fn add_page(&mut self) -> PageWriter<T> {
         let span = span!(Level::TRACE, "Adding Page To PDF");
         let _guard = span.enter();
         let (current_page_index, current_layer_index) = self.doc.add_page(
@@ -84,7 +89,7 @@ impl PdfWriter {
         PageWriter::new(self, current_page_index, current_layer_index)
     }
 
-    pub fn get_page(&self, page_number: usize) -> PageWriter {
+    pub fn get_page(&self, page_number: usize) -> PageWriter<T> {
         let (current_page_index, current_layer_index) = self.pages[page_number];
 
         PageWriter::new(self, current_page_index, current_layer_index)
@@ -119,14 +124,14 @@ impl PdfWriter {
     }
 }
 
-pub struct PageWriter<'a> {
+pub struct PageWriter<'a, T: GlyphLookup> {
     page_index: PdfPageIndex,
     layer_index: PdfLayerIndex,
-    writer: &'a PdfWriter,
+    writer: &'a PdfWriter<T>,
 }
 
-impl<'a> PageWriter<'a> {
-    fn new(writer: &'a PdfWriter, page_index: PdfPageIndex, layer_index: PdfLayerIndex) -> Self {
+impl<'a, T: GlyphLookup> PageWriter<'a, T> {
+    fn new(writer: &'a PdfWriter<T>, page_index: PdfPageIndex, layer_index: PdfLayerIndex) -> Self {
         Self {
             writer,
             page_index,
@@ -215,10 +220,9 @@ impl<'a> PageWriter<'a> {
     // Borrowed from `printpdf`
     // Assumption: all styles of a typeface share the same glyph_ids
     fn encode_pdf_text(&self, line: &str, font_lookup: &FontLookup) -> Vec<u8> {
-        let mut glyph_ids = vec![0; line.len()];
-        typeface.str_to_glyphs(line, &mut glyph_ids);
-
-        glyph_ids
+        self.writer
+            .layout_fonts
+            .get_glyph_ids(line, font_lookup)
             .iter()
             .flat_map(|x| vec![(x >> 8) as u8, (x & 255) as u8])
             .collect::<Vec<u8>>()
@@ -242,7 +246,6 @@ impl<'a> PageWriter<'a> {
     pub fn write_lines(
         &self,
         start: Point,
-        typeface: &Typeface,
         rich_text: &RichText,
         line_metrics: Vec<LineMetric>,
     ) -> Result<&Self, BadPdfLayout> {

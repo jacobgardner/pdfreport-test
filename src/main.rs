@@ -1,11 +1,14 @@
 // Compute layout -> Draw Shit -> Draw Text -> Profit
+#![allow(dead_code)]
+
+use std::rc::Rc;
 
 use dom::PdfDom;
 use pdf_writer::PdfWriter;
 use text_layout::TextLayout;
 use tracing::{span, Level};
 
-use crate::fonts::FontManager;
+use crate::{fonts::FontManager, text_layout::LayoutFonts};
 
 mod assemble_pdf;
 mod error;
@@ -96,18 +99,20 @@ async fn main() {
         _guard
     };
 
-    let output_text = build_text();
+    let _output_text = build_text();
 
     let fm = FontManager::new();
-    let mut pdf_writer = PdfWriter::new(&fm);
-    let text_layout = TextLayout::with_font_manager(&fm);
+    let layout_fonts = Rc::new(LayoutFonts::with_font_manager(&fm));
+    let pdf_writer = PdfWriter::new(&fm, layout_fonts.clone());
+
+    let _text_layout = TextLayout::new(&layout_fonts);
 
     let span = span!(Level::DEBUG, "Full Time");
     let _guard = span.enter();
 
-    let mut page_writer = pdf_writer.get_page(0);
+    let mut _page_writer = pdf_writer.get_page(0);
 
-    let layout_span = span!(Level::DEBUG, "Layout & Building PDF").entered();
+    let _layout_span = span!(Level::DEBUG, "Layout & Building PDF").entered();
 
     let pdf_layout: PdfDom = serde_json::from_str(
         r##"{
@@ -168,11 +173,9 @@ async fn main() {
 
     println!("Layout: {pdf_layout:?}");
 
-    assemble_pdf::assemble_pdf(&pdf_layout).await;
+    assemble_pdf::assemble_pdf(&pdf_layout).await.unwrap();
 
     println!("Done assembling...");
-
-    return;
 
     // {
     //     let text_compute: TextComputeFn = Box::new(|text_node: &TextNode| {

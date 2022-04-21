@@ -21,7 +21,7 @@ impl From<&str> for FontStyle {
     fn from(s: &str) -> Self {
         match s.to_lowercase().as_str() {
             "italic" => FontStyle::Italic,
-            "normal" | _ => FontStyle::Normal,
+            _ => FontStyle::Normal,
         }
     }
 }

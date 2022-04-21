@@ -12,19 +12,17 @@ use tracing::instrument;
 use crate::{
     fonts::{FontLookup, FontManager},
     line_metric::{LineMetric, ParagraphMetrics},
+    pdf_writer::GlyphLookup,
     rich_text::RichText,
 };
 
 #[derive(Debug)]
-pub struct TextLayout {
-    // TODO: Remove pub once everything is encapsulated
-    pub font_collection: FontCollection,
+pub struct LayoutFonts {
+    font_collection: FontCollection,
     font_manager: FontMgr,
-    // pub typeface: Typeface,
 }
 
-impl TextLayout {
-    #[instrument(name = "Initialize text layout engine")]
+impl LayoutFonts {
     pub fn with_font_manager(font_manager: &FontManager) -> Self {
         let mut font_collection = FontCollection::new();
 
@@ -35,8 +33,7 @@ impl TextLayout {
                 unsafe {
                     let d = Data::new_bytes(font.bytes.as_ref());
                     let t = Typeface::from_data(d, None);
-                    // typeface = Some(t.clone().unwrap());
-                    // tfp.register_typeface(t.unwrap(), Some("Inter"));
+
                     tfp.register_typeface(t.unwrap(), Some(&family_name));
                 }
             }
@@ -53,7 +50,7 @@ impl TextLayout {
         }
     }
 
-    fn typeface_by_font_style(&self, lookup: FontLookup) -> Typeface {
+    fn typeface_by_font_style(&self, lookup: &FontLookup) -> Typeface {
         self.font_manager
             .match_family_style(
                 &lookup.family_name,
@@ -61,6 +58,29 @@ impl TextLayout {
             )
             // TODO: Don't unwrap
             .unwrap()
+    }
+}
+
+impl GlyphLookup for LayoutFonts {
+    fn get_glyph_ids(&self, line: &str, font_lookup: &FontLookup) -> Vec<u16> {
+        let typeface = self.typeface_by_font_style(font_lookup);
+
+        let mut glyph_ids = vec![0; line.len()];
+        typeface.str_to_glyphs(line, &mut glyph_ids);
+
+        glyph_ids
+    }
+}
+
+#[derive(Debug)]
+pub struct TextLayout<'a> {
+    layout_fonts: &'a LayoutFonts,
+}
+
+impl<'a> TextLayout<'a> {
+    #[instrument(name = "Initialize text layout engine")]
+    pub fn new(layout_fonts: &'a LayoutFonts) -> Self {
+        Self { layout_fonts }
     }
 
     #[instrument(name = "Computing paragraph layout")]
@@ -85,7 +105,7 @@ impl TextLayout {
         paragraph_style.set_text_align(TextAlign::Center);
 
         let mut paragraph_builder =
-            ParagraphBuilder::new(&paragraph_style, self.font_collection.clone());
+            ParagraphBuilder::new(&paragraph_style, self.layout_fonts.font_collection.clone());
 
         for (range, style) in rich_text.style_range_iter() {
             let mut ts = default_style.clone();

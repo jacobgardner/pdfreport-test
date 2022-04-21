@@ -7,7 +7,7 @@ use crate::{
     units::unit_to_pt,
 };
 
-use super::PageWriter;
+use super::{PageWriter, GlyphLookup};
 
 const SUPPORTED_TEXT_ATTRIBUTES: [&str; 10] = [
     "id",
@@ -22,7 +22,7 @@ const SUPPORTED_TEXT_ATTRIBUTES: [&str; 10] = [
     "dominant-baseline",
 ];
 
-impl<'a> PageWriter<'a> {
+impl<'a, T: GlyphLookup> PageWriter<'a, T> {
     pub fn draw_svg(
         &self,
         start: Point,

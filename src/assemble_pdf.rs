@@ -9,13 +9,14 @@ use crate::{
     dom::{nodes::TextNode, FontFamilyInfo, PdfDom},
     error::BadPdfLayout,
     fonts::{FontData, FontFamily, FontManager},
-    pdf_writer::PdfWriter,
+    pdf_writer::{GlyphLookup, PdfWriter},
     resource_cache::ResourceCache,
+    text_layout::LayoutFonts,
 };
 
 pub async fn load_fonts(
     resource_cache: &mut ResourceCache,
-    font_families: &Vec<FontFamilyInfo>,
+    font_families: &[FontFamilyInfo],
 ) -> Result<FontManager, BadPdfLayout> {
     // let font_manager = FontManager::new();
 
@@ -39,6 +40,12 @@ pub async fn load_fonts(
     Ok(FontManager { families })
 }
 
+impl GlyphLookup for Rc<LayoutFonts> {
+    fn get_glyph_ids(&self, line: &str, font_lookup: &crate::fonts::FontLookup) -> Vec<u16> {
+        LayoutFonts::get_glyph_ids(self, line, font_lookup)
+    }
+}
+
 pub async fn assemble_pdf(pdf_layout: &PdfDom) -> Result<(), BadPdfLayout> {
     // Demonstration of the ability to have an item with a non-static lifetime
     //  doing stuff in a static lifetime
@@ -46,8 +53,9 @@ pub async fn assemble_pdf(pdf_layout: &PdfDom) -> Result<(), BadPdfLayout> {
     let mut resource_cache = ResourceCache::new();
 
     let font_manager = load_fonts(&mut resource_cache, &pdf_layout.fonts).await?;
+    let layout_fonts = Rc::new(LayoutFonts::with_font_manager(&font_manager));
 
-    let pdf_writer = Rc::new(RefCell::new(PdfWriter::new(&font_manager)));
+    let pdf_writer = Rc::new(RefCell::new(PdfWriter::new(&font_manager, layout_fonts)));
 
     let shared_pdf_writer = pdf_writer.clone();
     // We have to use move here twice so each closure gets ownership of the Rc and can
