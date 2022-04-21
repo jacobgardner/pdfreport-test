@@ -41,7 +41,7 @@ pub async fn load_fonts(
 }
 
 impl GlyphLookup for Rc<LayoutFonts> {
-    fn get_glyph_ids(&self, line: &str, font_lookup: &crate::fonts::FontLookup) -> Vec<u16> {
+    fn get_glyph_ids(&self, line: &str, font_lookup: &crate::fonts::FontLookup) -> Result<Vec<u16>, BadPdfLayout> {
         LayoutFonts::get_glyph_ids(self, line, font_lookup)
     }
 }

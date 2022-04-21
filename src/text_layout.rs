@@ -10,6 +10,7 @@ use skia_safe::{
 use tracing::instrument;
 
 use crate::{
+    error::BadPdfLayout,
     fonts::{FontLookup, FontManager},
     line_metric::{LineMetric, ParagraphMetrics},
     pdf_writer::GlyphLookup,
@@ -50,25 +51,28 @@ impl LayoutFonts {
         }
     }
 
-    fn typeface_by_font_style(&self, lookup: &FontLookup) -> Typeface {
+    fn typeface_by_font_style(&self, lookup: &FontLookup) -> Result<Typeface, BadPdfLayout> {
         self.font_manager
             .match_family_style(
                 &lookup.family_name,
                 FontStyle::new(lookup.weight.into(), Width::NORMAL, lookup.style.into()),
             )
-            // TODO: Don't unwrap
-            .unwrap()
+            .ok_or_else(|| BadPdfLayout::FontStyleNotFoundForFamily {
+                font_family: String::from(lookup.family_name),
+                font_weight: lookup.weight,
+                font_style: lookup.style,
+            })
     }
 }
 
 impl GlyphLookup for LayoutFonts {
-    fn get_glyph_ids(&self, line: &str, font_lookup: &FontLookup) -> Vec<u16> {
-        let typeface = self.typeface_by_font_style(font_lookup);
+    fn get_glyph_ids(&self, line: &str, font_lookup: &FontLookup) -> Result<Vec<u16>, BadPdfLayout> {
+        let typeface = self.typeface_by_font_style(font_lookup)?;
 
         let mut glyph_ids = vec![0; line.len()];
         typeface.str_to_glyphs(line, &mut glyph_ids);
 
-        glyph_ids
+        Ok(glyph_ids)
     }
 }
 
@@ -98,8 +102,7 @@ impl<'a> TextLayout<'a> {
             },
         ));
         default_style.set_font_size(rich_text.default_style.font_size.0 as f32);
-        // TODO: Make configurable in the future
-        default_style.set_font_families(&["Inter"]);
+        default_style.set_font_families(&[&rich_text.default_style.font_family]);
 
         paragraph_style.set_text_style(&default_style);
         paragraph_style.set_text_align(TextAlign::Center);

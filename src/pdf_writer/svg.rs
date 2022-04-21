@@ -1,13 +1,14 @@
 use printpdf::{Color, Point, Pt, Rgb, Svg, SvgTransform, TextMatrix};
 
 use crate::{
+    error::BadPdfLayout,
     fonts::FontLookup,
     line_metric::LineMetric,
     rich_text::{FontStyle, FontWeight, RichText, RichTextStyle},
     units::unit_to_pt,
 };
 
-use super::{PageWriter, GlyphLookup};
+use super::{GlyphLookup, PageWriter};
 
 const SUPPORTED_TEXT_ATTRIBUTES: [&str; 10] = [
     "id",
@@ -87,11 +88,8 @@ impl<'a, T: GlyphLookup> PageWriter<'a, T> {
             let font_stack = node.attribute("font-family").unwrap_or("sans-serif");
             let dominant_baseline = node.attribute("dominant-baseline").unwrap_or("auto");
 
-            let preferred_fonts: Vec<_> = font_stack.split(',').map(|f| f.trim()).collect();
+            let found_font = self.find_best_font_from_stack(font_stack)?;
 
-            println!("Font Stack: {:?}", preferred_fonts);
-            // TODO: Replace with searching font manager for matching family
-            let found_font = preferred_fonts[0];
             // We want to find a font in the stack that matches up to a loaded skia/pdf typeface.
             //   If we don't find one, default to the first typeface, probably?
 
@@ -163,9 +161,22 @@ impl<'a, T: GlyphLookup> PageWriter<'a, T> {
             current_layer.set_font(current_font, font_size.0);
             current_layer.set_fill_color(Color::Rgb(Rgb::new(fill.0, fill.1, fill.2, None)));
 
-            self.write_text(&current_layer, node_text, &font_lookup);
+            self.write_text(&current_layer, node_text, &font_lookup)?;
         }
 
         Ok(self)
+    }
+
+    fn find_best_font_from_stack<'b>(
+        &'a self,
+        font_stack: &'b str,
+    ) -> Result<&'b str, BadPdfLayout> {
+        font_stack
+            .split(',')
+            .map(|f| f.trim())
+            .find(|f| self.writer.font_families.contains_key(*f))
+            .ok_or_else(|| BadPdfLayout::FontFamilyNotFound {
+                font_family: String::from(font_stack),
+            })
     }
 }

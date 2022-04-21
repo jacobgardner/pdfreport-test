@@ -1,5 +1,3 @@
-// TODO: Eventually we would want these fonts to be specified externally
-
 use std::{collections::HashMap, rc::Rc};
 
 use bytes::Bytes;

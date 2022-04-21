@@ -27,12 +27,12 @@ pub struct PdfWriter<T: GlyphLookup> {
     doc: PdfDocumentReference,
     pages: Vec<(PdfPageIndex, PdfLayerIndex)>,
     font_families: HashMap<String, HashMap<FontKey, IndirectFontRef>>, // fonts: Vec<IndirectFontRef>,
-    // TODO: replace with generic that implement a trait for just the thing we need
     layout_fonts: T,
 }
 
 pub trait GlyphLookup {
-    fn get_glyph_ids(&self, line: &str, font_lookup: &FontLookup) -> Vec<u16>;
+    fn get_glyph_ids(&self, line: &str, font_lookup: &FontLookup)
+        -> Result<Vec<u16>, BadPdfLayout>;
 }
 
 const TOP_LEFT_CORNER: Range<usize> = 12..16;
@@ -219,19 +219,29 @@ impl<'a, T: GlyphLookup> PageWriter<'a, T> {
 
     // Borrowed from `printpdf`
     // Assumption: all styles of a typeface share the same glyph_ids
-    fn encode_pdf_text(&self, line: &str, font_lookup: &FontLookup) -> Vec<u8> {
-        self.writer
+    fn encode_pdf_text(
+        &self,
+        line: &str,
+        font_lookup: &FontLookup,
+    ) -> Result<Vec<u8>, BadPdfLayout> {
+        Ok(self
+            .writer
             .layout_fonts
-            .get_glyph_ids(line, font_lookup)
+            .get_glyph_ids(line, font_lookup)?
             .iter()
             .flat_map(|x| vec![(x >> 8) as u8, (x & 255) as u8])
-            .collect::<Vec<u8>>()
+            .collect::<Vec<u8>>())
     }
 
     // This is more efficient than printpdf's write_line call
     //  because this uses Skia's much faster glyph lookup
-    fn write_text(&self, current_layer: &PdfLayerReference, line: &str, font_lookup: &FontLookup) {
-        let bytes = self.encode_pdf_text(line, font_lookup);
+    fn write_text(
+        &self,
+        current_layer: &PdfLayerReference,
+        line: &str,
+        font_lookup: &FontLookup,
+    ) -> Result<(), BadPdfLayout> {
+        let bytes = self.encode_pdf_text(line, font_lookup)?;
 
         current_layer.add_operation(lopdf::content::Operation::new(
             "Tj",
@@ -240,6 +250,8 @@ impl<'a, T: GlyphLookup> PageWriter<'a, T> {
                 lopdf::StringFormat::Hexadecimal,
             )],
         ));
+
+        Ok(())
     }
 
     // TODO: Decouple this from Skia's structures
@@ -273,14 +285,8 @@ impl<'a, T: GlyphLookup> PageWriter<'a, T> {
 
                 current_index = end_index;
 
-                // TODO: Look up appropriate font
-                // let font_idx =
-                //     find_font_index_by_style(current_style.weight, current_style.is_italic);
-                // let font_idx = 0;
-                // let current_font = &self.writer.fonts[font_idx];
-
                 let font_lookup = FontLookup {
-                    family_name: "Inter",
+                    family_name: &current_style.font_family,
                     weight: current_style.weight,
                     style: current_style.style,
                 };
@@ -296,7 +302,7 @@ impl<'a, T: GlyphLookup> PageWriter<'a, T> {
                     None,
                 )));
 
-                self.write_text(&current_layer, current_span, &font_lookup);
+                self.write_text(&current_layer, current_span, &font_lookup)?;
 
                 if current_index == line_metric.end_index {
                     break;
