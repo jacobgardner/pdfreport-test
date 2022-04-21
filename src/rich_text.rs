@@ -3,8 +3,21 @@ use std::ops::Range;
 use printpdf::Pt;
 
 use num_derive::FromPrimitive;
+use serde::Deserialize;
 
-#[derive(Debug, Clone, Copy, PartialEq, FromPrimitive)]
+#[derive(Debug, Clone, Copy, PartialEq, FromPrimitive, Deserialize)]
+pub enum FontStyle {
+    Normal,
+    Italic
+}
+
+impl Default for FontStyle {
+    fn default() -> Self {
+        FontStyle::Normal
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, FromPrimitive, Deserialize)]
 pub enum FontWeight {
     Thin = 100,
     ExtraLight = 200,

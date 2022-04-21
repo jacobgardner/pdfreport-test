@@ -18,6 +18,12 @@ pub enum BadPdfLayout {
         #[from]
         source: stretch2::Error,
     },
+    
+    #[error("Unable to fetch resource: {source}")]
+    ResourceNotFound {
+        #[from]
+        source: reqwest::Error
+    }
 }
 
 // impl From<MeasurementParseError> for BadPdfLayout {

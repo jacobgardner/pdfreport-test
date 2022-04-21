@@ -10,7 +10,7 @@ use skia_safe::{
 use tracing::instrument;
 
 use crate::{
-    fonts::FONTS,
+    fonts::{FontLookup, FontManager},
     line_metric::{LineMetric, ParagraphMetrics},
     rich_text::RichText,
 };
@@ -19,37 +19,48 @@ use crate::{
 pub struct TextLayout {
     // TODO: Remove pub once everything is encapsulated
     pub font_collection: FontCollection,
-    pub typeface: Typeface,
+    font_manager: FontMgr,
+    // pub typeface: Typeface,
 }
 
 impl TextLayout {
     #[instrument(name = "Initialize text layout engine")]
-    pub fn new() -> Self {
+    pub fn with_font_manager(font_manager: &FontManager) -> Self {
         let mut font_collection = FontCollection::new();
 
         let mut tfp = TypefaceFontProvider::new();
 
-        let mut typeface: Option<Typeface> = None;
-
-        for font in FONTS {
-            // Safe because all the font data is 'static for now
-            unsafe {
-                let d = Data::new_bytes(font.bytes);
-                let t = Typeface::from_data(d, None);
-                typeface = Some(t.clone().unwrap());
-                tfp.register_typeface(t.unwrap(), Some("Inter"));
+        for (family_name, family) in font_manager.families.iter() {
+            for font in family.fonts.iter() {
+                unsafe {
+                    let d = Data::new_bytes(font.bytes.as_ref());
+                    let t = Typeface::from_data(d, None);
+                    // typeface = Some(t.clone().unwrap());
+                    // tfp.register_typeface(t.unwrap(), Some("Inter"));
+                    tfp.register_typeface(t.unwrap(), Some(&family_name));
+                }
             }
         }
 
-        let manager = FontMgr::from(tfp);
+        let font_manager = FontMgr::from(tfp);
 
-        font_collection.set_asset_font_manager(manager);
+        font_collection.set_asset_font_manager(font_manager.clone());
         font_collection.disable_font_fallback();
 
         Self {
             font_collection,
-            typeface: typeface.unwrap(),
+            font_manager,
         }
+    }
+
+    fn typeface_by_font_style(&self, lookup: FontLookup) -> Typeface {
+        self.font_manager
+            .match_family_style(
+                &lookup.family_name,
+                FontStyle::new(lookup.weight.into(), Width::NORMAL, lookup.style.into()),
+            )
+            // TODO: Don't unwrap
+            .unwrap()
     }
 
     #[instrument(name = "Computing paragraph layout")]
@@ -146,6 +157,15 @@ impl From<FontWeight> for Weight {
             FontWeight::Bold => Weight::BOLD,
             FontWeight::ExtraBold => Weight::EXTRA_BOLD,
             FontWeight::Black => Weight::BLACK,
+        }
+    }
+}
+
+impl From<crate::rich_text::FontStyle> for Slant {
+    fn from(style: crate::rich_text::FontStyle) -> Self {
+        match style {
+            crate::rich_text::FontStyle::Italic => Slant::Italic,
+            crate::rich_text::FontStyle::Normal => Slant::Upright,
         }
     }
 }

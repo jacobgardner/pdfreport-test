@@ -1,4 +1,4 @@
-use std::{cell::RefCell, rc::Rc};
+use std::{cell::RefCell, future, rc::Rc, collections::HashMap};
 
 use stretch2 as stretch;
 
@@ -6,17 +6,49 @@ use stretch::{node::MeasureFunc, prelude::*};
 
 use crate::{
     block_layout::{BlockLayout, ImageComputeFn, TextComputeFn},
-    dom::{nodes::TextNode, PdfDom},
+    dom::{nodes::TextNode, FontFamilyInfo, PdfDom},
     error::BadPdfLayout,
+    fonts::{FontData, FontFamily, FontManager},
     pdf_writer::PdfWriter,
+    resource_cache::ResourceCache,
 };
 
-pub fn assemble_pdf(pdf_layout: &PdfDom) -> Result<(), BadPdfLayout> {
+pub async fn load_fonts(
+    resource_cache: &mut ResourceCache,
+    font_families: &Vec<FontFamilyInfo>,
+) -> Result<FontManager, BadPdfLayout> {
+    // let font_manager = FontManager::new();
+
+    let mut families = HashMap::new();
+
+    for font_family_info in font_families {
+        let mut font_data: Vec<FontData> = Vec::new();
+
+        for font_info in font_family_info.fonts.iter() {
+            font_data.push(FontData::from_font_info(resource_cache, font_info).await?);
+        }
+
+        let font_family = FontFamily {
+            family_name: font_family_info.family_name.clone(),
+            fonts: font_data,
+        };
+
+        families.insert(font_family_info.family_name.clone(), font_family);
+    }
+
+    Ok(FontManager { families })
+}
+
+pub async fn assemble_pdf(pdf_layout: &PdfDom) -> Result<(), BadPdfLayout> {
     // Demonstration of the ability to have an item with a non-static lifetime
     //  doing stuff in a static lifetime
     //
+    let mut resource_cache = ResourceCache::new();
 
-    let pdf_writer = Rc::new(RefCell::new(PdfWriter::new()));
+    let font_manager =
+        load_fonts(&mut resource_cache, &pdf_layout.fonts).await?;
+
+    let pdf_writer = Rc::new(RefCell::new(PdfWriter::new(&font_manager)));
 
     let shared_pdf_writer = pdf_writer.clone();
     // We have to use move here twice so each closure gets ownership of the Rc and can

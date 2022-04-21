@@ -10,6 +10,8 @@ use stretch2::prelude::*;
 use text_layout::TextLayout;
 use tracing::{span, Level};
 
+use crate::fonts::FontManager;
+
 mod assemble_pdf;
 mod error;
 mod fonts;
@@ -18,6 +20,7 @@ mod math;
 mod pdf_writer;
 mod rich_text;
 mod text_layout;
+mod resource_cache;
 // mod paginated_layout;
 mod block_layout;
 mod dom;
@@ -87,7 +90,9 @@ WHY THIS MATTERS
     .replace("  ", " ")
 }
 
-fn main() {
+
+#[tokio::main]
+async fn main() {
     #[cfg(feature = "trace_chrome")]
     let _guard = {
         use tracing_chrome::ChromeLayerBuilder;
@@ -99,8 +104,9 @@ fn main() {
 
     let output_text = build_text();
 
-    let mut pdf_writer = PdfWriter::new();
-    let text_layout = TextLayout::new();
+    let fm = FontManager::new();
+    let mut pdf_writer = PdfWriter::new(&fm);
+    let text_layout = TextLayout::with_font_manager(&fm);
 
     let span = span!(Level::DEBUG, "Full Time");
     let _guard = span.enter();
@@ -111,7 +117,19 @@ fn main() {
 
     let pdf_layout: PdfDom = serde_json::from_str(
         r##"{
-            "fonts": [],
+            "fonts": [{
+                "family_name": "Inter",
+                "fonts": [
+                    {
+                        "source": "https://github.com/jacobgardner/pdfreport-test/blob/main/assets/fonts/inter-static/Inter-Black.ttf?raw=true",
+                        "weight": "Black"
+                    },
+                    {
+                        "source": "https://github.com/jacobgardner/pdfreport-test/blob/main/assets/fonts/inter-static/Inter-Bold.ttf?raw=true",
+                        "weight": "Bold"
+                    }
+                ]
+            }],
             "styles": {
                 "h1": {
                     "color": "#ABCDEF",
@@ -153,97 +171,99 @@ fn main() {
         }"##,
     )
     .unwrap();
+    
+    println!("Layout: {pdf_layout:?}");
 
-    assemble_pdf::assemble_pdf(&pdf_layout).unwrap();
+    assemble_pdf::assemble_pdf(&pdf_layout).await;
 
     println!("Done assembling...");
 
     return;
 
-    {
-        let text_compute: TextComputeFn = Box::new(|text_node: &TextNode| {
-            let text_node = text_node.clone();
-            MeasureFunc::Boxed(Box::new(move |_sz| {
-                println!("{:?}", text_node.styles);
-                Size {
-                    width: 32.,
-                    height: 32.,
-                }
-            }))
-        });
+    // {
+    //     let text_compute: TextComputeFn = Box::new(|text_node: &TextNode| {
+    //         let text_node = text_node.clone();
+    //         MeasureFunc::Boxed(Box::new(move |_sz| {
+    //             println!("{:?}", text_node.styles);
+    //             Size {
+    //                 width: 32.,
+    //                 height: 32.,
+    //             }
+    //         }))
+    //     });
 
-        let image_compute: ImageComputeFn = Box::new(|_image_node| {
-            MeasureFunc::Raw(move |_sz| Size {
-                width: 32.,
-                height: 32.,
-            })
-        });
+    //     let image_compute: ImageComputeFn = Box::new(|_image_node| {
+    //         MeasureFunc::Raw(move |_sz| Size {
+    //             width: 32.,
+    //             height: 32.,
+    //         })
+    //     });
 
-        let _layout = BlockLayout::build_layout(&pdf_layout, text_compute, image_compute).unwrap();
-    }
+    //     let _layout = BlockLayout::build_layout(&pdf_layout, text_compute, image_compute).unwrap();
+    // }
 
-    let page_count = 1;
+    // let page_count = 1;
 
-    for i in 0..page_count {
-        let default_style = RichTextStyle {
-            font_size: Pt(14.),
-            weight: rich_text::FontWeight::Regular,
-            is_italic: false,
-            color: (0.267, 0.29, 0.353),
-        };
+    // for i in 0..page_count {
+    //     let default_style = RichTextStyle {
+    //         font_size: Pt(14.),
+    //         weight: rich_text::FontWeight::Regular,
+    //         is_italic: false,
+    //         color: (0.267, 0.29, 0.353),
+    //     };
 
-        let mut rich_text = RichText::new(&output_text[i..], default_style);
+    //     let mut rich_text = RichText::new(&output_text[i..], default_style);
 
-        rich_text
-            .push_style(
-                RichTextStyleChanges {
-                    font_size: Some(Pt(32.)),
-                    weight: Some(rich_text::FontWeight::Bold),
-                    ..Default::default()
-                },
-                0..32,
-            )
-            .push_style(
-                RichTextStyleChanges {
-                    color: Some((i as f32 / page_count as f32, 0., 0.)),
-                    italic: Some(true),
-                    ..Default::default()
-                },
-                16..32,
-            );
+    //     rich_text
+    //         .push_style(
+    //             RichTextStyleChanges {
+    //                 font_size: Some(Pt(32.)),
+    //                 weight: Some(rich_text::FontWeight::Bold),
+    //                 ..Default::default()
+    //             },
+    //             0..32,
+    //         )
+    //         .push_style(
+    //             RichTextStyleChanges {
+    //                 color: Some((i as f32 / page_count as f32, 0., 0.)),
+    //                 italic: Some(true),
+    //                 ..Default::default()
+    //             },
+    //             16..32,
+    //         );
 
-        // // We have to change the string every time otherwise Skia caches the
-        // // layout calculation and we cheat in performance
-        // let page_string = &output_string[i..];
+    //     // // We have to change the string every time otherwise Skia caches the
+    //     // // layout calculation and we cheat in performance
+    //     // let page_string = &output_string[i..];
 
-        // 20 Mm of padding on left & right
-        let text_width = Mm(210. - 40.).into_pt();
+    //     // 20 Mm of padding on left & right
+    //     let text_width = Mm(210. - 40.).into_pt();
 
-        let paragraph_metrics = text_layout.compute_paragraph_layout(&rich_text, text_width);
+    //     let paragraph_metrics = text_layout.compute_paragraph_layout(&rich_text, text_width);
 
-        page_writer
-            .draw_rect(
-                Point::new(Mm(20.), Mm(280.)),
-                Point::new(
-                    Mm(20.) + text_width.into(),
-                    Mm(280.) - paragraph_metrics.height.into(),
-                ),
-                Some(Pt(5.)),
-            )
-            .write_lines(
-                Point::new(Mm(20.), Mm(280.)),
-                &text_layout.typeface,
-                &rich_text,
-                paragraph_metrics.line_metrics,
-            );
+    //     page_writer
+    //         .draw_rect(
+    //             Point::new(Mm(20.), Mm(280.)),
+    //             Point::new(
+    //                 Mm(20.) + text_width.into(),
+    //                 Mm(280.) - paragraph_metrics.height.into(),
+    //             ),
+    //             Some(Pt(5.)),
+    //         )
+    //         .write_lines(
+    //             Point::new(Mm(20.), Mm(280.)),
+    //             &text_layout.typeface,
+    //             &rich_text,
+    //             paragraph_metrics.line_metrics,
+    //         );
 
-        page_writer
-            .draw_svg(Point::new(Mm(21.), Mm(270.)), SVG)
-            .unwrap();
+    //     page_writer
+    //         .draw_svg(Point::new(Mm(21.), Mm(270.)), SVG)
+    //         .unwrap();
 
-        page_writer = pdf_writer.add_page();
-    }
-    layout_span.exit();
+    //     page_writer = pdf_writer.add_page();
+    // }
+    // layout_span.exit();
 
-    pdf_writer.save("output.pdf");
+    // pdf_writer.save("output.pdf");
 }

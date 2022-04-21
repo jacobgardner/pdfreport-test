@@ -1,7 +1,7 @@
 use printpdf::{Color, Point, Pt, Rgb, Svg, SvgTransform, TextMatrix};
 
 use crate::{
-    fonts::find_font_index_by_style,
+    line_metric::LineMetric,
     rich_text::{FontWeight, RichText, RichTextStyle},
     text_layout::TextLayout,
     units::unit_to_pt,
@@ -98,7 +98,7 @@ impl<'a> PageWriter<'a> {
             //  for the string and compute what we need to compute for center/end alignment and vertical alignment
             // TODO: This^^
 
-            let layout = TextLayout::new();
+            // let layout = TextLayout::with_font_manager();
             if !node.children().all(|n| n.is_text()) {
                 panic!("For <text>, we only support all text child nodes for now");
             }
@@ -114,11 +114,22 @@ impl<'a> PageWriter<'a> {
                 },
             );
 
-            let paragraph = layout.compute_paragraph_layout(&rich, Pt(1000.0));
+            // TODO: FIXME!!!!!
+            // let paragraph = layout.compute_paragraph_layout(&rich, Pt(1000.0));
 
-            assert_eq!(paragraph.line_metrics.len(), 1);
+            // assert_eq!(paragraph.line_metrics.len(), 1);
 
-            let line_metric = paragraph.line_metrics.first().unwrap();
+            // let line_metric = paragraph.line_metrics.first().unwrap();
+            let line_metric = LineMetric {
+                start_index: 0,
+                end_index: 10,
+                ascent: Pt(0.),
+                descent: Pt(1.),
+                baseline: Pt(2.),
+                height: Pt(3.),
+                width: Pt(4.),
+                left: Pt(5.),
+            };
 
             let x_offset = match anchor.to_lowercase().as_str() {
                 "start" => Pt(0.0),
@@ -139,13 +150,16 @@ impl<'a> PageWriter<'a> {
                 start.y + y - y_offset,
             ));
 
-            let font_idx = find_font_index_by_style(weight, is_italic);
+            // TODO: Fix ME!!!!!!
+            let font_idx = 0; //find_font_index_by_style(weight, is_italic);
             let current_font = &self.writer.fonts[font_idx];
 
             current_layer.set_font(current_font, font_size.0);
             current_layer.set_fill_color(Color::Rgb(Rgb::new(fill.0, fill.1, fill.2, None)));
+            
 
-            PageWriter::write_text(&current_layer, node_text, &layout.typeface);
+            // FIXME: Make this work again
+            // PageWriter::write_text(&current_layer, node_text, &layout.typeface);
         }
 
         Ok(self)

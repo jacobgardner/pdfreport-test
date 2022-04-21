@@ -8,7 +8,7 @@ publish = false
 # https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [features]
-trace_chrome = [ "tracing-chrome" ]
+trace_chrome = ["tracing-chrome"]
 
 [workspace]
 members = ["crates/*"]
@@ -22,9 +22,9 @@ tracing-subscriber = { version = "*", features = ["std", "fmt"] }
 skia-safe = { version = "*", features = ["textlayout"] }
 stretch2 = "*"
 itertools = "*"
-serde = {version = "*", features = ["derive"]}
+serde = { version = "*", features = ["derive"] }
 serde_json = "*"
-optional-merge-derive = {path = "crates/optional-merge-derive"}
+optional-merge-derive = { path = "crates/optional-merge-derive" }
 usvg = "*"
 roxmltree = "*"
 num = "*"
@@ -34,6 +34,11 @@ color_processing = "*"
 regex = "*"
 lazy_static = "*"
 thiserror = "*"
+reqwest = "*"
+lru = "*"
+bytes = "*"
+futures = "*"
+tokio = { version = "1.17.0", features = ["full"] }
 
 # Optional Dependencies
 tracing-chrome = { version = "*", optional = true }

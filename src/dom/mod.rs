@@ -9,13 +9,27 @@ pub mod style;
 pub use nodes::DomNode;
 pub use style::{MergeableStyle, Style};
 
-#[derive(Deserialize)]
-pub struct FontInformation {}
+use crate::rich_text::{FontStyle, FontWeight};
 
-#[derive(Deserialize)]
+#[derive(Debug, Deserialize)]
+pub struct FontInfo {
+    pub source: String,
+    #[serde(default)]
+    pub weight: FontWeight,
+    #[serde(default)]
+    pub style: FontStyle,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct FontFamilyInfo {
+    pub family_name: String,
+    pub fonts: Vec<FontInfo>,
+}
+
+#[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct PdfDom {
-    pub fonts: Vec<FontInformation>,
+    pub fonts: Vec<FontFamilyInfo>,
     pub styles: HashMap<String, MergeableStyle>,
     pub root: DomNode,
 }

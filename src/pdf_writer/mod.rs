@@ -10,11 +10,7 @@ use tracing::{instrument, span, Level};
 
 mod svg;
 
-use crate::{
-    fonts::{find_font_index_by_style, FONTS},
-    line_metric::LineMetric,
-    rich_text::RichText,
-};
+use crate::{fonts::FontManager, line_metric::LineMetric, rich_text::RichText};
 
 pub struct PdfWriter {
     dimensions: (Mm, Mm),
@@ -30,7 +26,7 @@ const BOTTOM_LEFT_CORNER: Range<usize> = 8..12;
 
 impl PdfWriter {
     #[instrument(name = "Create PDF Context")]
-    pub fn new() -> Self {
+    pub fn new(font_manager: &FontManager) -> Self {
         // A4 Page dimensions
         let dimensions = (Mm(210.), Mm(297.));
 
@@ -39,9 +35,11 @@ impl PdfWriter {
 
         let mut fonts = vec![];
 
-        for font in FONTS {
-            let font = doc.add_external_font(font.bytes).unwrap();
-            fonts.push(font);
+        for (_family_name, font_family) in font_manager.families.iter() {
+            for font in font_family.fonts.iter() {
+                let font = doc.add_external_font((*font.bytes).as_ref()).unwrap();
+                fonts.push(font);
+            }
         }
 
         Self {
@@ -232,8 +230,10 @@ impl<'a> PageWriter<'a> {
 
                 current_index = end_index;
 
-                let font_idx =
-                    find_font_index_by_style(current_style.weight, current_style.is_italic);
+                // TODO: Look up appropriate font 
+                // let font_idx =
+                //     find_font_index_by_style(current_style.weight, current_style.is_italic);
+                let font_idx = 0;
                 let current_font = &self.writer.fonts[font_idx];
 
                 current_layer.set_font(current_font, current_style.font_size.0);
