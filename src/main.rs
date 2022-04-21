@@ -1,12 +1,7 @@
 // Compute layout -> Draw Shit -> Draw Text -> Profit
 
-use block_layout::{BlockLayout, ImageComputeFn, TextComputeFn};
-use dom::{nodes::TextNode, PdfDom};
+use dom::PdfDom;
 use pdf_writer::PdfWriter;
-use printpdf::{Mm, Point, Pt};
-use rich_text::{RichText, RichTextStyle, RichTextStyleChanges};
-use stretch2::node::MeasureFunc;
-use stretch2::prelude::*;
 use text_layout::TextLayout;
 use tracing::{span, Level};
 
@@ -18,9 +13,9 @@ mod fonts;
 mod line_metric;
 mod math;
 mod pdf_writer;
+mod resource_cache;
 mod rich_text;
 mod text_layout;
-mod resource_cache;
 // mod paginated_layout;
 mod block_layout;
 mod dom;
@@ -89,7 +84,6 @@ WHY THIS MATTERS
     .replace('\n', " ")
     .replace("  ", " ")
 }
-
 
 #[tokio::main]
 async fn main() {
@@ -171,7 +165,7 @@ async fn main() {
         }"##,
     )
     .unwrap();
-    
+
     println!("Layout: {pdf_layout:?}");
 
     assemble_pdf::assemble_pdf(&pdf_layout).await;

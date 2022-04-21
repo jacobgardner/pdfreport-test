@@ -1,4 +1,4 @@
-use std::{cell::RefCell, future, rc::Rc, collections::HashMap};
+use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 use stretch2 as stretch;
 
@@ -45,8 +45,7 @@ pub async fn assemble_pdf(pdf_layout: &PdfDom) -> Result<(), BadPdfLayout> {
     //
     let mut resource_cache = ResourceCache::new();
 
-    let font_manager =
-        load_fonts(&mut resource_cache, &pdf_layout.fonts).await?;
+    let font_manager = load_fonts(&mut resource_cache, &pdf_layout.fonts).await?;
 
     let pdf_writer = Rc::new(RefCell::new(PdfWriter::new(&font_manager)));
 

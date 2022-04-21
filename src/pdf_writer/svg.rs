@@ -1,9 +1,9 @@
 use printpdf::{Color, Point, Pt, Rgb, Svg, SvgTransform, TextMatrix};
 
 use crate::{
+    fonts::FontLookup,
     line_metric::LineMetric,
-    rich_text::{FontWeight, RichText, RichTextStyle},
-    text_layout::TextLayout,
+    rich_text::{FontStyle, FontWeight, RichText, RichTextStyle},
     units::unit_to_pt,
 };
 
@@ -77,8 +77,7 @@ impl<'a> PageWriter<'a> {
             let x = unit_to_pt(node.attribute("x").unwrap_or("0"))?;
             let y = unit_to_pt(node.attribute("y").unwrap_or("0"))?;
             let weight = FontWeight::from(node.attribute("font-weight").unwrap_or("regular"));
-            let font_style = node.attribute("font-style").unwrap_or("normal");
-            let is_italic = font_style.to_lowercase() == "italic";
+            let font_style = FontStyle::from(node.attribute("font-style").unwrap_or("normal"));
             let font_size = unit_to_pt(node.attribute("font-size").unwrap_or("12"))?;
             let fill =
                 color_processing::Color::new_string(node.attribute("fill").unwrap_or("#000000"))
@@ -91,6 +90,8 @@ impl<'a> PageWriter<'a> {
             let preferred_fonts: Vec<_> = font_stack.split(',').map(|f| f.trim()).collect();
 
             println!("Font Stack: {:?}", preferred_fonts);
+            // TODO: Replace with searching font manager for matching family
+            let found_font = preferred_fonts[0];
             // We want to find a font in the stack that matches up to a loaded skia/pdf typeface.
             //   If we don't find one, default to the first typeface, probably?
 
@@ -107,9 +108,10 @@ impl<'a> PageWriter<'a> {
             let rich = RichText::new(
                 node_text,
                 RichTextStyle {
+                    font_family: String::from(found_font),
                     font_size,
                     weight,
-                    is_italic,
+                    style: font_style,
                     color: (fill.0 as f32, fill.1 as f32, fill.2 as f32),
                 },
             );
@@ -150,16 +152,18 @@ impl<'a> PageWriter<'a> {
                 start.y + y - y_offset,
             ));
 
-            // TODO: Fix ME!!!!!!
-            let font_idx = 0; //find_font_index_by_style(weight, is_italic);
-            let current_font = &self.writer.fonts[font_idx];
+            let font_lookup = FontLookup {
+                family_name: found_font,
+                weight,
+                style: font_style,
+            };
+
+            let current_font = self.writer.lookup_font(&font_lookup)?;
 
             current_layer.set_font(current_font, font_size.0);
             current_layer.set_fill_color(Color::Rgb(Rgb::new(fill.0, fill.1, fill.2, None)));
-            
 
-            // FIXME: Make this work again
-            // PageWriter::write_text(&current_layer, node_text, &layout.typeface);
+            self.write_text(&current_layer, node_text, &font_lookup);
         }
 
         Ok(self)

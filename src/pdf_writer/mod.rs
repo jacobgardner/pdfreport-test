@@ -1,4 +1,4 @@
-use std::{fs::File, io::BufWriter, ops::Range};
+use std::{collections::HashMap, fs::File, io::BufWriter, ops::Range};
 
 use printpdf::{
     calculate_points_for_circle, lopdf, Color, IndirectFontRef, Line, Mm, PdfDocument,
@@ -10,13 +10,24 @@ use tracing::{instrument, span, Level};
 
 mod svg;
 
-use crate::{fonts::FontManager, line_metric::LineMetric, rich_text::RichText};
+use crate::{
+    error::BadPdfLayout,
+    fonts::{FontLookup, FontManager},
+    line_metric::LineMetric,
+    rich_text::{FontStyle, FontWeight, RichText},
+};
+
+#[derive(Hash, Eq, PartialEq)]
+struct FontKey {
+    weight: FontWeight,
+    style: FontStyle,
+}
 
 pub struct PdfWriter {
     dimensions: (Mm, Mm),
     doc: PdfDocumentReference,
     pages: Vec<(PdfPageIndex, PdfLayerIndex)>,
-    fonts: Vec<IndirectFontRef>,
+    font_families: HashMap<String, HashMap<FontKey, IndirectFontRef>>, // fonts: Vec<IndirectFontRef>,
 }
 
 const TOP_LEFT_CORNER: Range<usize> = 12..16;
@@ -30,15 +41,24 @@ impl PdfWriter {
         // A4 Page dimensions
         let dimensions = (Mm(210.), Mm(297.));
 
+        let font_families = HashMap::new();
+
         let (doc, page1, layer1) =
             PdfDocument::new("Test Report", dimensions.0, dimensions.1, "Layer 1");
 
-        let mut fonts = vec![];
+        for (family_name, font_family) in font_manager.families.iter() {
+            let font_family_fonts = HashMap::new();
 
-        for (_family_name, font_family) in font_manager.families.iter() {
             for font in font_family.fonts.iter() {
-                let font = doc.add_external_font((*font.bytes).as_ref()).unwrap();
-                fonts.push(font);
+                let indirect_font_ref = doc.add_external_font((*font.bytes).as_ref()).unwrap();
+
+                font_family_fonts.insert(
+                    FontKey {
+                        weight: font.weight,
+                        style: font.style,
+                    },
+                    indirect_font_ref,
+                );
             }
         }
 
@@ -46,7 +66,7 @@ impl PdfWriter {
             dimensions,
             doc,
             pages: vec![(page1, layer1)],
-            fonts,
+            font_families,
         }
     }
 
@@ -76,6 +96,26 @@ impl PdfWriter {
         self.doc
             .save(&mut BufWriter::new(File::create(file_name).unwrap()))
             .unwrap()
+    }
+
+    fn lookup_font(&self, font_lookup: &FontLookup) -> Result<&IndirectFontRef, BadPdfLayout> {
+        let family = self
+            .font_families
+            .get(font_lookup.family_name)
+            .ok_or_else(|| BadPdfLayout::FontFamilyNotFound {
+                font_family: String::from(font_lookup.family_name),
+            })?;
+
+        family
+            .get(&FontKey {
+                weight: font_lookup.weight,
+                style: font_lookup.style,
+            })
+            .ok_or_else(|| BadPdfLayout::FontStyleNotFoundForFamily {
+                font_family: String::from(font_lookup.family_name),
+                font_weight: font_lookup.weight,
+                font_style: font_lookup.style,
+            })
     }
 }
 
@@ -174,7 +214,7 @@ impl<'a> PageWriter<'a> {
 
     // Borrowed from `printpdf`
     // Assumption: all styles of a typeface share the same glyph_ids
-    fn encode_pdf_text(line: &str, typeface: &Typeface) -> Vec<u8> {
+    fn encode_pdf_text(&self, line: &str, font_lookup: &FontLookup) -> Vec<u8> {
         let mut glyph_ids = vec![0; line.len()];
         typeface.str_to_glyphs(line, &mut glyph_ids);
 
@@ -186,8 +226,8 @@ impl<'a> PageWriter<'a> {
 
     // This is more efficient than printpdf's write_line call
     //  because this uses Skia's much faster glyph lookup
-    fn write_text(current_layer: &PdfLayerReference, line: &str, typeface: &Typeface) {
-        let bytes = PageWriter::encode_pdf_text(line, typeface);
+    fn write_text(&self, current_layer: &PdfLayerReference, line: &str, font_lookup: &FontLookup) {
+        let bytes = self.encode_pdf_text(line, font_lookup);
 
         current_layer.add_operation(lopdf::content::Operation::new(
             "Tj",
@@ -205,7 +245,7 @@ impl<'a> PageWriter<'a> {
         typeface: &Typeface,
         rich_text: &RichText,
         line_metrics: Vec<LineMetric>,
-    ) -> &Self {
+    ) -> Result<&Self, BadPdfLayout> {
         let span = span!(Level::TRACE, "Writing Lines");
         let _guard = span.enter();
         let current_layer = self.get_current_layer();
@@ -230,11 +270,19 @@ impl<'a> PageWriter<'a> {
 
                 current_index = end_index;
 
-                // TODO: Look up appropriate font 
+                // TODO: Look up appropriate font
                 // let font_idx =
                 //     find_font_index_by_style(current_style.weight, current_style.is_italic);
-                let font_idx = 0;
-                let current_font = &self.writer.fonts[font_idx];
+                // let font_idx = 0;
+                // let current_font = &self.writer.fonts[font_idx];
+
+                let font_lookup = FontLookup {
+                    family_name: "Inter",
+                    weight: current_style.weight,
+                    style: current_style.style,
+                };
+
+                let current_font = self.writer.lookup_font(&font_lookup)?;
 
                 current_layer.set_font(current_font, current_style.font_size.0);
                 let clr = current_style.color;
@@ -245,7 +293,7 @@ impl<'a> PageWriter<'a> {
                     None,
                 )));
 
-                PageWriter::write_text(&current_layer, current_span, typeface);
+                self.write_text(&current_layer, current_span, &font_lookup);
 
                 if current_index == line_metric.end_index {
                     break;
@@ -261,6 +309,6 @@ impl<'a> PageWriter<'a> {
         }
         current_layer.end_text_section();
 
-        self
+        Ok(self)
     }
 }

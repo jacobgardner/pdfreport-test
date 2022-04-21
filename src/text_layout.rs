@@ -72,10 +72,9 @@ impl TextLayout {
         default_style.set_font_style(FontStyle::new(
             rich_text.default_style.weight.into(),
             Width::NORMAL,
-            if rich_text.default_style.is_italic {
-                Slant::Italic
-            } else {
-                Slant::Upright
+            match rich_text.default_style.style {
+                crate::rich_text::FontStyle::Normal => Slant::Upright,
+                crate::rich_text::FontStyle::Italic => Slant::Italic,
             },
         ));
         default_style.set_font_size(rich_text.default_style.font_size.0 as f32);
@@ -93,10 +92,9 @@ impl TextLayout {
             ts.set_font_style(FontStyle::new(
                 style.weight.into(),
                 Width::NORMAL,
-                if style.is_italic {
-                    Slant::Italic
-                } else {
-                    Slant::Upright
+                match style.style {
+                    crate::rich_text::FontStyle::Italic => Slant::Italic,
+                    crate::rich_text::FontStyle::Normal => Slant::Upright,
                 },
             ));
             ts.set_font_size(style.font_size.0 as f32);

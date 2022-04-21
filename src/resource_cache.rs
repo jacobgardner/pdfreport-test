@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use bytes::Bytes;
 use lru::LruCache;
-use reqwest::{Client, IntoUrl};
+use reqwest::Client;
 
 use crate::error::BadPdfLayout;
 

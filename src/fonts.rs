@@ -16,8 +16,8 @@ type FamilyName = String;
 #[derive(Debug)]
 pub struct FontData {
     pub bytes: Rc<Bytes>,
-    weight: FontWeight,
-    style: FontStyle,
+    pub weight: FontWeight,
+    pub style: FontStyle,
 }
 
 impl FontData {

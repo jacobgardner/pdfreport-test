@@ -5,10 +5,10 @@ use printpdf::Pt;
 use num_derive::FromPrimitive;
 use serde::Deserialize;
 
-#[derive(Debug, Clone, Copy, PartialEq, FromPrimitive, Deserialize)]
+#[derive(Hash, Eq, PartialEq, Debug, Clone, Copy, FromPrimitive, Deserialize)]
 pub enum FontStyle {
     Normal,
-    Italic
+    Italic,
 }
 
 impl Default for FontStyle {
@@ -17,7 +17,16 @@ impl Default for FontStyle {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, FromPrimitive, Deserialize)]
+impl From<&str> for FontStyle {
+    fn from(s: &str) -> Self {
+        match s.to_lowercase().as_str() {
+            "italic" => FontStyle::Italic,
+            "normal" | _ => FontStyle::Normal,
+        }
+    }
+}
+
+#[derive(Hash, Eq, PartialEq, Debug, Clone, Copy, FromPrimitive, Deserialize)]
 pub enum FontWeight {
     Thin = 100,
     ExtraLight = 200,
@@ -56,9 +65,10 @@ impl Default for FontWeight {
 
 #[derive(Debug, Default, Clone)]
 pub struct RichTextStyleChanges {
+    pub font_family: Option<String>,
     pub font_size: Option<Pt>,
     pub weight: Option<FontWeight>,
-    pub italic: Option<bool>,
+    pub style: Option<FontStyle>,
     pub color: Option<(f32, f32, f32)>,
 }
 
@@ -82,9 +92,10 @@ impl RichTextStyleChanges {
 
 #[derive(Debug, Default, Clone)]
 pub struct RichTextStyle {
+    pub font_family: String,
     pub font_size: Pt,
     pub weight: FontWeight,
-    pub is_italic: bool,
+    pub style: FontStyle,
     pub color: (f32, f32, f32),
 }
 
@@ -196,8 +207,8 @@ impl<'a> Iterator for StyleIterator<'a> {
                 next_style.weight = weight;
             }
 
-            if let Some(italic) = style.italic {
-                next_style.is_italic = italic;
+            if let Some(font_style) = style.style {
+                next_style.style = font_style;
             }
 
             if let Some(color) = style.color {
