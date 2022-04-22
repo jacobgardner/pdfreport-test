@@ -4,7 +4,9 @@
 use std::rc::Rc;
 
 use dom::PdfDom;
+use itertools::Itertools;
 use pdf_writer::PdfWriter;
+use regex::Regex;
 use text_layout::TextLayout;
 use tracing::{span, Level};
 
@@ -26,66 +28,98 @@ mod styles;
 mod units;
 
 const SVG: &str = include_str!("../assets/svg-test.svg");
+const BASE_FONT_URL: &str =
+    "https://github.com/jacobgardner/pdfreport-test/blob/main/assets/fonts/inter-static/";
 
-fn build_text() -> String {
-    r#"Chapter 1: Your approach to Work
+fn example_layout() -> PdfDom {
+    let re = Regex::new(r"(?i)Inter-(UI-)?(?P<weight>.*?)(?P<style>Italic)?(-BETA)?\.ttf").unwrap();
 
-Introduction
+    let fonts = std::fs::read_dir("./assets/fonts/inter-static")
+        .unwrap()
+        .map(|path| path.unwrap().file_name().into_string().unwrap())
+        .map(|filename| {
+            let captures = re.captures(&filename).unwrap();
+            let weight = captures.name("weight").unwrap().as_str();
+            let style = captures
+                .name("style")
+                .map(|m| m.as_str())
+                .unwrap_or("Normal");
+    
+            let weight = if weight == "" {
+                "Regular"
+            } else {
+                weight
+            };
 
-Why this matters
+            format!(
+                r#"
+                {{
+                    "source": "{BASE_FONT_URL}{filename}?raw=true",
+                    "weight": "{weight}",
+                    "style": "{style}"
+                }}
+            "#
+            )
+        })
+        .join(",");
 
-Your results indicate that you are moderate in Decision-Making. This indicates that you are likely to be generally effective
-when it comes to making decisions. You are likely to spend
-an adequate amount of time gathering and analyzing available
-information, weighing risks, and plotting a course to follow.
-In addition to this, you might approach many decisions with a
-somewhat open mind to new directions. Finally, you might be
-generally effective at considering potential outcomes of your
-decisions prior to making them.
-While you are likely to be effective in most day-to-day decision-making situations, you might have difficulty when presented with especially complex decisions. These difficulties
-might take the form of being overwhelmed by options, spending too much time analyzing information, or making decisions
-based on incomplete information.
-CALLOUT
-These callout boxes will
-provide supplemental information pertaining to the
-adjacent section (or the
-section above, depending
-on your screen size).
-EXPLAIN THE GROUPINGS
-Here's a quick snapshot of what these three groupings mean.
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc
-viverra ligula nec posuere dictum. Curabitur varius erat eget
-nisi sodales, nec auctor leo placerat. Vivamus sit amet porttitor urna, sed rutrum augue. Donec bibendum lacus vel felis
-viverra, a auctor orci vestibulum. Nulla et erat ac sem gravida
-lacinia. Maecenas molestie orci et augue convallis, ut vehicula ante fermentum. Curabitur nec blandit arcu. Suspendisse
-potenti. Suspendisse leo arcu, aliquam in porttitor scelerisque,
-condimentum id quam. Nulla facilisi. Vivamus id urna ipsum.
-Nulla non sapien leo. Vestibulum non ligula sapien. Nullam
-finibus nibh a massa auctor sodales. Nulla mauris neque,
-bibendum vel velit id, aliquam pharetra neque. Nam ultricies
-posuere dolor eget congue.
-CALLOUT
-These callout boxes will
-provide supplemental information pertaining to the
-adjacent section (or the
-section above, depending
-on your screen size).
-HOW TO USE IT
-Explaining how every measure should be completed, but allows for the user to browse at their own pace and leisure.
-They're welcome to scroll through, but a deep dive is necessary. At the end of each measure the users will have two
-actions to take: adding items to their action planner or marking
-the measure as complete.
-CALLOUT
-These callout boxes will
-provide supplemental information pertaining to the
-adjacent section (or the
-section above, depending
-on your screen size).
-Decision Making
-WHY THIS MATTERS
-    "#
-    .replace('\n', " ")
-    .replace("  ", " ")
+    // Not using format! here because I don't want to escape every {{ }}
+    let json_str = r##"{
+        "fonts": [{
+            "family_name": "Inter",
+            "fonts": [
+    "##
+    .to_owned()
+        + &fonts
+        + r##"
+            ]
+        }],
+        "styles": {
+            "root": {
+                "font": {
+                    "family": "Inter" 
+                }
+            },
+            "h1": {
+                "color": "#ABCDEF",
+                "flex": {
+                    "direction": "Column"
+                },
+                "margin": {
+                    "bottom": 4
+                },
+                "padding": {
+                    "left": 40,
+                    "right": 40
+                },
+                "border": {
+                    "width": 1,  
+                    "color": "#ABCDEF",
+                    "radius": {
+                        "topRight": 5,
+                        "bottomRight": 5
+                    }
+                }
+            },
+            "italic": {
+                 
+            }
+        },
+        "root": {
+            "type": "Styled",
+            "styles": ["root"],
+            "children": [{
+                "type": "Text",
+                "styles": ["h1"],
+                "children": ["This is some header text ", {"styles": ["italic"], "children": ["italic text"]}] 
+            }, {
+                "type": "Image",
+                "content": "<svg xmlns:xlink=\"http://www.w3.org/1999/xlink\" role=\"img\" aria-label=\"22\" width=\"73\" height=\"73\" viewBox=\"0 0 73 73\" xmlns=\"http://www.w3.org/2000/svg\"><circle class=\"donutMetric__innerCircle\" cx=\"36.5\" cy=\"36.5\" r=\"25\" fill=\"#D3D1E6\" /></svg>"
+            }]
+        }
+    }"##;
+
+    serde_json::from_str(&json_str).unwrap()
 }
 
 #[tokio::main]
@@ -98,8 +132,6 @@ async fn main() {
         tracing_subscriber::registry().with(chrome_layer).init();
         _guard
     };
-
-    let _output_text = build_text();
 
     let fm = FontManager::new();
     let layout_fonts = Rc::new(LayoutFonts::with_font_manager(&fm));
@@ -114,67 +146,7 @@ async fn main() {
 
     let _layout_span = span!(Level::DEBUG, "Layout & Building PDF").entered();
 
-    let pdf_layout: PdfDom = serde_json::from_str(
-        r##"{
-            "fonts": [{
-                "family_name": "Inter",
-                "fonts": [
-                    {
-                        "source": "https://github.com/jacobgardner/pdfreport-test/blob/main/assets/fonts/inter-static/Inter-Black.ttf?raw=true",
-                        "weight": "Black"
-                    },
-                    {
-                        "source": "https://github.com/jacobgardner/pdfreport-test/blob/main/assets/fonts/inter-static/Inter-Bold.ttf?raw=true",
-                        "weight": "Bold"
-                    }
-                ]
-            }],
-            "styles": {
-                "root": {
-                    "font": {
-                        "family": "Inter" 
-                    }
-                },
-                "h1": {
-                    "color": "#ABCDEF",
-                    "flex": {
-                        "direction": "Column"
-                    },
-                    "margin": {
-                        "bottom": 4
-                    },
-                    "padding": {
-                        "left": 40,
-                        "right": 40
-                    },
-                    "border": {
-                        "width": 1,  
-                        "color": "#ABCDEF",
-                        "radius": {
-                            "topRight": 5,
-                            "bottomRight": 5
-                        }
-                    }
-                },
-                "italic": {
-                     
-                }
-            },
-            "root": {
-                "type": "Styled",
-                "styles": ["root"],
-                "children": [{
-                    "type": "Text",
-                    "styles": ["h1"],
-                    "children": ["This is some header text ", {"styles": ["italic"], "children": ["italic text"]}] 
-                }, {
-                    "type": "Image",
-                    "content": "<svg xmlns:xlink=\"http://www.w3.org/1999/xlink\" role=\"img\" aria-label=\"22\" width=\"73\" height=\"73\" viewBox=\"0 0 73 73\" xmlns=\"http://www.w3.org/2000/svg\"><circle class=\"donutMetric__innerCircle\" cx=\"36.5\" cy=\"36.5\" r=\"25\" fill=\"#D3D1E6\" /></svg>"
-                }]
-            }
-        }"##,
-    )
-    .unwrap();
+    let pdf_layout = example_layout();
 
     println!("Layout: {pdf_layout:?}");
 
