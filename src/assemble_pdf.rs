@@ -65,7 +65,7 @@ pub async fn assemble_pdf(pdf_layout: &PdfDom) -> Result<(), BadPdfLayout> {
     )));
     let text_layout = Rc::new(TextLayout::new(layout_fonts));
 
-    let shared_pdf_writer = pdf_writer.clone();
+    let _shared_pdf_writer = pdf_writer.clone();
     // We have to use move here twice so each closure gets ownership of the Rc and can
     // manage its lifetime
     let text_compute: TextComputeFn = Box::new(
@@ -99,7 +99,7 @@ pub async fn assemble_pdf(pdf_layout: &PdfDom) -> Result<(), BadPdfLayout> {
                     text_layout.compute_paragraph_layout(&rich_text, Pt(width as f64));
 
                 Size {
-                    width: width,
+                    width,
                     height: paragraph_metrics.height.0 as f32,
                 }
             }))
