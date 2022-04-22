@@ -178,7 +178,7 @@ async fn main() {
 
     println!("Layout: {pdf_layout:?}");
 
-    assemble_pdf::assemble_pdf(&pdf_layout).await.unwrap();
+    assemble_pdf::assemble_pdf(Rc::new(pdf_layout)).await.unwrap();
 
     println!("Done assembling...");
 

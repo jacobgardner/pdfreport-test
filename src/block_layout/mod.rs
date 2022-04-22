@@ -1,4 +1,8 @@
-use std::collections::{BTreeSet, HashMap};
+use std::{
+    cell::RefCell,
+    collections::{BTreeSet, HashMap},
+    rc::Rc,
+};
 
 use printpdf::Pt;
 use stretch::node::MeasureFunc;
@@ -6,17 +10,14 @@ use stretch2 as stretch;
 use stretch2::prelude::*;
 
 use crate::{
-    dom::{
-        nodes::{ImageNode, TextNode},
-        DomNode, MergeableStyle, PdfDom, Style,
-    },
+    dom::{nodes::ImageNode, DomNode, MergeableStyle, PdfDom, Style},
     error::BadPdfLayout,
 };
 
 mod flex_style;
 
-pub type TextComputeFn<'a> = Box<dyn Fn(&'a TextNode, Style) -> MeasureFunc>;
-pub type ImageComputeFn<'a> = Box<dyn Fn(&'a ImageNode) -> MeasureFunc>;
+pub type TextComputeFn = Box<dyn Fn(Node, Rc<RefCell<BlockLayout>>) -> MeasureFunc>;
+pub type ImageComputeFn = Box<dyn Fn(Node) -> MeasureFunc>;
 
 #[derive(Clone, Debug)]
 struct DrawOrder {
@@ -70,32 +71,32 @@ impl Ord for DrawOrder {
     }
 }
 
-pub struct BlockLayout<'a> {
-    pdf_dom: &'a PdfDom,
+pub struct BlockLayout {
+    pdf_dom: Rc<PdfDom>,
     stretch: Stretch,
-    text_node_compute: TextComputeFn<'a>,
-    image_node_compute: ImageComputeFn<'a>,
-    layout_node_map: HashMap<Node, &'a DomNode>,
+    text_node_compute: TextComputeFn,
+    image_node_compute: ImageComputeFn,
+    layout_node_map: HashMap<Node, DomNode>,
     layout_style_map: HashMap<Node, Style>,
     node_draw_order: BTreeSet<DrawOrder>,
 }
 
-impl<'a> BlockLayout<'a> {
+impl BlockLayout {
     pub fn build_layout<T: Into<Pt>>(
-        pdf_dom: &'a PdfDom,
-        text_compute: TextComputeFn<'a>,
-        image_compute: ImageComputeFn<'a>,
+        pdf_dom: Rc<PdfDom>,
+        text_compute: TextComputeFn,
+        image_compute: ImageComputeFn,
         page_dimensions: Size<T>,
-    ) -> Result<Self, BadPdfLayout> {
-        let mut layout = Self {
-            pdf_dom,
+    ) -> Result<Rc<RefCell<Self>>, BadPdfLayout> {
+        let layout = Rc::new(RefCell::new(Self {
+            pdf_dom: pdf_dom.clone(),
             stretch: Stretch::new(),
             text_node_compute: text_compute,
             image_node_compute: image_compute,
             layout_node_map: HashMap::new(),
             layout_style_map: HashMap::new(),
             node_draw_order: BTreeSet::new(),
-        };
+        }));
 
         let current_style = Style::default();
 
@@ -105,7 +106,8 @@ impl<'a> BlockLayout<'a> {
             width: Number::Defined(page_width), // 8.5 inches
             height: Number::Undefined,
         };
-        let root_layout_node = layout
+
+        let root_layout_node = (*layout.borrow_mut())
             .stretch
             .new_node(
                 stretch::style::Style {
@@ -121,18 +123,27 @@ impl<'a> BlockLayout<'a> {
 
         let root_node = &pdf_dom.root;
 
-        layout.build_layout_nodes(0, current_style, root_layout_node, root_node)?;
+        BlockLayout::build_layout_nodes(
+            layout.clone(),
+            0,
+            current_style,
+            root_layout_node,
+            root_node,
+        )?;
 
         println!("Compute Layout...");
-        layout.stretch.compute_layout(root_layout_node, page_size)?;
+        (*layout.borrow_mut())
+            .stretch
+            .compute_layout(root_layout_node, page_size)?;
         println!("Done Computing Layout!");
 
         for &DrawOrder {
             node,
             depth,
             z_order,
-        } in &layout.node_draw_order
+        } in &layout.borrow().node_draw_order
         {
+            let layout = (*layout).borrow();
             let node_layout = layout.stretch.layout(node)?;
             println!("Z:{z_order} -> D:{depth} -> {node:?} {node_layout:?}");
         }
@@ -169,15 +180,17 @@ impl<'a> BlockLayout<'a> {
     // }
 
     fn build_layout_nodes(
-        &mut self,
+        layout: Rc<RefCell<BlockLayout>>,
         depth: usize,
         mut current_style: Style,
         parent_layout_node: stretch::node::Node,
-        current_pdf_node: &'a DomNode,
+        current_pdf_node: &DomNode,
     ) -> Result<(), BadPdfLayout> {
         for style_name in current_pdf_node.styles() {
+            let layout = (*layout).borrow();
             let mergeable_style =
-                self.styles()
+                layout
+                    .styles()
                     .get(style_name)
                     .ok_or_else(|| BadPdfLayout::UnmatchedStyle {
                         style_name: style_name.clone(),
@@ -187,39 +200,49 @@ impl<'a> BlockLayout<'a> {
         }
 
         let child_node = match current_pdf_node {
-            DomNode::Styled(_styled_node) => self
+            DomNode::Styled(_styled_node) => (*layout.borrow_mut())
                 .stretch
                 .new_node(current_style.clone().try_into()?, &[])?,
             DomNode::Text(text_node) => {
                 // We would want to pass in a function called something like:
                 //  compute_text_size which takes in the dom node, current style,
                 //  etc. and returns the desired closure, if we can
-                self.stretch.new_leaf(
-                    current_style.clone().try_into()?,
-                    (self.text_node_compute)(text_node, current_style.clone()),
-                )?
+                let mut layout_ref = (*layout).borrow_mut();
+                let new_child = layout_ref.stretch.new_node(current_style.clone().try_into()?, &[])?;
+
+                let f = (layout_ref.text_node_compute)(new_child, layout.clone());
+
+                layout_ref.stretch.set_measure(new_child, Some(f))?;
+
+                new_child
+                // self.stretch.new_leaf(
+                //     current_style.clone().try_into()?,
+                //     (self.text_node_compute)(text_node, current_style.clone()),
+                // )?
             }
-            DomNode::Image(image_node) => self.stretch.new_leaf(
+            DomNode::Image(image_node) => (*layout.borrow_mut()).stretch.new_leaf(
                 current_style.clone().try_into()?,
-                (self.image_node_compute)(image_node),
+                MeasureFunc::Raw(|sz| Size { width: 0., height: 0. }),
             )?,
         };
 
         assert!(
-            self.layout_style_map
+            (*layout.borrow_mut())
+                .layout_style_map
                 .insert(child_node, current_style.clone())
                 .is_none(),
             "Layout engine should guarantee all nodes are unique"
         );
 
         assert!(
-            self.layout_node_map
-                .insert(child_node, current_pdf_node)
+            (*layout.borrow_mut())
+                .layout_node_map
+                .insert(child_node, current_pdf_node.clone())
                 .is_none(),
             "Layout engine should guarantee all nodes are unique"
         );
 
-        self.node_draw_order.insert(DrawOrder {
+        (*layout.borrow_mut()).node_draw_order.insert(DrawOrder {
             depth,
             // If we add z-index to style, we should be able to update it here
             // and it just work
@@ -229,11 +252,18 @@ impl<'a> BlockLayout<'a> {
 
         if let DomNode::Styled(styled_node) = current_pdf_node {
             for child in &styled_node.children {
-                self.build_layout_nodes(depth + 1, current_style.clone(), child_node, child)?
+                BlockLayout::build_layout_nodes(
+                    layout.clone(),
+                    depth + 1,
+                    current_style.clone(),
+                    child_node,
+                    child,
+                )?
             }
         }
-
-        self.stretch.add_child(parent_layout_node, child_node)?;
+        (*layout.borrow_mut())
+            .stretch
+            .add_child(parent_layout_node, child_node)?;
 
         Ok(())
     }

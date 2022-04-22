@@ -7,13 +7,12 @@ use stretch::{node::MeasureFunc, prelude::*};
 
 use crate::{
     block_layout::{BlockLayout, ImageComputeFn, TextComputeFn},
-    dom::{nodes::TextNode, FontFamilyInfo, PdfDom},
+    dom::{DomNode, FontFamilyInfo, PdfDom},
     error::BadPdfLayout,
     fonts::{FontData, FontFamily, FontManager},
     pdf_writer::{GlyphLookup, PdfWriter},
     resource_cache::ResourceCache,
-    rich_text::RichText,
-    text_layout::{LayoutFonts, TextLayout},
+    text_layout::{LayoutFonts, TextLayout}, rich_text::RichText,
 };
 
 pub async fn load_fonts(
@@ -50,7 +49,7 @@ impl GlyphLookup for Rc<LayoutFonts> {
     }
 }
 
-pub async fn assemble_pdf(pdf_layout: &PdfDom) -> Result<(), BadPdfLayout> {
+pub async fn assemble_pdf(pdf_layout: Rc<PdfDom>) -> Result<(), BadPdfLayout> {
     // Demonstration of the ability to have an item with a non-static lifetime
     //  doing stuff in a static lifetime
     //
@@ -68,13 +67,15 @@ pub async fn assemble_pdf(pdf_layout: &PdfDom) -> Result<(), BadPdfLayout> {
     let _shared_pdf_writer = pdf_writer.clone();
     // We have to use move here twice so each closure gets ownership of the Rc and can
     // manage its lifetime
-    let text_compute: TextComputeFn = Box::new(
-        move |text_node: &TextNode, current_style: crate::dom::Style| {
-            let text_node = text_node.clone();
+    let text_compute: TextComputeFn =
+        Box::new(move |node: Node, layout: Rc<RefCell<BlockLayout>>| {
+            // let text_node = text_node.clone();
 
             // There may be a better way to do this
             let text_layout = text_layout.clone();
             MeasureFunc::Boxed(Box::new(move |sz| {
+                // Sometimes we get undefined widths.
+                // Not sure why, but we can ignore this???
                 if let Number::Undefined = sz.width {
                     return Size {
                         width: 0.,
@@ -82,11 +83,19 @@ pub async fn assemble_pdf(pdf_layout: &PdfDom) -> Result<(), BadPdfLayout> {
                     };
                 }
 
+                let layout = layout.clone();
+                let layout = layout.borrow_mut();
+
+                let text_node = if let DomNode::Text(text_node) = layout.get_dom_node(node) {
+                    text_node
+                } else {
+                    unreachable!();
+                };
                 let text_layout = text_layout.clone();
-                let current_style = current_style.clone();
+                let current_style = layout.get_style(node);
 
                 let full_text = text_node.raw_text();
-                let rich_text = RichText::new(&full_text, current_style.try_into().unwrap());
+                let rich_text = RichText::new(&full_text, current_style.clone().try_into().unwrap());
 
                 let width = if let Number::Defined(width) = sz.width {
                     width
@@ -99,12 +108,11 @@ pub async fn assemble_pdf(pdf_layout: &PdfDom) -> Result<(), BadPdfLayout> {
                     text_layout.compute_paragraph_layout(&rich_text, Pt(width as f64));
 
                 Size {
-                    width,
+                    width: width,
                     height: paragraph_metrics.height.0 as f32,
                 }
             }))
-        },
-    );
+        });
 
     pdf_writer.borrow_mut().add_page();
 
@@ -122,6 +130,8 @@ pub async fn assemble_pdf(pdf_layout: &PdfDom) -> Result<(), BadPdfLayout> {
         image_compute,
         crate::page_sizes::LETTER,
     )?;
+
+    let layout = layout.borrow_mut();
 
     for node in layout.draw_order() {
         let style = layout.get_style(node);

@@ -43,21 +43,21 @@ impl<'a> Iterator for TextNodeIterator<'a> {
     }
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Clone, Deserialize, Debug)]
 pub struct ImageNode {
     #[serde(default = "styles_list")]
     pub styles: Vec<String>,
     pub content: String,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Clone, Deserialize, Debug)]
 pub struct StyledNode {
     #[serde(default = "styles_list")]
     pub styles: Vec<String>,
     pub children: Vec<DomNode>,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Clone, Deserialize, Debug)]
 #[serde(tag = "type")]
 pub enum DomNode {
     Styled(StyledNode),
