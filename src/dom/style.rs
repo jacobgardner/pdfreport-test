@@ -1,6 +1,8 @@
 use optional_merge_derive::MergeOptional;
 use serde::Deserialize;
 
+use crate::rich_text::{FontStyle, FontWeight};
+
 type Color = String;
 
 macro_rules! primitive_merge  {
@@ -31,7 +33,7 @@ impl<T: Merges + Clone> Merges for Option<T> {
     }
 }
 
-primitive_merge!(f32, String, Direction, FlexWrap, FlexAlign);
+primitive_merge!(f32, String, Direction, FlexWrap, FlexAlign, FontStyle, FontWeight);
 
 trait Merges: Sized + Clone {
     fn merge(&self, rhs: &Self) -> Self;
@@ -107,6 +109,7 @@ pub enum FlexAlign {
 
 #[derive(MergeOptional, Clone, Debug)]
 pub struct FlexStyle {
+    // Add other attributes as needed...
     pub direction: Direction,
     pub wrap: FlexWrap,
     pub align_items: FlexAlign,
@@ -114,7 +117,6 @@ pub struct FlexStyle {
     pub grow: f32,
     pub shrink: f32,
     pub basis: String,
-    // TODO: Add other attributes as needed
 }
 
 impl Default for FlexStyle {
@@ -151,9 +153,30 @@ impl Default for EdgeStyle {
 }
 
 #[derive(MergeOptional, Clone, Debug)]
+pub struct FontStyles {
+    pub family: String,
+    pub size: f32,
+    pub style: FontStyle,
+    pub weight: FontWeight,
+}
+
+impl Default for FontStyles {
+    fn default() -> Self {
+        Self {
+            family: String::from("sans-serif"),
+            size: 12.,
+            style: FontStyle::Normal,
+            weight: FontWeight::Regular,
+        }
+    }
+}
+
+#[derive(MergeOptional, Clone, Debug)]
 pub struct Style {
     #[nested]
     pub border: BorderStyle,
+    #[nested]
+    pub font: FontStyles,
     pub color: Color,
     #[nested]
     pub margin: EdgeStyle,
@@ -175,8 +198,9 @@ impl Default for Style {
             flex: FlexStyle::default(),
             margin: EdgeStyle::default(),
             padding: EdgeStyle::default(),
-            width: String::from("undefined"),
-            height: String::from("undefined"),
+            width: String::from("auto"),
+            height: String::from("auto"),
+            font: FontStyles::default(),
         }
     }
 }

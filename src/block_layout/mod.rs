@@ -1,5 +1,6 @@
 use std::collections::{BTreeSet, HashMap};
 
+use printpdf::Pt;
 use stretch::node::MeasureFunc;
 use stretch2 as stretch;
 use stretch2::prelude::*;
@@ -14,7 +15,7 @@ use crate::{
 
 mod flex_style;
 
-pub type TextComputeFn<'a> = Box<dyn Fn(&'a TextNode) -> MeasureFunc>;
+pub type TextComputeFn<'a> = Box<dyn Fn(&'a TextNode, Style) -> MeasureFunc>;
 pub type ImageComputeFn<'a> = Box<dyn Fn(&'a ImageNode) -> MeasureFunc>;
 
 #[derive(Clone, Debug)]
@@ -80,10 +81,11 @@ pub struct BlockLayout<'a> {
 }
 
 impl<'a> BlockLayout<'a> {
-    pub fn build_layout(
+    pub fn build_layout<T: Into<Pt>>(
         pdf_dom: &'a PdfDom,
         text_compute: TextComputeFn<'a>,
         image_compute: ImageComputeFn<'a>,
+        page_dimensions: Size<T>,
     ) -> Result<Self, BadPdfLayout> {
         let mut layout = Self {
             pdf_dom,
@@ -93,29 +95,37 @@ impl<'a> BlockLayout<'a> {
             layout_node_map: HashMap::new(),
             layout_style_map: HashMap::new(),
             node_draw_order: BTreeSet::new(),
-            // node_order_heap: BinaryHeap::new(),
         };
 
-        // let mut style_stack = vec![Style::default()];
-
         let current_style = Style::default();
+
+        let page_width = page_dimensions.width.into().0 as f32;
+
+        let page_size = Size {
+            width: Number::Defined(page_width), // 8.5 inches
+            height: Number::Undefined,
+        };
         let root_layout_node = layout
             .stretch
-            .new_node(current_style.clone().try_into()?, &[])
+            .new_node(
+                stretch::style::Style {
+                    size: Size {
+                        width: Dimension::Points(page_width),
+                        height: Dimension::Undefined,
+                    },
+                    ..current_style.clone().try_into()?
+                },
+                &[],
+            )
             .expect("This should only be able to error if children are added.");
 
         let root_node = &pdf_dom.root;
 
         layout.build_layout_nodes(0, current_style, root_layout_node, root_node)?;
 
-        layout.stretch.compute_layout(
-            root_layout_node,
-            Size {
-                // TODO: Remove magic numbers
-                width: Number::Defined(8.5 * 72.), // 8.5 inches
-                height: Number::Undefined,
-            },
-        )?;
+        println!("Compute Layout...");
+        layout.stretch.compute_layout(root_layout_node, page_size)?;
+        println!("Done Computing Layout!");
 
         for &DrawOrder {
             node,
@@ -186,7 +196,7 @@ impl<'a> BlockLayout<'a> {
                 //  etc. and returns the desired closure, if we can
                 self.stretch.new_leaf(
                     current_style.clone().try_into()?,
-                    (self.text_node_compute)(text_node),
+                    (self.text_node_compute)(text_node, current_style.clone()),
                 )?
             }
             DomNode::Image(image_node) => self.stretch.new_leaf(

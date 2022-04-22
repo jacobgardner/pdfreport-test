@@ -1,3 +1,5 @@
+use itertools::Itertools;
+use num::iter::Range;
 use serde::Deserialize;
 
 #[derive(Deserialize, Debug, Clone)]
@@ -7,11 +9,38 @@ pub enum TextChild {
     TextNode(TextNode),
 }
 
+impl TextChild {
+    pub fn raw_text(&self) -> String {
+        match self {
+            TextChild::Content(content) => content.clone(),
+            TextChild::TextNode(node) => node.raw_text(),
+        }
+    }
+}
+
 #[derive(Deserialize, Debug, Clone)]
 pub struct TextNode {
     #[serde(default = "styles_list")]
     pub styles: Vec<String>,
     pub children: Vec<TextChild>,
+}
+
+pub struct TextNodeIterator<'a> {
+    root_node: &'a TextNode,
+}
+
+impl TextNode {
+    pub fn raw_text(&self) -> String {
+        self.children.iter().map(|t| t.raw_text()).join("")
+    }
+}
+
+impl<'a> Iterator for TextNodeIterator<'a> {
+    type Item = (Range<usize>, &'a [&'a str]);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        todo!()
+    }
 }
 
 #[derive(Deserialize, Debug)]

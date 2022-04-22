@@ -37,6 +37,12 @@ pub enum BadPdfLayout {
         font_weight: FontWeight,
         font_style: FontStyle,
     },
+
+    #[error("Cannot parse font-color: {source}")]
+    ColorParseError {
+        #[from]
+        source: color_processing::ParseError,
+    },
 }
 
 // impl From<MeasurementParseError> for BadPdfLayout {

@@ -14,7 +14,7 @@ mod assemble_pdf;
 mod error;
 mod fonts;
 mod line_metric;
-mod math;
+mod page_sizes;
 mod pdf_writer;
 mod resource_cache;
 mod rich_text;
@@ -105,7 +105,7 @@ async fn main() {
     let layout_fonts = Rc::new(LayoutFonts::with_font_manager(&fm));
     let pdf_writer = PdfWriter::new(&fm, layout_fonts.clone());
 
-    let _text_layout = TextLayout::new(&layout_fonts);
+    let _text_layout = TextLayout::new(layout_fonts);
 
     let span = span!(Level::DEBUG, "Full Time");
     let _guard = span.enter();
@@ -130,6 +130,11 @@ async fn main() {
                 ]
             }],
             "styles": {
+                "root": {
+                    "font": {
+                        "family": "Inter" 
+                    }
+                },
                 "h1": {
                     "color": "#ABCDEF",
                     "flex": {
@@ -157,7 +162,7 @@ async fn main() {
             },
             "root": {
                 "type": "Styled",
-                "styles": [],
+                "styles": ["root"],
                 "children": [{
                     "type": "Text",
                     "styles": ["h1"],

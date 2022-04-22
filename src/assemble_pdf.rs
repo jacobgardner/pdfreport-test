@@ -1,5 +1,6 @@
 use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
+use printpdf::Pt;
 use stretch2 as stretch;
 
 use stretch::{node::MeasureFunc, prelude::*};
@@ -11,15 +12,14 @@ use crate::{
     fonts::{FontData, FontFamily, FontManager},
     pdf_writer::{GlyphLookup, PdfWriter},
     resource_cache::ResourceCache,
-    text_layout::LayoutFonts,
+    rich_text::RichText,
+    text_layout::{LayoutFonts, TextLayout},
 };
 
 pub async fn load_fonts(
     resource_cache: &mut ResourceCache,
     font_families: &[FontFamilyInfo],
 ) -> Result<FontManager, BadPdfLayout> {
-    // let font_manager = FontManager::new();
-
     let mut families = HashMap::new();
 
     for font_family_info in font_families {
@@ -41,7 +41,11 @@ pub async fn load_fonts(
 }
 
 impl GlyphLookup for Rc<LayoutFonts> {
-    fn get_glyph_ids(&self, line: &str, font_lookup: &crate::fonts::FontLookup) -> Result<Vec<u16>, BadPdfLayout> {
+    fn get_glyph_ids(
+        &self,
+        line: &str,
+        font_lookup: &crate::fonts::FontLookup,
+    ) -> Result<Vec<u16>, BadPdfLayout> {
         LayoutFonts::get_glyph_ids(self, line, font_lookup)
     }
 }
@@ -55,27 +59,52 @@ pub async fn assemble_pdf(pdf_layout: &PdfDom) -> Result<(), BadPdfLayout> {
     let font_manager = load_fonts(&mut resource_cache, &pdf_layout.fonts).await?;
     let layout_fonts = Rc::new(LayoutFonts::with_font_manager(&font_manager));
 
-    let pdf_writer = Rc::new(RefCell::new(PdfWriter::new(&font_manager, layout_fonts)));
+    let pdf_writer = Rc::new(RefCell::new(PdfWriter::new(
+        &font_manager,
+        layout_fonts.clone(),
+    )));
+    let text_layout = Rc::new(TextLayout::new(layout_fonts));
 
     let shared_pdf_writer = pdf_writer.clone();
     // We have to use move here twice so each closure gets ownership of the Rc and can
     // manage its lifetime
-    let text_compute: TextComputeFn = Box::new(move |text_node: &TextNode| {
-        let text_node = text_node.clone();
+    let text_compute: TextComputeFn = Box::new(
+        move |text_node: &TextNode, current_style: crate::dom::Style| {
+            let text_node = text_node.clone();
 
-        // There may be a better way to do this
-        let pdf_writer = { Rc::clone(&shared_pdf_writer) };
-        MeasureFunc::Boxed(Box::new(move |_sz| {
-            // TODO: Replace with real text size calculation
-            //
-            pdf_writer.borrow_mut().add_page();
+            // There may be a better way to do this
+            let text_layout = text_layout.clone();
+            MeasureFunc::Boxed(Box::new(move |sz| {
+                if let Number::Undefined = sz.width {
+                    return Size {
+                        width: 0.,
+                        height: 0.,
+                    };
+                }
 
-            Size {
-                width: 32.,
-                height: 32.,
-            }
-        }))
-    });
+                let text_layout = text_layout.clone();
+                let current_style = current_style.clone();
+
+                let full_text = text_node.raw_text();
+                let rich_text = RichText::new(&full_text, current_style.try_into().unwrap());
+
+                let width = if let Number::Defined(width) = sz.width {
+                    width
+                } else {
+                    unreachable!();
+                };
+
+                // TODO: Cache paragraph metrics for drawing to the pdf
+                let paragraph_metrics =
+                    text_layout.compute_paragraph_layout(&rich_text, Pt(width as f64));
+
+                Size {
+                    width: width,
+                    height: paragraph_metrics.height.0 as f32,
+                }
+            }))
+        },
+    );
 
     pdf_writer.borrow_mut().add_page();
 
@@ -87,7 +116,12 @@ pub async fn assemble_pdf(pdf_layout: &PdfDom) -> Result<(), BadPdfLayout> {
         })
     });
 
-    let layout = BlockLayout::build_layout(pdf_layout, text_compute, image_compute)?;
+    let layout = BlockLayout::build_layout(
+        pdf_layout,
+        text_compute,
+        image_compute,
+        crate::page_sizes::LETTER,
+    )?;
 
     for node in layout.draw_order() {
         let style = layout.get_style(node);

@@ -5,6 +5,8 @@ use printpdf::Pt;
 use num_derive::FromPrimitive;
 use serde::Deserialize;
 
+use crate::{dom::Style, error::BadPdfLayout};
+
 #[derive(Hash, Eq, PartialEq, Debug, Clone, Copy, FromPrimitive, Deserialize)]
 pub enum FontStyle {
     Normal,
@@ -97,6 +99,22 @@ pub struct RichTextStyle {
     pub weight: FontWeight,
     pub style: FontStyle,
     pub color: (f32, f32, f32),
+}
+
+impl TryFrom<Style> for RichTextStyle {
+    type Error = BadPdfLayout;
+
+    fn try_from(s: Style) -> Result<Self, Self::Error> {
+        let color = color_processing::Color::new_string(s.color)?.get_rgba();
+
+        Ok(Self {
+            font_family: s.font.family,
+            font_size: Pt(s.font.size as f64),
+            weight: s.font.weight,
+            style: s.font.style,
+            color: (color.0 as f32, color.1 as f32, color.2 as f32),
+        })
+    }
 }
 
 #[derive(Debug, Clone)]

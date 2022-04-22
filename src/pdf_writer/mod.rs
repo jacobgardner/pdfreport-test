@@ -254,7 +254,6 @@ impl<'a, T: GlyphLookup> PageWriter<'a, T> {
         Ok(())
     }
 
-    // TODO: Decouple this from Skia's structures
     pub fn write_lines(
         &self,
         start: Point,

@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 use printpdf::Pt;
 use skia_safe::{
     font_style::{Slant, Weight, Width},
@@ -21,6 +23,12 @@ use crate::{
 pub struct LayoutFonts {
     font_collection: FontCollection,
     font_manager: FontMgr,
+}
+
+impl HasFontCollection for Rc<LayoutFonts> {
+    fn font_collection(&self) -> &skia_safe::textlayout::FontCollection {
+        &self.font_collection
+    }
 }
 
 impl LayoutFonts {
@@ -66,7 +74,11 @@ impl LayoutFonts {
 }
 
 impl GlyphLookup for LayoutFonts {
-    fn get_glyph_ids(&self, line: &str, font_lookup: &FontLookup) -> Result<Vec<u16>, BadPdfLayout> {
+    fn get_glyph_ids(
+        &self,
+        line: &str,
+        font_lookup: &FontLookup,
+    ) -> Result<Vec<u16>, BadPdfLayout> {
         let typeface = self.typeface_by_font_style(font_lookup)?;
 
         let mut glyph_ids = vec![0; line.len()];
@@ -77,13 +89,17 @@ impl GlyphLookup for LayoutFonts {
 }
 
 #[derive(Debug)]
-pub struct TextLayout<'a> {
-    layout_fonts: &'a LayoutFonts,
+pub struct TextLayout<T: HasFontCollection> {
+    layout_fonts: T,
 }
 
-impl<'a> TextLayout<'a> {
+pub trait HasFontCollection: std::fmt::Debug {
+    fn font_collection(&self) -> &FontCollection;
+}
+
+impl<T: HasFontCollection> TextLayout<T> {
     #[instrument(name = "Initialize text layout engine")]
-    pub fn new(layout_fonts: &'a LayoutFonts) -> Self {
+    pub fn new(layout_fonts: T) -> Self {
         Self { layout_fonts }
     }
 
@@ -102,13 +118,16 @@ impl<'a> TextLayout<'a> {
             },
         ));
         default_style.set_font_size(rich_text.default_style.font_size.0 as f32);
+        // TODO: Throw an error if font does not exist
         default_style.set_font_families(&[&rich_text.default_style.font_family]);
 
         paragraph_style.set_text_style(&default_style);
         paragraph_style.set_text_align(TextAlign::Center);
 
-        let mut paragraph_builder =
-            ParagraphBuilder::new(&paragraph_style, self.layout_fonts.font_collection.clone());
+        let mut paragraph_builder = ParagraphBuilder::new(
+            &paragraph_style,
+            self.layout_fonts.font_collection().clone(),
+        );
 
         for (range, style) in rich_text.style_range_iter() {
             let mut ts = default_style.clone();
@@ -165,9 +184,6 @@ use crate::rich_text::FontWeight;
 
 impl From<FontWeight> for Weight {
     fn from(weight: FontWeight) -> Self {
-        // TODO: FIXME
-        // There's an easier way to do this, but I didn't feel like looking it
-        // up right now.
         match weight {
             FontWeight::Thin => Weight::THIN,
             FontWeight::ExtraLight => Weight::EXTRA_LIGHT,

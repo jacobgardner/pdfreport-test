@@ -3,8 +3,8 @@ use printpdf::{Color, Point, Pt, Rgb, Svg, SvgTransform, TextMatrix};
 use crate::{
     error::BadPdfLayout,
     fonts::FontLookup,
-    line_metric::LineMetric,
     rich_text::{FontStyle, FontWeight, RichText, RichTextStyle},
+    text_layout::{HasFontCollection, TextLayout},
     units::unit_to_pt,
 };
 
@@ -24,10 +24,11 @@ const SUPPORTED_TEXT_ATTRIBUTES: [&str; 10] = [
 ];
 
 impl<'a, T: GlyphLookup> PageWriter<'a, T> {
-    pub fn draw_svg(
+    pub fn draw_svg<F: HasFontCollection>(
         &self,
         start: Point,
         svg_text: &str,
+        layout: &TextLayout<F>,
     ) -> Result<&Self, Box<dyn std::error::Error>> {
         // let string_to_path_svg = tree.to_string(&usvg::XmlOptions::default());
         // let text_node = tree.node_by_id("text");
@@ -80,6 +81,7 @@ impl<'a, T: GlyphLookup> PageWriter<'a, T> {
             let weight = FontWeight::from(node.attribute("font-weight").unwrap_or("regular"));
             let font_style = FontStyle::from(node.attribute("font-style").unwrap_or("normal"));
             let font_size = unit_to_pt(node.attribute("font-size").unwrap_or("12"))?;
+            // TODO: Don't unwrap
             let fill =
                 color_processing::Color::new_string(node.attribute("fill").unwrap_or("#000000"))
                     .unwrap()
@@ -90,14 +92,6 @@ impl<'a, T: GlyphLookup> PageWriter<'a, T> {
 
             let found_font = self.find_best_font_from_stack(font_stack)?;
 
-            // We want to find a font in the stack that matches up to a loaded skia/pdf typeface.
-            //   If we don't find one, default to the first typeface, probably?
-
-            // Once we have the correct typeface found, we should be able to use Skia to get the line_metrics
-            //  for the string and compute what we need to compute for center/end alignment and vertical alignment
-            // TODO: This^^
-
-            // let layout = TextLayout::with_font_manager();
             if !node.children().all(|n| n.is_text()) {
                 panic!("For <text>, we only support all text child nodes for now");
             }
@@ -114,22 +108,10 @@ impl<'a, T: GlyphLookup> PageWriter<'a, T> {
                 },
             );
 
-            // TODO: FIXME!!!!!
-            // let paragraph = layout.compute_paragraph_layout(&rich, Pt(1000.0));
+            let paragraph = layout.compute_paragraph_layout(&rich, Pt(1000.0));
+            assert_eq!(paragraph.line_metrics.len(), 1);
 
-            // assert_eq!(paragraph.line_metrics.len(), 1);
-
-            // let line_metric = paragraph.line_metrics.first().unwrap();
-            let line_metric = LineMetric {
-                start_index: 0,
-                end_index: 10,
-                ascent: Pt(0.),
-                descent: Pt(1.),
-                baseline: Pt(2.),
-                height: Pt(3.),
-                width: Pt(4.),
-                left: Pt(5.),
-            };
+            let line_metric = paragraph.line_metrics.first().unwrap();
 
             let x_offset = match anchor.to_lowercase().as_str() {
                 "start" => Pt(0.0),
