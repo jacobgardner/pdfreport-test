@@ -2,3 +2,4 @@
 output.pdf
 trace-*.json
 .vscode
+cache

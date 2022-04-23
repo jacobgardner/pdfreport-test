@@ -44,12 +44,8 @@ fn example_layout() -> PdfDom {
                 .name("style")
                 .map(|m| m.as_str())
                 .unwrap_or("Normal");
-    
-            let weight = if weight == "" {
-                "Regular"
-            } else {
-                weight
-            };
+
+            let weight = if weight == "" { "Regular" } else { weight };
 
             format!(
                 r#"

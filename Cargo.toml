@@ -39,6 +39,7 @@ lru = "*"
 bytes = "*"
 futures = "*"
 tokio = { version = "1.17.0", features = ["full"] }
+chrono = { version = "*", features = ["serde"] }
 
 # Optional Dependencies
 tracing-chrome = { version = "*", optional = true }

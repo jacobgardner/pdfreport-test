@@ -16,6 +16,7 @@ use crate::{
     text_layout::{LayoutFonts, TextLayout},
 };
 
+// TODO: Parallelize
 pub async fn load_fonts(
     resource_cache: &mut ResourceCache,
     font_families: &[FontFamilyInfo],
