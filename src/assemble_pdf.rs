@@ -115,7 +115,10 @@ pub async fn assemble_pdf(pdf_layout: &PdfDom) -> Result<(), BadPdfLayout> {
             let rich_text = RichText::new(&full_text, converted_style);
 
             for TextNodeIterItem(range, style) in text_node.iter_rich_text(&current_style, &styles) {
+                // TODO: Implement me please :'(
+                // rich_text.push_style(style.into(), range);
                 println!("- {range:?}: {style:?}");
+                unimplemented!();
             }
 
             let width = if let Number::Defined(width) = sz.width {
