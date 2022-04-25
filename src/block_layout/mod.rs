@@ -1,4 +1,8 @@
-use std::collections::{BTreeSet, HashMap};
+use std::{
+    cell::RefCell,
+    collections::{BTreeSet, HashMap},
+    rc::Rc,
+};
 
 use printpdf::Pt;
 use stretch::node::MeasureFunc;
@@ -15,7 +19,7 @@ use crate::{
 
 mod flex_style;
 
-pub type TextComputeFn<'a> = Box<dyn Fn(&'a TextNode, Style) -> MeasureFunc>;
+pub type TextComputeFn<'a> = Box<dyn Fn(Node, &'a TextNode, Rc<Style>) -> MeasureFunc + 'a>;
 pub type ImageComputeFn<'a> = Box<dyn Fn(&'a ImageNode) -> MeasureFunc>;
 
 #[derive(Clone, Debug)]
@@ -76,8 +80,9 @@ pub struct BlockLayout<'a> {
     text_node_compute: TextComputeFn<'a>,
     image_node_compute: ImageComputeFn<'a>,
     layout_node_map: HashMap<Node, &'a DomNode>,
-    layout_style_map: HashMap<Node, Style>,
+    layout_style_map: Rc<RefCell<HashMap<Node, Rc<Style>>>>,
     node_draw_order: BTreeSet<DrawOrder>,
+    styles: Rc<HashMap<String, MergeableStyle>>,
 }
 
 impl<'a> BlockLayout<'a> {
@@ -93,8 +98,9 @@ impl<'a> BlockLayout<'a> {
             text_node_compute: text_compute,
             image_node_compute: image_compute,
             layout_node_map: HashMap::new(),
-            layout_style_map: HashMap::new(),
+            layout_style_map: Rc::new(RefCell::new(HashMap::new())),
             node_draw_order: BTreeSet::new(),
+            styles: Rc::new(pdf_dom.styles.clone()),
         };
 
         let current_style = Style::default();
@@ -121,7 +127,7 @@ impl<'a> BlockLayout<'a> {
 
         let root_node = &pdf_dom.root;
 
-        layout.build_layout_nodes(0, current_style, root_layout_node, root_node)?;
+        layout.build_layout_nodes(0, Rc::new(current_style), root_layout_node, root_node)?;
 
         println!("Compute Layout...");
         layout.stretch.compute_layout(root_layout_node, page_size)?;
@@ -140,15 +146,17 @@ impl<'a> BlockLayout<'a> {
         Ok(layout)
     }
 
-    fn styles(&self) -> &HashMap<String, MergeableStyle> {
-        &self.pdf_dom.styles
+    fn styles(&self) -> Rc<HashMap<String, MergeableStyle>> {
+        self.styles.clone()
     }
 
     // There may be a way to ensure that the node passed in came from
     //  this structure to make the expect even safer
-    pub fn get_style(&self, node: Node) -> &Style {
+    pub fn get_style(&self, node: Node) -> Rc<Style> {
         self.layout_style_map
+            .borrow()
             .get(&node)
+            .cloned()
             .expect("The provided node should have come from this layout")
     }
 
@@ -171,42 +179,55 @@ impl<'a> BlockLayout<'a> {
     fn build_layout_nodes(
         &mut self,
         depth: usize,
-        mut current_style: Style,
+        mut current_style: Rc<Style>,
         parent_layout_node: stretch::node::Node,
         current_pdf_node: &'a DomNode,
     ) -> Result<(), BadPdfLayout> {
+        let styles = self.styles.clone();
+
         for style_name in current_pdf_node.styles() {
             let mergeable_style =
-                self.styles()
+                styles
                     .get(style_name)
                     .ok_or_else(|| BadPdfLayout::UnmatchedStyle {
                         style_name: style_name.clone(),
                     })?;
 
-            current_style = current_style.merge_style(mergeable_style);
+            current_style = Rc::new(current_style.merge_style(mergeable_style));
         }
 
         let child_node = match current_pdf_node {
             DomNode::Styled(_styled_node) => self
                 .stretch
-                .new_node(current_style.clone().try_into()?, &[])?,
+                .new_node((*current_style).clone().try_into()?, &[])?,
             DomNode::Text(text_node) => {
+                let child = self
+                    .stretch
+                    .new_node((*current_style).clone().try_into()?, &[])?;
+
                 // We would want to pass in a function called something like:
                 //  compute_text_size which takes in the dom node, current style,
                 //  etc. and returns the desired closure, if we can
-                self.stretch.new_leaf(
-                    current_style.clone().try_into()?,
-                    (self.text_node_compute)(text_node, current_style.clone()),
-                )?
+                self.stretch.set_measure(
+                    child,
+                    Some((self.text_node_compute)(
+                        child,
+                        text_node,
+                        current_style.clone(),
+                    )),
+                )?;
+
+                child
             }
             DomNode::Image(image_node) => self.stretch.new_leaf(
-                current_style.clone().try_into()?,
+                (*current_style).clone().try_into()?,
                 (self.image_node_compute)(image_node),
             )?,
         };
 
         assert!(
             self.layout_style_map
+                .borrow_mut()
                 .insert(child_node, current_style.clone())
                 .is_none(),
             "Layout engine should guarantee all nodes are unique"

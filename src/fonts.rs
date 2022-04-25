@@ -20,7 +20,7 @@ pub struct FontData {
 
 impl FontData {
     pub async fn from_font_info(
-        resource_cache: &mut ResourceCache,
+        resource_cache: &ResourceCache,
         font_info: &FontInfo,
     ) -> Result<Self, BadPdfLayout> {
         let font_bytes = resource_cache.get(&font_info.source).await?;

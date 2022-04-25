@@ -3,7 +3,7 @@ use printpdf::{Mm, Pt};
 use regex::Regex;
 use thiserror::Error;
 
-#[derive(Error, Debug)]
+#[derive(Clone, Error, Debug)]
 pub enum MeasurementParseError {
     #[error(
         "Malformed source string, \"{source_str}\", expected a number or a number followed by an optional unit or percentage."

@@ -1,3 +1,4 @@
+use std::cell::RefCell;
 use std::path::PathBuf;
 use std::{collections::HashMap, rc::Rc};
 
@@ -13,12 +14,12 @@ use crate::error::BadPdfLayout;
 const MAX_RESOURCE_COUNT: usize = 100;
 
 pub struct ResourceCache {
-    cache: LruCache<String, Rc<Bytes>>,
+    cache: RefCell<LruCache<String, Rc<Bytes>>>,
     client: Client,
-    storage_cache: StorageCache,
+    storage_cache: RefCell<StorageCache>,
 }
 
-#[derive(Deserialize, Serialize)]
+#[derive(Clone, Deserialize, Serialize)]
 struct FileInfo {
     #[serde(with = "ts_seconds")]
     timestamp: DateTime<Utc>,
@@ -55,37 +56,43 @@ impl StorageCache {
 impl ResourceCache {
     pub fn new() -> Self {
         Self {
-            cache: LruCache::new(MAX_RESOURCE_COUNT),
+            cache: RefCell::new(LruCache::new(MAX_RESOURCE_COUNT)),
             client: Client::new(),
-            storage_cache: StorageCache::with_cache_index("./cache/cache-index.json"),
+            storage_cache: RefCell::new(StorageCache::with_cache_index("./cache/cache-index.json")),
         }
     }
 
     // This assumes that the resource at the URL never changes
     //   We may want to have an ETAG comparison
-    pub async fn get(&mut self, url: &str) -> Result<Rc<Bytes>, BadPdfLayout> {
+    pub async fn get(&self, url: &str) -> Result<Rc<Bytes>, BadPdfLayout> {
+        // let cache = self.cache.borrow();
+        // let storage_cache = self.storage_cache.borrow();
+
         // We have to do this since NLL are not yet implemented in Rust yet
-        if self.cache.contains(url) {
-            let resource = self.cache.get(url);
+        if self.cache.borrow().contains(url) {
+            let mut cache = self.cache.borrow_mut();
+            let resource = cache.get(url);
             Ok(resource.unwrap().clone())
         } else {
             let mut request_builder = self.client.get(url);
 
-            let cached_file = self.storage_cache.files.get(url);
+            let cached_file = self.storage_cache.borrow().files.get(url).cloned();
 
-            if let Some(cached_file) = cached_file {
+            if let Some(cached_file) = &cached_file {
                 request_builder = request_builder.header("If-None-Match", &cached_file.etag);
             }
 
+            // We have to make sure no borrowing crosses this boundary
             let response = request_builder.send().await?;
 
             if response.status() == StatusCode::NOT_MODIFIED {
                 let mut cached_path = PathBuf::from("./cache");
-                cached_path.push(cached_file.unwrap().cache_location.clone());
+                cached_path.push(cached_file.unwrap().cache_location);
 
                 let resource = Rc::new(Bytes::from(std::fs::read(cached_path).unwrap()));
 
-                self.cache.put(String::from(url), resource.clone());
+                let mut cache = self.cache.borrow_mut();
+                cache.put(String::from(url), resource.clone());
 
                 Ok(resource)
             } else {
@@ -104,14 +111,16 @@ impl ResourceCache {
 
                     std::fs::write(path, resource.as_ref()).unwrap();
 
-                    self.storage_cache.files.insert(url.to_owned(), info);
+                    let mut storage_cache = self.storage_cache.borrow_mut();
+                    storage_cache.files.insert(url.to_owned(), info);
 
                     let cache_json = serde_json::to_string(&self.storage_cache).unwrap();
 
                     std::fs::write("./cache/cache-index.json", cache_json).unwrap();
                 }
 
-                self.cache.put(String::from(url), resource.clone());
+                let mut cache = self.cache.borrow_mut();
+                cache.put(String::from(url), resource.clone());
 
                 Ok(resource)
             }

@@ -45,7 +45,7 @@ fn example_layout() -> PdfDom {
                 .map(|m| m.as_str())
                 .unwrap_or("Normal");
 
-            let weight = if weight == "" { "Regular" } else { weight };
+            let weight = if weight.is_empty() { "Regular" } else { weight };
 
             format!(
                 r#"
@@ -143,8 +143,6 @@ async fn main() {
     let _layout_span = span!(Level::DEBUG, "Layout & Building PDF").entered();
 
     let pdf_layout = example_layout();
-
-    println!("Layout: {pdf_layout:?}");
 
     assemble_pdf::assemble_pdf(&pdf_layout).await.unwrap();
 
