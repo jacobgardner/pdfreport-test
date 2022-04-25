@@ -35,7 +35,7 @@ impl<T: Merges + Clone> Merges for Option<T> {
 
 primitive_merge!(f32, String, Direction, FlexWrap, FlexAlign, FontStyle, FontWeight);
 
-trait Merges: Sized + Clone {
+pub trait Merges: Sized + Clone {
     fn merge(&self, rhs: &Self) -> Self;
 
     fn merge_optional(&self, rhs: &Option<Self>) -> Option<Self> {

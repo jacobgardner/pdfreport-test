@@ -1,5 +1,6 @@
 use std::{collections::HashMap, ops::Range, slice::Iter};
 
+use crate::dom::style::Merges;
 use crate::dom::MergeableStyle;
 use itertools::Itertools;
 use serde::Deserialize;
@@ -41,7 +42,7 @@ pub struct TextNodeIterator<'a> {
     root_style: &'a Style,
     style_map: &'a HashMap<String, MergeableStyle>,
     iter_stack: Vec<Iter<'a, TextChild>>,
-    style_stack: Vec<Style>,
+    style_stack: Vec<MergeableStyle>,
     start_index_stack: Vec<usize>,
 }
 
@@ -66,22 +67,19 @@ impl TextNode {
             root_style: current_style,
             style_map: styles,
             iter_stack: Vec::new(),
-            style_stack: vec![current_style.clone()],
+            style_stack: vec![MergeableStyle::default()],
             start_index_stack: vec![0],
         }
     }
 }
 
 #[derive(PartialEq)]
-pub struct TextNodeIterItem(pub Range<usize>, pub Style);
+pub struct TextNodeIterItem(pub Range<usize>, pub MergeableStyle);
 
 use core::fmt::Debug;
 impl Debug for TextNodeIterItem {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_tuple("R")
-            .field(&self.0)
-            .field(&self.1)
-            .finish()
+        f.debug_tuple("R").field(&self.0).field(&self.1).finish()
     }
 }
 
@@ -97,7 +95,7 @@ impl<'a> Iterator for TextNodeIterator<'a> {
             // The root_style has already had its merged style calculated
             return Some(TextNodeIterItem(
                 self.root_node.text_range(0),
-                self.root_style.clone(),
+                MergeableStyle::default(),
             ));
         }
 
@@ -123,10 +121,11 @@ impl<'a> Iterator for TextNodeIterator<'a> {
                         for style_name in node.styles.iter() {
                             // FIXME: Don't unwrap, return error
                             let merging_style = self.style_map.get(style_name).unwrap();
-                            current_style = current_style.merge_style(merging_style) 
+                            current_style = current_style.merge(merging_style);
                         }
 
-                        self.start_index_stack.push(*self.start_index_stack.last().unwrap());
+                        self.start_index_stack
+                            .push(*self.start_index_stack.last().unwrap());
                         self.iter_stack.push(node.children.iter());
                         self.style_stack.push(current_style.clone());
 
@@ -140,7 +139,7 @@ impl<'a> Iterator for TextNodeIterator<'a> {
                 self.iter_stack.pop();
                 let final_index = self.start_index_stack.pop().unwrap();
                 if let Some(index) = self.start_index_stack.last_mut() {
-                    *index = final_index; 
+                    *index = final_index;
                 }
                 self.style_stack.pop();
             }
@@ -258,26 +257,38 @@ mod tests {
             width: "15px".to_owned(),
             ..Style::default()
         };
-        let style = root_style.clone(); 
+        let style = root_style.clone();
 
         let styles = HashMap::from([
-            ("s1".to_owned(), MergeableStyle {
-                width: Some("15px".to_owned()),
-                ..MergeableStyle::default()
-            }),
-            ("s2".to_owned(), MergeableStyle {
-                height: Some("30px".to_owned()),
-                ..MergeableStyle::default()
-            }),
-            ("s3".to_owned(), MergeableStyle {
-                width: Some("45px".to_owned()),
-                ..MergeableStyle::default()
-            }),
-            ("s4".to_owned(), MergeableStyle {
-                height: Some("50px".to_owned()),
-                ..MergeableStyle::default()
-            }),
-        ]); 
+            (
+                "s1".to_owned(),
+                MergeableStyle {
+                    width: Some("15px".to_owned()),
+                    ..MergeableStyle::default()
+                },
+            ),
+            (
+                "s2".to_owned(),
+                MergeableStyle {
+                    height: Some("30px".to_owned()),
+                    ..MergeableStyle::default()
+                },
+            ),
+            (
+                "s3".to_owned(),
+                MergeableStyle {
+                    width: Some("45px".to_owned()),
+                    ..MergeableStyle::default()
+                },
+            ),
+            (
+                "s4".to_owned(),
+                MergeableStyle {
+                    height: Some("50px".to_owned()),
+                    ..MergeableStyle::default()
+                },
+            ),
+        ]);
 
         let node = TextNode {
             styles: vec![],
@@ -286,7 +297,7 @@ mod tests {
 
         assert_eq!(
             &node.iter_rich_text(&style, &styles).collect::<Vec<_>>(),
-            &[TextNodeIterItem(0..0, root_style.clone())]
+            &[TextNodeIterItem(0..0, MergeableStyle::default())]
         );
 
         let node = TextNode {
@@ -298,8 +309,8 @@ mod tests {
         assert_eq!(
             &node.iter_rich_text(&style, &styles).collect::<Vec<_>>(),
             &[
-                TextNodeIterItem(0..5, root_style.clone()),
-                TextNodeIterItem(0..5, root_style.clone())
+                TextNodeIterItem(0..5, MergeableStyle::default()),
+                TextNodeIterItem(0..5, MergeableStyle::default())
             ]
         );
 
@@ -318,13 +329,13 @@ mod tests {
         assert_eq!(
             &node.iter_rich_text(&style, &styles).collect::<Vec<_>>(),
             &[
-                TextNodeIterItem(0..30, root_style.clone()),
-                TextNodeIterItem(0..5, root_style.clone()),
-                TextNodeIterItem(5..10, root_style.clone()),
-                TextNodeIterItem(10..15, root_style.clone()),
-                TextNodeIterItem(15..20, root_style.clone()),
-                TextNodeIterItem(20..25, root_style.clone()),
-                TextNodeIterItem(25..30, root_style.clone()),
+                TextNodeIterItem(0..30, MergeableStyle::default()),
+                TextNodeIterItem(0..5, MergeableStyle::default()),
+                TextNodeIterItem(5..10, MergeableStyle::default()),
+                TextNodeIterItem(10..15, MergeableStyle::default()),
+                TextNodeIterItem(15..20, MergeableStyle::default()),
+                TextNodeIterItem(20..25, MergeableStyle::default()),
+                TextNodeIterItem(25..30, MergeableStyle::default()),
             ]
         );
 
@@ -352,63 +363,95 @@ mod tests {
                 TextChild::Content(String::from("abcde")),
             ],
         };
-        
+
         let items = node.iter_rich_text(&style, &styles).collect::<Vec<_>>();
-        
-        assert_eq!(items[0], TextNodeIterItem(0..30, Style {
-            width: "15px".to_owned(),
-            ..Style::default()
-        }));
 
-        assert_eq!(items[1], TextNodeIterItem(0..5, Style {
-            width: "15px".to_owned(),
-            ..Style::default()
-        }));
+        assert_eq!(items[0], TextNodeIterItem(0..30, MergeableStyle::default()));
 
-        assert_eq!(items[2], TextNodeIterItem(5..15, Style {
-            width: "15px".to_owned(),
-            height: "30px".to_owned(),
-            ..Style::default()
-        }));
+        assert_eq!(items[1], TextNodeIterItem(0..5, MergeableStyle::default()));
 
-        assert_eq!(items[3], TextNodeIterItem(5..10, Style {
-            width: "15px".to_owned(),
-            height: "30px".to_owned(),
-            ..Style::default()
-        }));
+        assert_eq!(
+            items[2],
+            TextNodeIterItem(
+                5..15,
+                MergeableStyle {
+                    height: Some("30px".to_owned()),
+                    ..MergeableStyle::default()
+                }
+            )
+        );
 
-        assert_eq!(items[4], TextNodeIterItem(10..15, Style {
-            width: "15px".to_owned(),
-            height: "30px".to_owned(),
-            ..Style::default()
-        }));
+        assert_eq!(
+            items[3],
+            TextNodeIterItem(
+                5..10,
+                MergeableStyle {
+                    height: Some("30px".to_owned()),
+                    ..MergeableStyle::default()
+                }
+            )
+        );
 
-        assert_eq!(items[5], TextNodeIterItem(15..25, Style {
-            width: "45px".to_owned(),
-            ..Style::default()
-        }));
+        assert_eq!(
+            items[4],
+            TextNodeIterItem(
+                10..15,
+                MergeableStyle {
+                    height: Some("30px".to_owned()),
+                    ..MergeableStyle::default()
+                }
+            )
+        );
 
-        assert_eq!(items[6], TextNodeIterItem(15..20, Style {
-            width: "45px".to_owned(),
-            height: "50px".to_owned(),
-            ..Style::default()
-        }));
+        assert_eq!(
+            items[5],
+            TextNodeIterItem(
+                15..25,
+                MergeableStyle {
+                    width: Some("45px".to_owned()),
+                    ..MergeableStyle::default()
+                }
+            )
+        );
 
-        assert_eq!(items[7], TextNodeIterItem(15..20, Style {
-            width: "45px".to_owned(),
-            height: "50px".to_owned(),
-            ..Style::default()
-        }));
+        assert_eq!(
+            items[6],
+            TextNodeIterItem(
+                15..20,
+                MergeableStyle {
+                    width: Some("45px".to_owned()),
+                    height: Some("50px".to_owned()),
+                    ..MergeableStyle::default()
+                }
+            )
+        );
 
+        assert_eq!(
+            items[7],
+            TextNodeIterItem(
+                15..20,
+                MergeableStyle {
+                    width: Some("45px".to_owned()),
+                    height: Some("50px".to_owned()),
+                    ..MergeableStyle::default()
+                }
+            )
+        );
 
-        assert_eq!(items[8], TextNodeIterItem(20..25, Style {
-            width: "45px".to_owned(),
-            ..Style::default()
-        }));
+        assert_eq!(
+            items[8],
+            TextNodeIterItem(
+                20..25,
+                MergeableStyle {
+                    width: Some("45px".to_owned()),
+                    ..MergeableStyle::default()
+                }
+            )
+        );
 
-        assert_eq!(items[9], TextNodeIterItem(25..30, Style {
-            width: "15px".to_owned(),
-            ..Style::default()
-        }));
+        assert_eq!(
+            items[9],
+            TextNodeIterItem(25..30, MergeableStyle::default())
+        );
     }
 }
