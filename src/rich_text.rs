@@ -65,32 +65,32 @@ impl Default for FontWeight {
     }
 }
 
-#[derive(Debug, Default, Clone)]
-pub struct RichTextStyleChanges {
-    pub font_family: Option<String>,
-    pub font_size: Option<Pt>,
-    pub weight: Option<FontWeight>,
-    pub style: Option<FontStyle>,
-    pub color: Option<(f32, f32, f32)>,
-}
+// #[derive(Debug, Default, Clone)]
+// pub struct RichTextStyleChanges {
+//     pub font_family: Option<String>,
+//     pub font_size: Option<Pt>,
+//     pub weight: Option<FontWeight>,
+//     pub style: Option<FontStyle>,
+//     pub color: Option<(f32, f32, f32)>,
+// }
 
-impl RichTextStyleChanges {
-    #[allow(dead_code)]
-    pub fn font_size(size: Pt) -> Self {
-        Self {
-            font_size: Some(size),
-            ..Default::default()
-        }
-    }
+// impl RichTextStyleChanges {
+//     #[allow(dead_code)]
+//     pub fn font_size(size: Pt) -> Self {
+//         Self {
+//             font_size: Some(size),
+//             ..Default::default()
+//         }
+//     }
 
-    #[allow(dead_code)]
-    pub fn color(color: (f32, f32, f32)) -> Self {
-        Self {
-            color: Some(color),
-            ..Default::default()
-        }
-    }
-}
+//     #[allow(dead_code)]
+//     pub fn color(color: (f32, f32, f32)) -> Self {
+//         Self {
+//             color: Some(color),
+//             ..Default::default()
+//         }
+//     }
+// }
 
 #[derive(Debug, Default, Clone)]
 pub struct RichTextStyle {
@@ -117,25 +117,27 @@ impl TryFrom<Style> for RichTextStyle {
     }
 }
 
+use crate::dom::MergeableStyle;
+
 #[derive(Debug, Clone)]
-pub struct RichText<'a> {
+pub struct RichText {
     prev_start: usize,
-    pub(crate) paragraph: &'a str,
+    pub(crate) paragraph: String,
     pub(crate) default_style: RichTextStyle,
-    pub(crate) style_ranges: Vec<(Range<usize>, RichTextStyleChanges)>,
+    pub(crate) style_ranges: Vec<(Range<usize>, MergeableStyle)>,
 }
 
-impl<'a> RichText<'a> {
-    pub fn new(paragraph: &'a str, default_style: RichTextStyle) -> Self {
+impl RichText {
+    pub fn new(paragraph: &str, default_style: RichTextStyle) -> Self {
         Self {
             prev_start: 0,
-            paragraph,
+            paragraph: paragraph.to_owned(),
             default_style,
             style_ranges: Vec::new(),
         }
     }
 
-    pub fn push_style(&mut self, style: RichTextStyleChanges, range: Range<usize>) -> &mut Self {
+    pub fn push_style(&mut self, style: MergeableStyle, range: Range<usize>) -> &mut Self {
         assert!(
             range.start >= self.prev_start,
             "Expected styles to be presented in monotonically increasing order"
@@ -148,13 +150,13 @@ impl<'a> RichText<'a> {
         self
     }
 
-    pub fn style_range_iter(&'a self) -> StyleIterator<'a> {
+    pub fn style_range_iter<'a>(&'a self) -> StyleIterator<'a> {
         StyleIterator::new(self)
     }
 }
 
 pub struct StyleIterator<'a> {
-    rich_text: &'a RichText<'a>,
+    rich_text: &'a RichText,
     style_stack: Vec<RichTextStyle>,
     range_stack: Vec<Range<usize>>,
     current_position: usize,
@@ -162,7 +164,7 @@ pub struct StyleIterator<'a> {
 }
 
 impl<'a> StyleIterator<'a> {
-    fn new(rich_text: &'a RichText<'a>) -> Self {
+    fn new(rich_text: &'a RichText) -> Self {
         Self {
             rich_text,
             style_stack: vec![rich_text.default_style.clone()],
@@ -217,20 +219,21 @@ impl<'a> Iterator for StyleIterator<'a> {
             let mut next_style = current_style;
             // We could probably create a macros or something to merge this so
             // we don't have to keep this up to date
-            if let Some(font_size) = style.font_size {
-                next_style.font_size = font_size;
+            if let Some(font_size) = style.font.as_ref().map(|f| f.size).flatten() {
+                next_style.font_size = Pt(font_size as f64);
             }
 
-            if let Some(weight) = style.weight {
+            if let Some(weight) = style.font.as_ref().map(|f| f.weight).flatten() {
                 next_style.weight = weight;
             }
 
-            if let Some(font_style) = style.style {
+            if let Some(font_style) = style.font.as_ref().map(|f| f.style).flatten() {
                 next_style.style = font_style;
             }
 
-            if let Some(color) = style.color {
-                next_style.color = color;
+            if let Some(color) = style.color.as_ref() {
+                let color = color_processing::Color::new_string(color).unwrap().get_rgba();
+                next_style.color = (color.0 as f32, color.1 as f32, color.2 as f32);
             }
 
             // Create new style based on prev_style

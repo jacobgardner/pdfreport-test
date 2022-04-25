@@ -5,8 +5,6 @@ use crate::dom::MergeableStyle;
 use itertools::Itertools;
 use serde::Deserialize;
 
-use super::Style;
-
 #[derive(Deserialize, Debug, Clone)]
 #[serde(untagged)]
 pub enum TextChild {
@@ -39,7 +37,6 @@ pub struct TextNode {
 
 pub struct TextNodeIterator<'a> {
     root_node: &'a TextNode,
-    root_style: &'a Style,
     style_map: &'a HashMap<String, MergeableStyle>,
     iter_stack: Vec<Iter<'a, TextChild>>,
     style_stack: Vec<MergeableStyle>,
@@ -59,12 +56,10 @@ impl TextNode {
 
     pub fn iter_rich_text<'a>(
         &'a self,
-        current_style: &'a Style,
         styles: &'a HashMap<String, MergeableStyle>,
     ) -> TextNodeIterator<'a> {
         TextNodeIterator {
             root_node: self,
-            root_style: current_style,
             style_map: styles,
             iter_stack: Vec::new(),
             style_stack: vec![MergeableStyle::default()],
@@ -253,12 +248,6 @@ mod tests {
 
     #[test]
     fn style_iterator() {
-        let root_style = Style {
-            width: "15px".to_owned(),
-            ..Style::default()
-        };
-        let style = root_style.clone();
-
         let styles = HashMap::from([
             (
                 "s1".to_owned(),
@@ -296,7 +285,7 @@ mod tests {
         };
 
         assert_eq!(
-            &node.iter_rich_text(&style, &styles).collect::<Vec<_>>(),
+            &node.iter_rich_text(&styles).collect::<Vec<_>>(),
             &[TextNodeIterItem(0..0, MergeableStyle::default())]
         );
 
@@ -307,7 +296,7 @@ mod tests {
 
         // TODO: Add styles to tests from here down
         assert_eq!(
-            &node.iter_rich_text(&style, &styles).collect::<Vec<_>>(),
+            &node.iter_rich_text(&styles).collect::<Vec<_>>(),
             &[
                 TextNodeIterItem(0..5, MergeableStyle::default()),
                 TextNodeIterItem(0..5, MergeableStyle::default())
@@ -327,7 +316,7 @@ mod tests {
         };
 
         assert_eq!(
-            &node.iter_rich_text(&style, &styles).collect::<Vec<_>>(),
+            &node.iter_rich_text(&styles).collect::<Vec<_>>(),
             &[
                 TextNodeIterItem(0..30, MergeableStyle::default()),
                 TextNodeIterItem(0..5, MergeableStyle::default()),
@@ -364,7 +353,7 @@ mod tests {
             ],
         };
 
-        let items = node.iter_rich_text(&style, &styles).collect::<Vec<_>>();
+        let items = node.iter_rich_text(&styles).collect::<Vec<_>>();
 
         assert_eq!(items[0], TextNodeIterItem(0..30, MergeableStyle::default()));
 

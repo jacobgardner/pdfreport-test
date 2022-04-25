@@ -1,16 +1,20 @@
 use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 use futures::future::try_join_all;
-use printpdf::Pt;
+use printpdf::{Mm, Point, Pt};
+use std::ops::Deref;
+use std::ops::DerefMut;
 use stretch2 as stretch;
 
 use stretch::{node::MeasureFunc, prelude::*};
 
+use crate::dom::DomNode;
 use crate::{
     block_layout::{BlockLayout, ImageComputeFn, TextComputeFn},
-    dom::{FontFamilyInfo, PdfDom, nodes::TextNodeIterItem},
+    dom::{nodes::TextNodeIterItem, FontFamilyInfo, PdfDom},
     error::BadPdfLayout,
     fonts::{FontData, FontFamily, FontManager},
+    line_metric::ParagraphMetrics,
     pdf_writer::{GlyphLookup, PdfWriter},
     resource_cache::ResourceCache,
     rich_text::RichText,
@@ -54,12 +58,23 @@ impl GlyphLookup for Rc<LayoutFonts> {
     }
 }
 
+use crate::dom::MergeableStyle;
+
+// TODO: Better name lol
+#[derive(Debug)]
+struct RelevantThings {
+    layout_paragraph_metrics_map: HashMap<Node, ParagraphMetrics>,
+    layout_rich_text_map: HashMap<Node, RichText>,
+    text_layout: TextLayout<Rc<LayoutFonts>>,
+    measure_errors: Vec<BadPdfLayout>,
+    styles: HashMap<String, MergeableStyle>,
+}
+
 pub async fn assemble_pdf(pdf_layout: &PdfDom) -> Result<(), BadPdfLayout> {
     // Demonstration of the ability to have an item with a non-static lifetime
     //  doing stuff in a static lifetime
     //
     let resource_cache = ResourceCache::new();
-    let layout_paragraph_metrics_map = Rc::new(RefCell::new(HashMap::new()));
 
     let font_manager = load_fonts(&resource_cache, &pdf_layout.fonts).await?;
     let layout_fonts = Rc::new(LayoutFonts::with_font_manager(&font_manager));
@@ -68,13 +83,16 @@ pub async fn assemble_pdf(pdf_layout: &PdfDom) -> Result<(), BadPdfLayout> {
         &font_manager,
         layout_fonts.clone(),
     )));
-    let text_layout = Rc::new(TextLayout::new(layout_fonts));
-    let measure_errors: Rc<RefCell<Vec<BadPdfLayout>>> = Rc::new(RefCell::new(Vec::new()));
-    let closure_measure_errors = measure_errors.clone();
 
-    let _shared_pdf_writer = pdf_writer.clone();
+    let relevant_things = Rc::new(RefCell::new(RelevantThings {
+        layout_paragraph_metrics_map: HashMap::new(),
+        layout_rich_text_map: HashMap::new(),
+        text_layout: TextLayout::new(layout_fonts),
+        measure_errors: Vec::new(),
+        styles: pdf_layout.styles.clone(),
+    }));
 
-    let styles = Rc::new(pdf_layout.styles.clone());
+    let relevant_things_for_closure = relevant_things.clone();
 
     // We have to use move here twice so each closure gets ownership of the Rc and can
     // manage its lifetime
@@ -82,29 +100,37 @@ pub async fn assemble_pdf(pdf_layout: &PdfDom) -> Result<(), BadPdfLayout> {
         let text_node = text_node.clone();
 
         // There may be a better way to do this
-        let text_layout = text_layout.clone();
+        let relevant_things_for_closure = relevant_things_for_closure.clone();
 
-        let layout_paragraph_metrics_map = layout_paragraph_metrics_map.clone();
-        let styles = styles.clone();
-        let measure_errors = closure_measure_errors.clone();
         MeasureFunc::Boxed(Box::new(move |sz| {
-            if sz.width == Number::Undefined || !measure_errors.borrow().is_empty() {
+            let relevant_things_for_closure = relevant_things_for_closure.clone();
+            let mut relevant_things_for_closure = relevant_things_for_closure.borrow_mut();
+            let RelevantThings {
+                layout_rich_text_map,
+                layout_paragraph_metrics_map,
+                text_layout,
+                styles,
+                measure_errors,
+                ..
+            } = relevant_things_for_closure.deref_mut();
+
+            if sz.width == Number::Undefined || !measure_errors.is_empty() {
                 return Size {
                     width: 0.,
                     height: 0.,
                 };
             }
 
-            let styles = styles.clone();
+            // let styles = styles.clone();
 
-            let text_layout = text_layout.clone();
+            // let text_layout = text_layout.clone();
 
             let full_text = text_node.raw_text();
 
             let converted_style = match (*current_style).clone().try_into() {
                 Ok(style) => style,
                 Err(err) => {
-                    measure_errors.borrow_mut().push(err);
+                    measure_errors.push(err);
                     return Size {
                         width: 0.,
                         height: 0.,
@@ -112,13 +138,10 @@ pub async fn assemble_pdf(pdf_layout: &PdfDom) -> Result<(), BadPdfLayout> {
                 }
             };
 
-            let rich_text = RichText::new(&full_text, converted_style);
+            let mut rich_text = RichText::new(&full_text, converted_style);
 
-            for TextNodeIterItem(range, style) in text_node.iter_rich_text(&current_style, &styles) {
-                // TODO: Implement me please :'(
-                // rich_text.push_style(style.into(), range);
-                println!("- {range:?}: {style:?}");
-                unimplemented!();
+            for TextNodeIterItem(range, style) in text_node.iter_rich_text(&styles) {
+                rich_text.push_style(style, range);
             }
 
             let width = if let Number::Defined(width) = sz.width {
@@ -132,10 +155,9 @@ pub async fn assemble_pdf(pdf_layout: &PdfDom) -> Result<(), BadPdfLayout> {
 
             let computed_height = paragraph_metrics.height.0;
 
-            let layout_paragraph_metrics_map = layout_paragraph_metrics_map.clone();
-            layout_paragraph_metrics_map
-                .borrow_mut()
-                .insert(node, paragraph_metrics);
+            layout_paragraph_metrics_map.insert(node, paragraph_metrics);
+
+            layout_rich_text_map.insert(node, rich_text);
 
             Size {
                 width,
@@ -161,15 +183,16 @@ pub async fn assemble_pdf(pdf_layout: &PdfDom) -> Result<(), BadPdfLayout> {
         crate::page_sizes::LETTER,
     )?;
 
-    if !measure_errors.borrow().is_empty() {
+    if !relevant_things.borrow().measure_errors.is_empty() {
         drop(layout);
 
         // We can do this as long as layout is dropped by this point
         //  because all the references to measure errors should be dropped
         //  as part of it.
-        let err = Rc::try_unwrap(measure_errors)
+        let err = Rc::try_unwrap(relevant_things)
             .unwrap()
             .into_inner()
+            .measure_errors
             .into_iter()
             .next()
             .unwrap();
@@ -177,13 +200,39 @@ pub async fn assemble_pdf(pdf_layout: &PdfDom) -> Result<(), BadPdfLayout> {
         return Err(err);
     }
 
+    let mut pdf_writer = pdf_writer.borrow_mut();
+    let page_writer = pdf_writer.add_page();
+
+    let relevant_things = relevant_things.borrow();
+    let RelevantThings {
+        layout_rich_text_map,
+        layout_paragraph_metrics_map,
+        ..
+    } = relevant_things.deref();
+
     for node in layout.draw_order() {
         let style = layout.get_style(node);
         let dom_node = layout.get_dom_node(node);
 
-        println!("Node: {node:?}");
-        println!("Style: {style:?}");
-        println!("Dom: {dom_node:?}");
+        match dom_node {
+            DomNode::Text(text_node) => {
+                let rich_text = layout_rich_text_map.get(&node).unwrap();
+                let paragraph_metrics = layout_paragraph_metrics_map.get(&node).unwrap();
+
+                page_writer
+                    .write_lines(
+                        Point::new(Mm(0.), Mm(0.)),
+                        rich_text,
+                        &paragraph_metrics.line_metrics,
+                    )
+                    .unwrap();
+            }
+            _ => {}
+        }
+
+        // println!("Node: {node:?}");
+        // println!("Style: {style:?}");
+        // println!("Dom: {dom_node:?}");
         // println!("{:?}", layout.layout_style_map());
     }
     // let layout_to_style_nodes: HashMap<Node, Style> = HashMap::new();

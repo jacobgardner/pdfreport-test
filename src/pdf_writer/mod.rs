@@ -258,7 +258,7 @@ impl<'a, T: GlyphLookup> PageWriter<'a, T> {
         &self,
         start: Point,
         rich_text: &RichText,
-        line_metrics: Vec<LineMetric>,
+        line_metrics: &Vec<LineMetric>,
     ) -> Result<&Self, BadPdfLayout> {
         let span = span!(Level::TRACE, "Writing Lines");
         let _guard = span.enter();

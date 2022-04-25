@@ -12,6 +12,7 @@ pub struct LineMetric {
     pub left: Pt,
 }
 
+#[derive(Debug)]
 pub struct ParagraphMetrics {
     pub height: Pt,
     pub line_metrics: Vec<LineMetric>,
