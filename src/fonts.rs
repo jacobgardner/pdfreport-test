@@ -61,6 +61,7 @@ impl FontFamily {
     }
 }
 
+#[derive(Debug)]
 pub struct FontLookup<'a> {
     pub family_name: &'a str,
     pub weight: FontWeight,

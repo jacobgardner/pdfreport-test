@@ -74,16 +74,20 @@ fn example_layout() -> PdfDom {
             "root": {
                 "font": {
                     "family": "Inter" 
+                },
+                "padding": {
+                    "left": 40,
+                    "right": 40,
+                    "top": 40,
+                    "bottom": 40
                 }
             },
             "h1": {
-                "color": "#ABCDEF",
+                "color": "#A98765",
                 "flex": {
                     "direction": "Column"
                 },
-                "margin": {
-                    "bottom": 4
-                },
+
                 "padding": {
                     "left": 40,
                     "right": 40

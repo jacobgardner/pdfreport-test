@@ -150,6 +150,10 @@ impl<'a> BlockLayout<'a> {
         self.styles.clone()
     }
 
+    pub fn get_layout(&self, node: Node) -> Result<&Layout, BadPdfLayout> {
+        Ok(self.stretch.layout(node)?)
+    }
+
     // There may be a way to ensure that the node passed in came from
     //  this structure to make the expect even safer
     pub fn get_style(&self, node: Node) -> Rc<Style> {

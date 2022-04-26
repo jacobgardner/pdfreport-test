@@ -9,6 +9,8 @@ use stretch2 as stretch;
 use stretch::{node::MeasureFunc, prelude::*};
 
 use crate::dom::DomNode;
+use crate::page_sizes::A4;
+use crate::page_sizes::LETTER;
 use crate::{
     block_layout::{BlockLayout, ImageComputeFn, TextComputeFn},
     dom::{nodes::TextNodeIterItem, FontFamilyInfo, PdfDom},
@@ -166,8 +168,6 @@ pub async fn assemble_pdf(pdf_layout: &PdfDom) -> Result<(), BadPdfLayout> {
         }))
     });
 
-    pdf_writer.borrow_mut().add_page();
-
     let image_compute: ImageComputeFn = Box::new(|_image_node| {
         // TODO: Replace with real image size calculation
         MeasureFunc::Raw(move |_sz| Size {
@@ -200,43 +200,55 @@ pub async fn assemble_pdf(pdf_layout: &PdfDom) -> Result<(), BadPdfLayout> {
         return Err(err);
     }
 
-    let mut pdf_writer = pdf_writer.borrow_mut();
-    let page_writer = pdf_writer.add_page();
+    {
+        let mut pdf_writer = pdf_writer.borrow_mut();
+        let page_writer = pdf_writer.get_page(0);
 
-    let relevant_things = relevant_things.borrow();
-    let RelevantThings {
-        layout_rich_text_map,
-        layout_paragraph_metrics_map,
-        ..
-    } = relevant_things.deref();
+        let relevant_things = relevant_things.borrow();
+        let RelevantThings {
+            layout_rich_text_map,
+            layout_paragraph_metrics_map,
+            ..
+        } = relevant_things.deref();
 
-    for node in layout.draw_order() {
-        let style = layout.get_style(node);
-        let dom_node = layout.get_dom_node(node);
+        for node in layout.draw_order() {
+            let style = layout.get_style(node);
+            let dom_node = layout.get_dom_node(node);
 
-        match dom_node {
-            DomNode::Text(text_node) => {
-                let rich_text = layout_rich_text_map.get(&node).unwrap();
-                let paragraph_metrics = layout_paragraph_metrics_map.get(&node).unwrap();
+            match dom_node {
+                DomNode::Text(text_node) => {
+                    let rich_text = layout_rich_text_map.get(&node).unwrap();
+                    let paragraph_metrics = layout_paragraph_metrics_map.get(&node).unwrap();
 
-                page_writer
-                    .write_lines(
-                        Point::new(Mm(0.), Mm(0.)),
-                        rich_text,
-                        &paragraph_metrics.line_metrics,
-                    )
-                    .unwrap();
+                    let layout_info = layout.get_layout(node)?;
+
+                    page_writer
+                        .write_lines(
+                            Point::new(
+                                Pt(layout_info.location.x as f64).into(),
+                                // TODO: Lookup the page size instead of using
+                                // this const.
+                                A4.height //- Pt(layout_info.size.height as f64).into()
+                                    - Pt(layout_info.location.y as f64).into(),
+                            ),
+                            rich_text,
+                            &paragraph_metrics.line_metrics,
+                        )
+                        .unwrap();
+                }
+                _ => {}
             }
-            _ => {}
         }
-
-        // println!("Node: {node:?}");
-        // println!("Style: {style:?}");
-        // println!("Dom: {dom_node:?}");
-        // println!("{:?}", layout.layout_style_map());
     }
-    // let layout_to_style_nodes: HashMap<Node, Style> = HashMap::new();
-    // let layout_to_dom_nodes: HashMap<Node, &DomNode> = HashMap::new();
+
+    drop(layout);
+
+    Rc::try_unwrap(pdf_writer)
+        .map_err(|_| BadPdfLayout::UnmatchedStyle {
+            style_name: "".to_owned(),
+        })?
+        .into_inner()
+        .save("output.pdf");
 
     Ok(())
 }

@@ -1,4 +1,4 @@
-use std::rc::Rc;
+use std::{collections::HashMap, rc::Rc};
 
 use printpdf::Pt;
 use skia_safe::{
@@ -15,7 +15,7 @@ use crate::{
     error::BadPdfLayout,
     fonts::{FontLookup, FontManager},
     line_metric::{LineMetric, ParagraphMetrics},
-    pdf_writer::GlyphLookup,
+    pdf_writer::{FontKey, GlyphLookup},
     rich_text::RichText,
 };
 
@@ -23,6 +23,7 @@ use crate::{
 pub struct LayoutFonts {
     font_collection: FontCollection,
     font_manager: FontMgr,
+    typeface_lookup: HashMap<String, HashMap<FontKey, Typeface>>,
 }
 
 impl HasFontCollection for Rc<LayoutFonts> {
@@ -36,16 +37,28 @@ impl LayoutFonts {
         let mut font_collection = FontCollection::new();
 
         let mut tfp = TypefaceFontProvider::new();
+        let mut typeface_lookup = HashMap::new();
 
         for (family_name, family) in font_manager.families.iter() {
+            let mut family_lookup = HashMap::new();
             for font in family.fonts.iter() {
                 unsafe {
                     let d = Data::new_bytes(font.bytes.as_ref());
-                    let t = Typeface::from_data(d, None);
+                    let t = Typeface::from_data(d, None).unwrap();
 
-                    tfp.register_typeface(t.unwrap(), Some(&family_name));
+                    family_lookup.insert(
+                        FontKey {
+                            weight: font.weight,
+                            style: font.style,
+                        },
+                        t.clone(),
+                    );
+
+                    tfp.register_typeface(t, Some(&family_name));
                 }
             }
+
+            typeface_lookup.insert(family_name.clone(), family_lookup);
         }
 
         let font_manager = FontMgr::from(tfp);
@@ -56,17 +69,23 @@ impl LayoutFonts {
         Self {
             font_collection,
             font_manager,
+            typeface_lookup,
         }
     }
 
     fn typeface_by_font_style(&self, lookup: &FontLookup) -> Result<Typeface, BadPdfLayout> {
-        self.font_manager
-            .match_family_style(
-                &lookup.family_name,
-                FontStyle::new(lookup.weight.into(), Width::NORMAL, lookup.style.into()),
-            )
+        self.typeface_lookup
+            .get(lookup.family_name)
+            .ok_or_else(|| BadPdfLayout::FontFamilyNotFound {
+                font_family: lookup.family_name.to_owned(),
+            })?
+            .get(&FontKey {
+                weight: lookup.weight,
+                style: lookup.style,
+            })
+            .cloned()
             .ok_or_else(|| BadPdfLayout::FontStyleNotFoundForFamily {
-                font_family: String::from(lookup.family_name),
+                font_family: lookup.family_name.to_owned(),
                 font_weight: lookup.weight,
                 font_style: lookup.style,
             })
@@ -122,7 +141,7 @@ impl<T: HasFontCollection> TextLayout<T> {
         default_style.set_font_families(&[&rich_text.default_style.font_family]);
 
         paragraph_style.set_text_style(&default_style);
-        paragraph_style.set_text_align(TextAlign::Center);
+        paragraph_style.set_text_align(TextAlign::Left);
 
         let mut paragraph_builder = ParagraphBuilder::new(
             &paragraph_style,
