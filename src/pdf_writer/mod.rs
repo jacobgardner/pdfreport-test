@@ -5,6 +5,7 @@ use printpdf::{
     PdfDocumentReference, PdfLayerIndex, PdfLayerReference, PdfPageIndex, PdfPageReference, Point,
     Pt, Rgb, TextMatrix,
 };
+use stretch2::prelude::Size;
 use tracing::{span, Level};
 
 mod svg;
@@ -21,7 +22,6 @@ pub struct FontKey {
     pub weight: FontWeight,
     pub style: FontStyle,
 }
-
 
 pub struct PdfWriter<T: GlyphLookup> {
     dimensions: (Mm, Mm),
@@ -42,14 +42,15 @@ const BOTTOM_RIGHT_CORNER: Range<usize> = 4..8;
 const BOTTOM_LEFT_CORNER: Range<usize> = 8..12;
 
 impl<T: GlyphLookup> PdfWriter<T> {
-    pub fn new(font_manager: &FontManager, layout_fonts: T) -> Self {
-        // A4 Page dimensions
-        let dimensions = (Mm(210.), Mm(297.));
-
+    pub fn new(font_manager: &FontManager, layout_fonts: T, dimensions: Size<Mm>) -> Self {
         let mut font_families = HashMap::new();
 
-        let (doc, page1, layer1) =
-            PdfDocument::new("Test Report", dimensions.0, dimensions.1, "Layer 1");
+        let (doc, page1, layer1) = PdfDocument::new(
+            "Test Report",
+            dimensions.width,
+            dimensions.height,
+            "Layer 1",
+        );
 
         for (family_name, font_family) in font_manager.families.iter() {
             let mut font_family_fonts = HashMap::new();
@@ -70,7 +71,7 @@ impl<T: GlyphLookup> PdfWriter<T> {
         }
 
         Self {
-            dimensions,
+            dimensions: (dimensions.width, dimensions.height),
             doc,
             pages: vec![(page1, layer1)],
             font_families,

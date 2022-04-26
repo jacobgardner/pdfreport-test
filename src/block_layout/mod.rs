@@ -133,15 +133,15 @@ impl<'a> BlockLayout<'a> {
         layout.stretch.compute_layout(root_layout_node, page_size)?;
         println!("Done Computing Layout!");
 
-        for &DrawOrder {
-            node,
-            depth,
-            z_order,
-        } in &layout.node_draw_order
-        {
-            let node_layout = layout.stretch.layout(node)?;
-            println!("Z:{z_order} -> D:{depth} -> {node:?} {node_layout:?}");
-        }
+        // for &DrawOrder {
+        //     node,
+        //     depth,
+        //     z_order,
+        // } in &layout.node_draw_order
+        // {
+        //     let node_layout = layout.stretch.layout(node)?;
+        //     println!("Z:{z_order} -> D:{depth} -> {node:?} {node_layout:?}");
+        // }
 
         Ok(layout)
     }

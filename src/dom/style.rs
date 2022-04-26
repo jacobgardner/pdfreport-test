@@ -128,7 +128,7 @@ impl Default for FlexStyle {
             align_self: FlexAlign::Auto,
             grow: 0.,
             shrink: 1.,
-            basis: String::from("auto"),
+            basis: String::from("undefined"),
         }
     }
 }

@@ -78,6 +78,8 @@ impl TryFrom<Style> for stretch::style::Style {
             flex_grow: s.flex.grow,
             flex_shrink: s.flex.shrink,
             flex_basis: string_to_dim(&s.flex.basis)?,
+            // flex_wrap: FlexWrap::NoWrap,
+            // overflow: Overflow::,
             ..Default::default()
         })
     }

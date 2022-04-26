@@ -84,6 +84,7 @@ pub async fn assemble_pdf(pdf_layout: &PdfDom) -> Result<(), BadPdfLayout> {
     let pdf_writer = Rc::new(RefCell::new(PdfWriter::new(
         &font_manager,
         layout_fonts.clone(),
+        LETTER,
     )));
 
     let relevant_things = Rc::new(RefCell::new(RelevantThings {
@@ -116,12 +117,33 @@ pub async fn assemble_pdf(pdf_layout: &PdfDom) -> Result<(), BadPdfLayout> {
                 ..
             } = relevant_things_for_closure.deref_mut();
 
-            if sz.width == Number::Undefined || !measure_errors.is_empty() {
+            if !measure_errors.is_empty() {
                 return Size {
                     width: 0.,
                     height: 0.,
                 };
             }
+
+            if sz.width == Number::Undefined {
+                return Size {
+                    width: 1024.,
+                    height: 1.,
+                };
+            }
+
+            // if sz.width == Number::Undefined && sz.height == Number::Undefined{
+            //     if let Number::Defined(height) = sz.height {
+            //         return Size {
+            //             width: 1024.,
+            //             height: height,
+            //         };
+            //     } else {
+            //         return Size {
+            //             width: 0.,
+            //             height: 0.,
+            //         };
+            //     }
+            // }
 
             // let styles = styles.clone();
 
@@ -146,23 +168,42 @@ pub async fn assemble_pdf(pdf_layout: &PdfDom) -> Result<(), BadPdfLayout> {
                 rich_text.push_style(style, range);
             }
 
-            let width = if let Number::Defined(width) = sz.width {
-                width
+            // let width = if let Number::Defined(width) = sz.width {
+            //     width
+            // } else {
+            //     unreachable!();
+            // };
+            //
+
+            let paragraph_width = if let Number::Defined(width) = sz.width {
+                width as f64
             } else {
-                unreachable!();
+                LETTER.width.into_pt().0
             };
 
+            println!("{paragraph_width:?}, {node:?}");
+
             let paragraph_metrics =
-                text_layout.compute_paragraph_layout(&rich_text, Pt(width as f64));
+                text_layout.compute_paragraph_layout(&rich_text, Pt(paragraph_width));
 
             let computed_height = paragraph_metrics.height.0;
+            let computed_width = if let Number::Defined(width) = sz.width {
+                width
+            } else {
+                paragraph_metrics
+                    .line_metrics
+                    .iter()
+                    .map(|f| f.width.0)
+                    .max_by(|&a, &b| a.partial_cmp(&b).unwrap())
+                    .unwrap_or(0.) as f32
+            };
 
             layout_paragraph_metrics_map.insert(node, paragraph_metrics);
 
             layout_rich_text_map.insert(node, rich_text);
 
             Size {
-                width,
+                width: computed_width,
                 height: computed_height as f32,
             }
         }))
@@ -215,25 +256,36 @@ pub async fn assemble_pdf(pdf_layout: &PdfDom) -> Result<(), BadPdfLayout> {
             let style = layout.get_style(node);
             let dom_node = layout.get_dom_node(node);
 
+            let layout_info = layout.get_layout(node)?;
+
+            println!("{layout_info:?}");
+            // dbg!(layout_info);
+
+            let start = Point {
+                x: Pt(layout_info.location.x as f64),
+                // TODO: Lookup the page size instead of using
+                // this const.
+                y: Pt::from(LETTER.height) - Pt(layout_info.location.y as f64),
+            };
+
+            let end = Point {
+                x: start.x + Pt(layout_info.size.width as f64).into(),
+                y: start.y - Pt(layout_info.size.height as f64).into(),
+            };
+
+            // page_writer.draw_rect(start, end, None);
+
             match dom_node {
-                DomNode::Text(text_node) => {
-                    let rich_text = layout_rich_text_map.get(&node).unwrap();
+                DomNode::Text(_) => {
+                    let rich_text = match layout_rich_text_map.get(&node) {
+                        Some(rt) => rt,
+                        None => continue,
+                    };
+
                     let paragraph_metrics = layout_paragraph_metrics_map.get(&node).unwrap();
 
-                    let layout_info = layout.get_layout(node)?;
-
                     page_writer
-                        .write_lines(
-                            Point::new(
-                                Pt(layout_info.location.x as f64).into(),
-                                // TODO: Lookup the page size instead of using
-                                // this const.
-                                A4.height //- Pt(layout_info.size.height as f64).into()
-                                    - Pt(layout_info.location.y as f64).into(),
-                            ),
-                            rich_text,
-                            &paragraph_metrics.line_metrics,
-                        )
+                        .write_lines(start, rich_text, &paragraph_metrics.line_metrics)
                         .unwrap();
                 }
                 _ => {}

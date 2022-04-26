@@ -76,21 +76,40 @@ fn example_layout() -> PdfDom {
                     "family": "Inter" 
                 },
                 "padding": {
-                    "left": 40,
-                    "right": 40,
-                    "top": 40,
-                    "bottom": 40
+                    "left": 20,
+                    "right": 20,
+                    "top": 20,
+                    "bottom": 20
+                }
+            },
+            "container": {
+             "flex": {
+                    "direction": "Row"
+                }               
+            },
+            "c1": {
+                "flex": {
+                    "shrink": 1,
+                    "grow": 1
+                }
+            },
+            "c2": {
+                "flex": {
+                    "shrink": 1,
+                    "grow": 2
                 }
             },
             "h1": {
                 "color": "#A98765",
+                "font": {
+                    "size": 20
+                },
                 "flex": {
                     "direction": "Column"
                 },
-
                 "padding": {
-                    "left": 40,
-                    "right": 40
+                    "left": 0,
+                    "right": 0
                 },
                 "border": {
                     "width": 1,  
@@ -102,7 +121,11 @@ fn example_layout() -> PdfDom {
                 }
             },
             "italic": {
-                 
+                "color": "pink",
+                "font": {
+                    "size": 12,
+                    "style": "Italic"
+                } 
             }
         },
         "root": {
@@ -111,10 +134,23 @@ fn example_layout() -> PdfDom {
             "children": [{
                 "type": "Text",
                 "styles": ["h1"],
-                "children": ["This is some header text ", {"styles": ["italic"], "children": ["italic text"]}] 
-            }, {
-                "type": "Image",
-                "content": "<svg xmlns:xlink=\"http://www.w3.org/1999/xlink\" role=\"img\" aria-label=\"22\" width=\"73\" height=\"73\" viewBox=\"0 0 73 73\" xmlns=\"http://www.w3.org/2000/svg\"><circle class=\"donutMetric__innerCircle\" cx=\"36.5\" cy=\"36.5\" r=\"25\" fill=\"#D3D1E6\" /></svg>"
+                "children": ["This is some header text ", {"styles": ["italic"], "children": ["italic text that continues on to the next line if there is enough text to wrap??"]}] 
+            },
+            {
+                "type": "Styled",
+                "styles": ["container"],
+                "children": [ 
+                    {
+                        "type": "Text",
+                        "styles": ["h1", "c1"],
+                        "children": ["This is some header text ", {"styles": ["italic"], "children": ["italic text that continues on to the next line if there is enough text to wrap??"]}] 
+                    },       
+                    {
+                        "type": "Text",
+                        "styles": ["h1", "c2"],
+                        "children": ["This is some header text ", {"styles": ["italic"], "children": ["italic text that continues on to the next line if there is enough text to wrap??"]}] 
+                    }
+                ]
             }]
         }
     }"##;
@@ -135,14 +171,14 @@ async fn main() {
 
     let fm = FontManager::new();
     let layout_fonts = Rc::new(LayoutFonts::with_font_manager(&fm));
-    let pdf_writer = PdfWriter::new(&fm, layout_fonts.clone());
+    // let pdf_writer = PdfWriter::new(&fm, layout_fonts.clone(), LETTER);
 
     let _text_layout = TextLayout::new(layout_fonts);
 
     let span = span!(Level::DEBUG, "Full Time");
     let _guard = span.enter();
 
-    let mut _page_writer = pdf_writer.get_page(0);
+    // let mut _page_writer = pdf_writer.get_page(0);
 
     let _layout_span = span!(Level::DEBUG, "Layout & Building PDF").entered();
 
