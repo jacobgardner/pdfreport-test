@@ -273,7 +273,7 @@ pub async fn assemble_pdf(pdf_layout: &PdfDom) -> Result<(), BadPdfLayout> {
                 y: start.y - Pt(layout_info.size.height as f64).into(),
             };
 
-            // page_writer.draw_rect(start, end, None);
+            page_writer.draw_rect(start, end, None);
 
             match dom_node {
                 DomNode::Text(_) => {

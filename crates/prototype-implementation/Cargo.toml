@@ -1,0 +1,44 @@
+[package]
+name = "pdfreport-old"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+# See more keys and their definitions at
+# https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[features]
+trace_chrome = ["tracing-chrome"]
+
+[dependencies]
+printpdf = { version = "*", features = ["svg"] }
+# Leaving these dependencies as required because I don't feel like abstracting
+# the tracing layer right now
+tracing = { version = "*" }
+tracing-subscriber = { version = "*", features = ["std", "fmt"] }
+skia-safe = { version = "*", features = ["textlayout"] }
+stretch2 = "*"
+itertools = "*"
+serde = { version = "*", features = ["derive"] }
+serde_json = "*"
+optional-merge-derive = { path = "../optional-merge-derive" }
+usvg = "*"
+roxmltree = "*"
+num = "*"
+num-traits = "*"
+num-derive = "*"
+color_processing = "*"
+regex = "*"
+lazy_static = "*"
+thiserror = "*"
+reqwest = "*"
+lru = "*"
+bytes = "*"
+futures = "*"
+tokio = { version = "1.17.0", features = ["full"] }
+chrono = { version = "*", features = ["serde"] }
+rayon = "*"
+
+# Optional Dependencies
+tracing-chrome = { version = "*", optional = true }
+
