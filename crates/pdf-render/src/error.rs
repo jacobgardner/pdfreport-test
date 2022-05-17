@@ -5,11 +5,25 @@ use thiserror::Error;
 //     units::MeasurementParseError,
 // };
 
+
 #[derive(Error, Debug)]
-pub enum BadPdfLayout {
-    // TODO: Remove this once we know everything
-    #[error("Unknown error")]
-    UnknownError
+pub enum InternalServerError {
+  #[error("Write Error")]
+  WriteError(#[from] std::io::Error)
+}
+
+
+#[derive(Error, Debug)]
+pub enum UserInputError {
+}
+
+#[derive(Error, Debug)]
+pub enum PdfGenerationError {
+  #[error("Internal Server Error")]
+  InternalServerError(#[from] InternalServerError),
+  
+  #[error("User input error")]
+  PdfLayoutError(UserInputError)
   
     // #[error("Could not find style, {style_name}, in stylesheet. Style names are case-sensitive.")]
     // UnmatchedStyle { style_name: String },

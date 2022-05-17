@@ -1,7 +1,5 @@
 use std::fs::{self, File};
 
-use serde_json;
-
 use pdf_render::{build_pdf_from_dom, dom::PdfDom};
 
 pub fn main() {

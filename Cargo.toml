@@ -16,11 +16,16 @@ path = "src/server.rs"
 name = "cli"
 path = "src/cli.rs"
 
+[features]
+default = ["develop"]
+# Enables things that should NOT go to production, enabled by default, disable
+# in prod builds 
+develop = []
+
 [workspace]
 members = ["crates/*"]
 
 [dependencies]
-printpdf = { version = "*", features = ["svg"] }
 actix-web = "*"
 serde = { version = "*", features = ["derive"] }
 serde_json = "*"
