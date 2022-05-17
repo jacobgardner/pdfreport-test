@@ -23,7 +23,7 @@ pub enum PdfGenerationError {
   InternalServerError(#[from] InternalServerError),
   
   #[error("User input error")]
-  PdfLayoutError(UserInputError)
+  UserInputError(#[from] UserInputError)
   
     // #[error("Could not find style, {style_name}, in stylesheet. Style names are case-sensitive.")]
     // UnmatchedStyle { style_name: String },

@@ -1,6 +1,10 @@
 use actix_web::{get, post, web, App, HttpResponse, HttpServer};
 
-use pdf_render::{build_pdf_from_dom, dom::PdfDom, PdfGenerationError};
+use pdf_render::{
+    build_pdf_from_dom,
+    dom::PdfDom,
+    error::{InternalServerError, PdfGenerationError},
+};
 
 fn pdf_response_from_dom(pdf_dom: PdfDom) -> HttpResponse {
     let filename = pdf_dom.filename.clone();
@@ -19,7 +23,7 @@ fn pdf_response_from_dom(pdf_dom: PdfDom) -> HttpResponse {
         Err(PdfGenerationError::InternalServerError(err)) => {
             HttpResponse::InternalServerError().body(err.to_string())
         }
-        Err(PdfGenerationError::PdfLayoutError(err)) => {
+        Err(PdfGenerationError::UserInputError(err)) => {
             HttpResponse::BadRequest().body(err.to_string())
         }
     }

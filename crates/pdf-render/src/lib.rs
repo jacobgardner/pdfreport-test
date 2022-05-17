@@ -3,9 +3,9 @@ use printpdf::*;
 use std::io::{BufWriter, Write};
 
 pub mod dom;
-mod error;
+pub mod error;
 
-pub use error::PdfGenerationError;
+use error::PdfGenerationError;
 
 pub fn build_pdf_from_dom<W: Write>(
     pdf_dom: &dom::PdfDom,
