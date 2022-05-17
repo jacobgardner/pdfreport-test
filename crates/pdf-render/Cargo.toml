@@ -10,3 +10,6 @@ edition = "2021"
 serde = { version = "*", features = ["derive"] }
 thiserror = "*"
 printpdf = "*"
+num = "*"
+num-traits = "*"
+num-derive = "*"

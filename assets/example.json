@@ -1,5 +1,6 @@
 {
   "filename": "example.pdf",
+  "document_title": "Example PDF",
   "fonts": [
     {
       "family_name": "Inter",
