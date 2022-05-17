@@ -1,10 +1,6 @@
 use actix_web::{get, post, web, App, HttpResponse, HttpServer};
 
-use pdf_render::{
-    build_pdf_from_dom,
-    dom::PdfDom,
-    error::{InternalServerError, PdfGenerationError},
-};
+use pdf_render::{build_pdf_from_dom, dom::PdfDom, error::PdfGenerationError};
 
 fn pdf_response_from_dom(pdf_dom: PdfDom) -> HttpResponse {
     let filename = pdf_dom.filename.clone();

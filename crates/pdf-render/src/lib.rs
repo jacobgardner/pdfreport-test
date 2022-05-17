@@ -1,9 +1,12 @@
-use error::InternalServerError;
+use pdf_writer::PdfWriter;
 use printpdf::*;
-use std::io::{BufWriter, Write};
+use std::io::Write;
 
 pub mod dom;
 pub mod error;
+pub mod pdf_writer;
+pub mod geometry;
+pub mod page_sizes;
 
 use error::PdfGenerationError;
 
@@ -11,15 +14,10 @@ pub fn build_pdf_from_dom<W: Write>(
     pdf_dom: &dom::PdfDom,
     pdf_doc_writer: W,
 ) -> Result<W, PdfGenerationError> {
-    let (doc, page1, layer1) =
-        PdfDocument::new("PDF_Document_title", Mm(247.0), Mm(210.0), "Layer 1");
-    let (page2, layer1) = doc.add_page(Mm(10.0), Mm(250.0), "Page 2, Layer 1");
+    let pdf_writer = PdfWriter::new(&pdf_dom.document_title, page_sizes::LETTER);
 
-    let mut buf_writer = BufWriter::new(pdf_doc_writer);
+    pdf_writer.write_line("asdbd").write_line("aosdifjasfodij");
 
-    doc.save(&mut buf_writer).unwrap();
+    pdf_writer.save(pdf_doc_writer)
 
-    Ok(buf_writer
-        .into_inner()
-        .map_err(|e| InternalServerError::WriteError(e.into()))?)
 }
