@@ -72,14 +72,46 @@ mod tests {
     use super::*;
 
     #[test]
-    #[ignore = "TODO: Not yet working"]
     fn test_font_lookup() {
-        let font_collection = FontCollection::new();
+        let mut font_collection = FontCollection::new();
+        let mut family1 = FontFamilyCollection::new("Inter");
 
-        let fid = font_collection
-            .lookup_font("Inter", &FontAttributes::default())
-            .unwrap()
-            .font_id();
+        let fid1 = family1
+            .add_font(FontAttributes::default(), Bytes::from("1"))
+            .unwrap();
+        let fid2 = family1
+            .add_font(
+                FontAttributes {
+                    style: FontStyle::Italic,
+                    ..Default::default()
+                },
+                Bytes::from("2"),
+            )
+            .unwrap();
+            
+        font_collection.add_family(family1).unwrap();
+
+        assert_eq!(
+            font_collection
+                .lookup_font("Inter", &FontAttributes::default())
+                .unwrap()
+                .font_id(),
+            fid1
+        );
+
+        assert_eq!(
+            font_collection
+                .lookup_font(
+                    "Inter",
+                    &FontAttributes {
+                        style: FontStyle::Italic,
+                        ..Default::default()
+                    }
+                )
+                .unwrap()
+                .font_id(),
+            fid2
+        );
     }
 
     #[test]
@@ -101,7 +133,7 @@ mod tests {
             .unwrap();
 
         font_collection.add_family(family1).unwrap();
-        
+
         assert_eq!(font_collection.get_font(fid2).unwrap().as_bytes(), b"2");
         assert_eq!(font_collection.get_font(fid1).unwrap().as_bytes(), b"1");
     }

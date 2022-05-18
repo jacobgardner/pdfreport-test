@@ -1,7 +1,7 @@
 use std::sync::atomic::{AtomicUsize, Ordering};
 
 /// Guaranteed Unique Id 
-#[derive(Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
 pub struct FontId(usize);
 
 static CURRENT_ID: AtomicUsize = AtomicUsize::new(0);
