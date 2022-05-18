@@ -1,31 +1,30 @@
-use crate::{error::PdfGenerationError, fonts::FontId};
+use crate::{error::DocumentGenerationError, fonts::FontId};
 
-use self::pdf_writer::PdfWriter;
+pub use self::document_writer::DocumentWriter;
 
-pub struct PdfBuilder<Writer: PdfWriter> {
-    raw_pdf_writer: Writer,
+pub struct DocumentBuilder<Writer: DocumentWriter> {
+    raw_document_writer: Writer,
 }
 
-mod pdf_writer;
-pub mod print_pdf_writer;
+mod document_writer;
 
-impl<Writer: PdfWriter> PdfBuilder<Writer> {
-    pub fn new(raw_pdf_writer: Writer) -> Self {
-        Self { raw_pdf_writer }
+impl<Writer: DocumentWriter> DocumentBuilder<Writer> {
+    pub fn new(raw_document_writer: Writer) -> Self {
+        Self { raw_document_writer }
     }
 
     pub fn write_line(
         &mut self,
         font_id: FontId,
-        pdf_line: &str,
-    ) -> Result<&mut Self, PdfGenerationError> {
-        self.raw_pdf_writer.write_line(font_id, pdf_line)?;
+        line: &str,
+    ) -> Result<&mut Self, DocumentGenerationError> {
+        self.raw_document_writer.write_line(font_id, line)?;
 
         Ok(self)
     }
 
     pub fn into_inner(self) -> Writer {
-        self.raw_pdf_writer
+        self.raw_document_writer
     }
 }
 
@@ -33,12 +32,12 @@ impl<Writer: PdfWriter> PdfBuilder<Writer> {
 mod tests {
     use super::*;
 
-    struct MockPdfWriter {
+    struct MockDocWriter {
         title: String,
         lines: Vec<String>,
     }
 
-    impl MockPdfWriter {
+    impl MockDocWriter {
         fn new(doc_title: &str) -> Self {
             Self {
                 title: doc_title.to_owned(),
@@ -47,13 +46,13 @@ mod tests {
         }
     }
 
-    impl PdfWriter for MockPdfWriter {
+    impl DocumentWriter for MockDocWriter {
         fn write_line(
             &mut self,
             font_id: FontId,
-            pdf_line: &str,
-        ) -> Result<&mut MockPdfWriter, PdfGenerationError> {
-            self.lines.push(pdf_line.to_owned());
+            line: &str,
+        ) -> Result<&mut MockDocWriter, DocumentGenerationError> {
+            self.lines.push(line.to_owned());
 
             Ok(self)
         }
@@ -61,9 +60,9 @@ mod tests {
 
     #[test]
     fn can_write_line() {
-        let writer = MockPdfWriter::new("Test Title");
+        let writer = MockDocWriter::new("Test Title");
 
-        let mut builder: PdfBuilder<MockPdfWriter> = PdfBuilder::new(writer);
+        let mut builder: DocumentBuilder<MockDocWriter> = DocumentBuilder::new(writer);
 
         let f1 = FontId::new();
 

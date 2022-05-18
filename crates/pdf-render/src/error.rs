@@ -2,11 +2,6 @@ use thiserror::Error;
 
 use crate::fonts::FontAttributes;
 
-// use crate::{
-//     rich_text::{FontStyle, FontWeight},
-//     units::MeasurementParseError,
-// };
-
 #[derive(Error, Debug)]
 pub enum InternalServerError {
     #[error("Write PDF Error")]
@@ -39,7 +34,7 @@ pub enum UserInputError {
 }
 
 #[derive(Error, Debug)]
-pub enum PdfGenerationError {
+pub enum DocumentGenerationError {
     #[error("Internal Server Error")]
     InternalServerError(#[from] InternalServerError),
 

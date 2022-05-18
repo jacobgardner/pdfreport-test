@@ -1,11 +1,9 @@
-
-use printpdf::Mm as Ppmm;
+use printpdf::Mm as PrintPdfMm;
 
 use super::Mm;
 
-impl From<Mm> for Ppmm {
+impl From<Mm> for PrintPdfMm {
     fn from(ours: Mm) -> Self {
-      Ppmm(ours.0)
+        PrintPdfMm(ours.0)
     }
 }
-

@@ -1,8 +1,8 @@
 use actix_web::{get, post, web, App, HttpResponse, HttpServer};
 
-use pdf_render::{build_pdf_from_dom, dom::PdfDom, error::PdfGenerationError};
+use pdf_render::{build_pdf_from_dom, dom::DocStructure, error::DocumentGenerationError};
 
-fn pdf_response_from_dom(pdf_dom: PdfDom) -> HttpResponse {
+fn pdf_response_from_dom(pdf_dom: DocStructure) -> HttpResponse {
     let filename = pdf_dom.filename.clone();
     let response = build_pdf_from_dom(&pdf_dom, Vec::new());
 
@@ -16,17 +16,17 @@ fn pdf_response_from_dom(pdf_dom: PdfDom) -> HttpResponse {
             // Don't cache
             .append_header(("Cache-Control", "private"))
             .body(rendered_bytes),
-        Err(PdfGenerationError::InternalServerError(err)) => {
+        Err(DocumentGenerationError::InternalServerError(err)) => {
             HttpResponse::InternalServerError().body(err.to_string())
         }
-        Err(PdfGenerationError::UserInputError(err)) => {
+        Err(DocumentGenerationError::UserInputError(err)) => {
             HttpResponse::BadRequest().body(err.to_string())
         }
     }
 }
 
 #[post("/")]
-async fn render_pdf(body: web::Json<PdfDom>) -> HttpResponse {
+async fn render_pdf(body: web::Json<DocStructure>) -> HttpResponse {
     let pdf_dom = body.into_inner();
 
     pdf_response_from_dom(pdf_dom)
@@ -37,7 +37,7 @@ async fn render_pdf(body: web::Json<PdfDom>) -> HttpResponse {
 async fn test_render_pdf() -> HttpResponse {
     let example_json = std::fs::read_to_string("./assets/example.json").unwrap();
 
-    let pdf_dom: PdfDom = serde_json::from_str(&example_json).unwrap();
+    let pdf_dom: DocStructure = serde_json::from_str(&example_json).unwrap();
 
     pdf_response_from_dom(pdf_dom)
 }
