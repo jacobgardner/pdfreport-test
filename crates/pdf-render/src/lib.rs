@@ -5,7 +5,7 @@
 
 use bytes::Bytes;
 use doc_structure::FontFamilyInfo;
-use document_builder::{DocumentBuilder, DocumentWriter};
+use document_builder::{DocumentBuilder};
 use fonts::{FontAttributes, FontCollection, FontFamilyCollection, FontStyle, FontWeight};
 use print_pdf_writer::PrintPdfWriter;
 use rich_text::{RichTextLine, RichTextSpan};
@@ -22,11 +22,11 @@ pub mod rich_text;
 
 use error::{DocumentGenerationError};
 
-static TEMP_FONT_BYTES: &'static [u8] =
+static TEMP_FONT_BYTES: &[u8] =
     include_bytes!("../../../assets/fonts/inter-static/Inter-Regular.ttf");
 
 pub fn load_fonts_from_doc_structure(
-    fonts: &Vec<FontFamilyInfo>,
+    fonts: &[FontFamilyInfo],
 ) -> Result<FontCollection, DocumentGenerationError> {
     let mut font_collection = FontCollection::new();
 

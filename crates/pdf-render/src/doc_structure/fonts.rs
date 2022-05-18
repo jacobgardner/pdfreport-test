@@ -1,19 +1,13 @@
 use serde::Deserialize;
 
-use crate::fonts::{FontWeight, FontStyle, FontAttributes};
-
+use crate::fonts::FontAttributes;
 
 #[derive(Debug, Deserialize)]
 pub struct FontInfo {
     pub source: String,
-  
+
     #[serde(flatten)]
     pub attributes: FontAttributes,
-
-    // #[serde(default)]
-    // pub weight: FontWeight,
-    // #[serde(default)]
-    // pub style: FontStyle,
 }
 
 #[derive(Debug, Deserialize)]

@@ -1,4 +1,4 @@
-use crate::{error::DocumentGenerationError, fonts::FontId, rich_text::RichTextLine};
+use crate::{error::DocumentGenerationError, rich_text::RichTextLine};
 
 pub use self::document_writer::DocumentWriter;
 

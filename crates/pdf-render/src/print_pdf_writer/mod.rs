@@ -79,8 +79,6 @@ impl PrintPdfWriter {
 
 impl DocumentWriter for PrintPdfWriter {
     fn write_line(&mut self, pdf_line: RichTextLine) -> Result<&mut Self, DocumentGenerationError> {
-        let pdf_line: RichTextLine = pdf_line.into();
-
         let (page_index, layers) = &self.page_layer_indices[0];
         let first_layer = layers[0];
 
@@ -93,7 +91,7 @@ impl DocumentWriter for PrintPdfWriter {
             let font = self
                 .fonts
                 .get(&span.font_id)
-                .ok_or_else(|| InternalServerError::FontIdNotLoaded)?;
+                .ok_or(InternalServerError::FontIdNotLoaded)?;
 
             // TODO: I believe every time we set this, it adds more data to
             // the PDF, so we should probably optimize to only update the
