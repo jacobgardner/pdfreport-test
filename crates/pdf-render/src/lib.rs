@@ -1,12 +1,12 @@
-use pdf_builder::{PdfBuilder, print_pdf_writer::PrintPdfWriter};
+use pdf_builder::{print_pdf_writer::PrintPdfWriter, PdfBuilder};
 use std::io::Write;
 
 pub mod dom;
 pub mod error;
-pub mod pdf_builder;
+mod fonts;
 pub mod geometry;
 pub mod page_sizes;
-mod fonts;
+pub mod pdf_builder;
 
 use error::PdfGenerationError;
 
@@ -14,10 +14,11 @@ pub fn build_pdf_from_dom<W: Write>(
     pdf_dom: &dom::PdfDom,
     pdf_doc_writer: W,
 ) -> Result<W, PdfGenerationError> {
-    let mut pdf_writer: PdfBuilder<PrintPdfWriter> = PdfBuilder::new(&pdf_dom.document_title, page_sizes::LETTER);
+    let pdf_writer = PrintPdfWriter::new(&pdf_dom.document_title, page_sizes::LETTER);
+
+    let mut pdf_builder = PdfBuilder::new(pdf_writer);
 
     // pdf_writer.write_line("asdbd").write_line("aosdifjasfodij");
 
-    pdf_writer.save(pdf_doc_writer)
-
+    pdf_builder.into_inner().save(pdf_doc_writer)
 }

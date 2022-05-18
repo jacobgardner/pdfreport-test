@@ -9,8 +9,15 @@ use crate::fonts::FontAttributes;
 
 #[derive(Error, Debug)]
 pub enum InternalServerError {
-    #[error("Write Error")]
-    WriteError(#[from] std::io::Error),
+    #[error("Write PDF Error")]
+    WritePdfError(#[from] std::io::Error),
+
+    #[error("Error loading font: {family_name} w/ attributes: {attributes:?}")]
+    LoadFontError {
+        source: Box<dyn std::error::Error>,
+        family_name: String,
+        attributes: FontAttributes,
+    },
 }
 
 #[derive(Error, Debug)]

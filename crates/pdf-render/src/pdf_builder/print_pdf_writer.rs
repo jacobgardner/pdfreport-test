@@ -1,9 +1,9 @@
-use std::{collections::HashMap, io::BufWriter};
+use std::{collections::HashMap, io::{BufWriter, Write}};
 
 use printpdf::{IndirectFontRef, PdfDocument, PdfDocumentReference};
 
 use crate::{
-    error::InternalServerError,
+    error::{InternalServerError, PdfGenerationError},
     fonts::{FontCollection, FontId},
     geometry::{Mm, Size},
 };
@@ -15,10 +15,8 @@ pub struct PrintPdfWriter {
     font_families: HashMap<FontId, IndirectFontRef>,
 }
 
-impl PrintPdfWriter {}
-
-impl PdfWriter for PrintPdfWriter {
-    fn new(doc_title: &str, page_size: impl Into<Size<Mm>>) -> Self {
+impl PrintPdfWriter {
+    pub fn new(doc_title: &str, page_size: impl Into<Size<Mm>>) -> Self {
         let dimensions = page_size.into();
 
         let (doc, _, _) = PdfDocument::new(
@@ -34,11 +32,29 @@ impl PdfWriter for PrintPdfWriter {
         }
     }
 
-    fn write_line(&mut self, font_id: &FontId, pdf_line: &str) -> &mut Self {
-        self
+    fn load_fonts(
+        &mut self,
+        font_collection: &FontCollection,
+    ) -> Result<&mut Self, PdfGenerationError> {
+        for (family_name, font_family) in font_collection.families.iter() {
+            for (attributes, data) in font_family.fonts_by_attribute.iter() {
+                let indirect_font_ref = self
+                    .raw_pdf_doc
+                    .add_external_font(data.as_bytes())
+                    .map_err(|e| InternalServerError::LoadFontError {
+                        source: Box::new(e),
+                        family_name: family_name.clone(),
+                        attributes: *attributes,
+                    })?;
+
+                self.font_families.insert(data.font_id(), indirect_font_ref);
+            }
+        }
+
+        Ok(self)
     }
 
-    fn save<W: std::io::Write>(
+    pub fn save<W: Write>(
         self,
         pdf_doc_writer: W,
     ) -> Result<W, crate::error::PdfGenerationError> {
@@ -48,21 +64,20 @@ impl PdfWriter for PrintPdfWriter {
 
         let write_result = buf_writer
             .into_inner()
-            .map_err(|e| InternalServerError::WriteError(e.into()));
+            .map_err(|e| InternalServerError::WritePdfError(e.into()));
 
         Ok(write_result?)
     }
+}
 
-    fn load_fonts(&mut self, font_collection: &FontCollection) -> &mut Self {
-        for (_, font_family) in font_collection.families.iter() {
-            for (_, data) in font_family.fonts_by_attribute.iter() {
-                let indirect_font_ref =
-                    self.raw_pdf_doc.add_external_font(data.as_bytes()).unwrap();
+impl PdfWriter for PrintPdfWriter {
+    fn write_line(
+        &mut self,
+        font_id: FontId,
+        pdf_line: &str,
+    ) -> Result<&mut Self, PdfGenerationError> {
+        // self.font_families.get(font_id)
 
-                self.font_families.insert(data.font_id(), indirect_font_ref);
-            }
-        }
-
-        self
+        Ok(self)
     }
 }

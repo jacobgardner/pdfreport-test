@@ -24,6 +24,7 @@ develop = []
 
 [workspace]
 members = ["crates/*"]
+exclude = ["crates/prototype-implementation"]
 
 [dependencies]
 actix-web = "*"
