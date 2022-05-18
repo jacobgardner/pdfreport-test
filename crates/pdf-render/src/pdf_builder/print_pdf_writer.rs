@@ -1,25 +1,14 @@
-use std::{
-    collections::HashMap,
-    io::{BufWriter, Write},
-};
+use std::{collections::HashMap, io::{BufWriter, Write}};
 
-use document_render::{
-    document_builder::DocumentWriter,
-    error::DocumentGenerationError,
+use printpdf::{IndirectFontRef, PdfDocument, PdfDocumentReference};
+
+use crate::{
+    error::{InternalServerError, PdfGenerationError},
     fonts::{FontCollection, FontId},
     geometry::{Mm, Size},
 };
-use error::PdfAssembleError;
-use printpdf::{IndirectFontRef, PdfDocument, PdfDocumentReference};
 
-mod conversions;
-mod error;
-
-mod prelude {
-    pub(crate) use crate::conversions::AsPrintPdfMm;
-}
-
-use prelude::*;
+use super::pdf_writer::PdfWriter;
 
 pub struct PrintPdfWriter {
     raw_pdf_doc: PdfDocumentReference,
@@ -32,8 +21,8 @@ impl PrintPdfWriter {
 
         let (doc, _, _) = PdfDocument::new(
             doc_title,
-            dimensions.width.as_mm(),
-            dimensions.height.as_mm(),
+            dimensions.width.into(),
+            dimensions.height.into(),
             "Layer 1",
         );
 
@@ -46,13 +35,13 @@ impl PrintPdfWriter {
     fn load_fonts(
         &mut self,
         font_collection: &FontCollection,
-    ) -> Result<&mut Self, DocumentGenerationError> {
+    ) -> Result<&mut Self, PdfGenerationError> {
         for (family_name, font_family) in font_collection.families.iter() {
             for (attributes, data) in font_family.fonts_by_attribute.iter() {
                 let indirect_font_ref = self
                     .raw_pdf_doc
                     .add_external_font(data.as_bytes())
-                    .map_err(|e| PdfAssembleError::LoadFontError {
+                    .map_err(|e| InternalServerError::LoadFontError {
                         source: Box::new(e),
                         family_name: family_name.clone(),
                         attributes: *attributes,
@@ -65,25 +54,28 @@ impl PrintPdfWriter {
         Ok(self)
     }
 
-    pub fn save<W: Write>(self, pdf_doc_writer: W) -> Result<W, DocumentGenerationError> {
+    pub fn save<W: Write>(
+        self,
+        pdf_doc_writer: W,
+    ) -> Result<W, crate::error::PdfGenerationError> {
         let mut buf_writer = BufWriter::new(pdf_doc_writer);
 
         self.raw_pdf_doc.save(&mut buf_writer).unwrap();
 
         let write_result = buf_writer
             .into_inner()
-            .map_err(|e| PdfAssembleError::WritePdfError(e.into()));
+            .map_err(|e| InternalServerError::WritePdfError(e.into()));
 
         Ok(write_result?)
     }
 }
 
-impl DocumentWriter for PrintPdfWriter {
+impl PdfWriter for PrintPdfWriter {
     fn write_line(
         &mut self,
         font_id: FontId,
         pdf_line: &str,
-    ) -> Result<&mut Self, DocumentGenerationError> {
+    ) -> Result<&mut Self, PdfGenerationError> {
         // self.font_families.get(font_id)
 
         Ok(self)

@@ -12,11 +12,11 @@ pub enum InternalServerError {
     #[error("Write PDF Error")]
     WritePdfError(#[from] std::io::Error),
 
-    #[error("Error from {document_type} writer")]
-    DocumentWriterError {
-        #[source]
+    #[error("Error loading font: {family_name} w/ attributes: {attributes:?}")]
+    LoadFontError {
         source: Box<dyn std::error::Error>,
-        document_type: String,
+        family_name: String,
+        attributes: FontAttributes,
     },
 }
 
@@ -39,7 +39,7 @@ pub enum UserInputError {
 }
 
 #[derive(Error, Debug)]
-pub enum DocumentGenerationError {
+pub enum PdfGenerationError {
     #[error("Internal Server Error")]
     InternalServerError(#[from] InternalServerError),
 

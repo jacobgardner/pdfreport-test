@@ -1,14 +1,15 @@
-use crate::{error::DocumentGenerationError, fonts::FontId};
+use crate::{error::PdfGenerationError, fonts::FontId};
 
-pub use self::document_writer::DocumentWriter;
+use self::pdf_writer::PdfWriter;
 
-pub struct PdfBuilder<Writer: DocumentWriter> {
+pub struct PdfBuilder<Writer: PdfWriter> {
     raw_pdf_writer: Writer,
 }
 
-mod document_writer;
+mod pdf_writer;
+pub mod print_pdf_writer;
 
-impl<Writer: DocumentWriter> PdfBuilder<Writer> {
+impl<Writer: PdfWriter> PdfBuilder<Writer> {
     pub fn new(raw_pdf_writer: Writer) -> Self {
         Self { raw_pdf_writer }
     }
@@ -17,7 +18,7 @@ impl<Writer: DocumentWriter> PdfBuilder<Writer> {
         &mut self,
         font_id: FontId,
         pdf_line: &str,
-    ) -> Result<&mut Self, DocumentGenerationError> {
+    ) -> Result<&mut Self, PdfGenerationError> {
         self.raw_pdf_writer.write_line(font_id, pdf_line)?;
 
         Ok(self)
@@ -46,12 +47,12 @@ mod tests {
         }
     }
 
-    impl DocumentWriter for MockPdfWriter {
+    impl PdfWriter for MockPdfWriter {
         fn write_line(
             &mut self,
             font_id: FontId,
             pdf_line: &str,
-        ) -> Result<&mut MockPdfWriter, DocumentGenerationError> {
+        ) -> Result<&mut MockPdfWriter, PdfGenerationError> {
             self.lines.push(pdf_line.to_owned());
 
             Ok(self)
