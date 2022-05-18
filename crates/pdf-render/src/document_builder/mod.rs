@@ -1,4 +1,4 @@
-use crate::{error::DocumentGenerationError, rich_text::RichTextLine};
+use crate::{error::DocumentGenerationError, rich_text::RichText};
 
 pub use self::document_writer::DocumentWriter;
 
@@ -15,7 +15,7 @@ impl<Writer: DocumentWriter> DocumentBuilder<Writer> {
         }
     }
 
-    pub fn write_line(&mut self, line: RichTextLine) -> Result<&mut Self, DocumentGenerationError> {
+    pub fn write_line(&mut self, line: RichText) -> Result<&mut Self, DocumentGenerationError> {
         self.raw_document_writer.write_line(line)?;
 
         Ok(self)
@@ -47,7 +47,7 @@ mod tests {
     impl DocumentWriter for MockDocWriter {
         fn write_line(
             &mut self,
-            line: RichTextLine,
+            line: RichText,
         ) -> Result<&mut MockDocWriter, DocumentGenerationError> {
             self.lines.push(
                 line.0
@@ -62,12 +62,13 @@ mod tests {
     }
 
     #[test]
+    #[ignore="Not implemented yet"]
     fn can_write_line() {
         let writer = MockDocWriter::new("Test Title");
 
         let mut builder: DocumentBuilder<MockDocWriter> = DocumentBuilder::new(writer);
 
-        let f1 = FontId::new();
+        // let f1 = FontId::new();
 
         // builder.write_line(f1, "Hello").unwrap();
 

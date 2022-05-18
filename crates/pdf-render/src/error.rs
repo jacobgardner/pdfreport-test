@@ -16,6 +16,12 @@ pub enum InternalServerError {
 
     #[error("FontId does not match any loaded font.")]
     FontIdNotLoaded,
+    
+    #[error("Unable to associate font data with skia typeface for family, {family_name} w/ attributes: {attributes:?}")]
+    SkiaTypefaceFailure {
+        family_name: String,
+        attributes: FontAttributes
+    }
 }
 
 #[derive(Error, Debug)]

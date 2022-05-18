@@ -10,7 +10,7 @@ use crate::{
     error::{DocumentGenerationError, InternalServerError},
     fonts::{FontCollection, FontId},
     geometry::{Mm, Size},
-    rich_text::RichTextLine,
+    rich_text::RichText,
 };
 
 pub struct PrintPdfWriter {
@@ -78,7 +78,7 @@ impl PrintPdfWriter {
 }
 
 impl DocumentWriter for PrintPdfWriter {
-    fn write_line(&mut self, pdf_line: RichTextLine) -> Result<&mut Self, DocumentGenerationError> {
+    fn write_line(&mut self, pdf_line: RichText) -> Result<&mut Self, DocumentGenerationError> {
         let (page_index, layers) = &self.page_layer_indices[0];
         let first_layer = layers[0];
 
@@ -96,7 +96,7 @@ impl DocumentWriter for PrintPdfWriter {
             // TODO: I believe every time we set this, it adds more data to
             // the PDF, so we should probably optimize to only update the
             // styles when something has changed (keep track of last state)
-            layer.set_font(font, span.size);
+            layer.set_font(font, span.size.0);
             layer.write_text(span.text.clone(), font);
         }
 

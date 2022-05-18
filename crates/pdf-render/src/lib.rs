@@ -7,8 +7,9 @@ use bytes::Bytes;
 use doc_structure::FontFamilyInfo;
 use document_builder::{DocumentBuilder};
 use fonts::{FontAttributes, FontCollection, FontFamilyCollection, FontStyle, FontWeight};
+use geometry::Pt;
 use print_pdf_writer::PrintPdfWriter;
-use rich_text::{RichTextLine, RichTextSpan};
+use rich_text::{RichText, RichTextSpan};
 use std::io::Write;
 
 pub mod doc_structure;
@@ -19,6 +20,7 @@ pub mod geometry;
 pub mod page_sizes;
 pub mod print_pdf_writer;
 pub mod rich_text;
+pub mod paragraph_layout;
 
 use error::{DocumentGenerationError};
 
@@ -79,21 +81,21 @@ pub fn build_pdf_from_dom<W: Write>(
 
     let mut pdf_builder = DocumentBuilder::new(pdf_writer);
 
-    let line = RichTextLine(vec![
+    let line = RichText(vec![
         RichTextSpan {
             text: "The quick brown".to_owned(),
             font_id: bold,
-            size: 32.,
+            size: Pt(32.),
         },
         RichTextSpan {
             text: " fox jumps over the".to_owned(),
             font_id: regular,
-            size: 15.,
+            size: Pt(15.),
         },
         RichTextSpan {
             text: " lazy dog".to_owned(),
             font_id: italic,
-            size: 8.,
+            size: Pt(8.),
         },
     ]);
 
