@@ -27,10 +27,13 @@ pub enum UserInputError {
     },
 
     #[error("Font family, {family_name}, was registered with the same attribute multiple times: {attributes:?}")]
-    MultipleFontsWithSameAttribute {
+    NonUniqueFontAttribute {
         family_name: String,
         attributes: FontAttributes,
     },
+
+    #[error("Font family, {family_name}, was registered more than once")]
+    NonUniqueFontFamily { family_name: String },
 }
 
 #[derive(Error, Debug)]

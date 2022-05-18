@@ -7,7 +7,7 @@ use crate::error::{DocumentGenerationError, UserInputError};
 use super::{FontAttributes, FontData, FontId};
 
 pub struct FontFamilyCollection {
-    family_name: String,
+    pub(super) family_name: String,
     pub(crate) fonts_by_attribute: HashMap<FontAttributes, FontData>,
 }
 
@@ -43,7 +43,7 @@ impl FontFamilyCollection {
             .insert(attributes, FontData::new(new_font_id, bytes))
             .is_some()
         {
-            Err(UserInputError::MultipleFontsWithSameAttribute {
+            Err(UserInputError::NonUniqueFontAttribute {
                 family_name: self.family_name.clone(),
                 attributes,
             }
