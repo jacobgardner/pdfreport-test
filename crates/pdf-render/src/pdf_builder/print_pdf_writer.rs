@@ -4,7 +4,7 @@ use printpdf::{IndirectFontRef, PdfDocument, PdfDocumentReference};
 
 use crate::{
     error::InternalServerError,
-    fonts::{FontAttributes, FontCollection, FontId},
+    fonts::{FontCollection, FontId},
     geometry::{Mm, Size},
 };
 

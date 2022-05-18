@@ -1,7 +1,5 @@
 use std::io::Write;
 
-use printpdf::Font;
-
 use crate::{geometry::{Size, Mm}, error::PdfGenerationError, fonts::{FontId, FontCollection}};
 
 pub trait PdfWriter {

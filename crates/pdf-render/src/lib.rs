@@ -1,10 +1,9 @@
-use pdf_writer::{PdfBuilder, print_pdf_writer::PrintPdfWriter};
-use printpdf::*;
+use pdf_builder::{PdfBuilder, print_pdf_writer::PrintPdfWriter};
 use std::io::Write;
 
 pub mod dom;
 pub mod error;
-pub mod pdf_writer;
+pub mod pdf_builder;
 pub mod geometry;
 pub mod page_sizes;
 mod fonts;

@@ -1,10 +1,7 @@
-// use printpdf::*;
-use std::io::{BufWriter, Write};
-
-use printpdf::{PdfDocument, PdfDocumentReference};
+use std::io::Write;
 
 use crate::{
-    error::{InternalServerError, PdfGenerationError},
+    error::PdfGenerationError,
     fonts::FontId,
     geometry::{Mm, Size},
 };
@@ -80,9 +77,6 @@ mod tests {
         let mut builder: PdfBuilder<MockPdfWriter> =
             PdfBuilder::new("Test Title", (Mm(10.), Mm(10.)));
 
-        
-
-            
         // builder.write_line("Hello");
 
         let mut output: Vec<u8> = vec![];
