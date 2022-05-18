@@ -55,18 +55,12 @@ impl PdfWriter for PrintPdfWriter {
 
     fn load_fonts(&mut self, font_collection: &FontCollection) -> &mut Self {
         for (_, font_family) in font_collection.families.iter() {
-            // let mut font_family_fonts = HashMap::new();
-
             for (_, data) in font_family.fonts_by_attribute.iter() {
                 let indirect_font_ref =
                     self.raw_pdf_doc.add_external_font(data.as_bytes()).unwrap();
 
-                self.font_families.insert(data.font_id, indirect_font_ref);
-                // font_family_fonts.insert(attribute, indirect_font_ref);
+                self.font_families.insert(data.font_id(), indirect_font_ref);
             }
-
-            // self.font_families
-            //     .insert(family_name.clone(), font_family_fonts);
         }
 
         self
