@@ -1,8 +1,8 @@
-use std::{collections::HashMap, hash::Hash};
+use std::collections::HashMap;
 
 use skia_safe::{
     textlayout::{ParagraphBuilder, ParagraphStyle, TextAlign, TextStyle, TypefaceFontProvider},
-    typeface, Data, FontMgr, Typeface,
+    Data, FontMgr, Typeface,
 };
 
 use crate::{
@@ -88,7 +88,7 @@ impl ParagraphLayout {
     ) -> Result<RenderedTextBlock, DocumentGenerationError> {
         let mut paragraph_style = ParagraphStyle::new();
         let mut default_style = TextStyle::new();
-        
+
         default_style.set_font_families(&["Inter"]);
 
         paragraph_style.set_text_align(TextAlign::Left);

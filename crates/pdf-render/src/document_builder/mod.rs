@@ -1,4 +1,4 @@
-use crate::{error::DocumentGenerationError, rich_text::RichText};
+use crate::{error::DocumentGenerationError, rich_text::RichText, paragraph_layout::RenderedTextBlock, geometry::{Point, Pt}};
 
 pub use self::document_writer::DocumentWriter;
 
@@ -13,6 +13,16 @@ impl<Writer: DocumentWriter> DocumentBuilder<Writer> {
         Self {
             raw_document_writer,
         }
+    }
+
+    pub fn write_text_block(
+        &mut self,
+        text_block: RenderedTextBlock,
+        position: Point<Pt>,
+    ) -> Result<&mut Self, DocumentGenerationError> {
+        self.raw_document_writer.write_text_block(text_block, position)?;
+        
+        Ok(self)
     }
 
     pub fn write_line(&mut self, line: RichText) -> Result<&mut Self, DocumentGenerationError> {
@@ -59,10 +69,18 @@ mod tests {
 
             Ok(self)
         }
+
+        fn write_text_block(
+            &mut self,
+            text_block: crate::paragraph_layout::RenderedTextBlock,
+            position: crate::geometry::Point<crate::geometry::Pt>,
+        ) -> Result<&mut Self, DocumentGenerationError> {
+            todo!()
+        }
     }
 
     #[test]
-    #[ignore="Not implemented yet"]
+    #[ignore = "Not implemented yet"]
     fn can_write_line() {
         let writer = MockDocWriter::new("Test Title");
 

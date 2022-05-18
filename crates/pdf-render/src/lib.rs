@@ -7,7 +7,7 @@ use bytes::Bytes;
 use doc_structure::FontFamilyInfo;
 use document_builder::DocumentBuilder;
 use fonts::{FontAttributes, FontCollection, FontFamilyCollection, FontStyle, FontWeight};
-use geometry::Pt;
+use geometry::{Pt, Point};
 use paragraph_layout::{ParagraphLayout, LayoutStyle};
 use print_pdf_writer::PrintPdfWriter;
 use rich_text::{RichText, RichTextSpan};
@@ -106,9 +106,14 @@ pub fn build_pdf_from_dom<W: Write>(
     
     let text_block = paragraph_layout.calculate_layout(LayoutStyle {}, &line, Pt(200.))?;
     
-    for line in text_block.lines {
-        pdf_builder.write_line(line.rich_text)?;
-    }
+    pdf_builder.write_text_block(text_block, Point {
+        x: Pt(10.),
+        y: Pt(600.),
+    })?;
+    
+    // for line in text_block.lines {
+    //     pdf_builder.write_line(line.rich_text)?;
+    // }
 
     pdf_builder.into_inner().save(pdf_doc_writer)
 }

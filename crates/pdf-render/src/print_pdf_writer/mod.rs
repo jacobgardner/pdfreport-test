@@ -3,13 +3,14 @@ use std::{
     io::{BufWriter, Write},
 };
 
-use printpdf::{IndirectFontRef, PdfDocument, PdfDocumentReference, PdfLayerIndex, PdfPageIndex};
+use printpdf::{IndirectFontRef, PdfDocument, PdfDocumentReference, PdfLayerIndex, PdfPageIndex, TextMatrix};
 
 use crate::{
     document_builder::DocumentWriter,
     error::{DocumentGenerationError, InternalServerError},
     fonts::{FontCollection, FontId},
-    geometry::{Mm, Size},
+    geometry::{Mm, Point, Pt, Size},
+    paragraph_layout::RenderedTextBlock,
     rich_text::RichText,
 };
 
@@ -98,6 +99,50 @@ impl DocumentWriter for PrintPdfWriter {
             // styles when something has changed (keep track of last state)
             layer.set_font(font, span.size.0);
             layer.write_text(span.text.clone(), font);
+        }
+
+        layer.end_text_section();
+
+        Ok(self)
+    }
+
+    fn write_text_block(
+        &mut self,
+        text_block: RenderedTextBlock,
+        position: Point<Pt>,
+    ) -> Result<&mut Self, DocumentGenerationError> {
+        let (page_index, layers) = &self.page_layer_indices[0];
+        let first_layer = layers[0];
+
+        let page = self.raw_pdf_doc.get_page(*page_index);
+        let layer = page.get_layer(first_layer);
+
+        layer.begin_text_section();
+
+        let x = printpdf::Pt::from(position.x);
+        let y = printpdf::Pt::from(position.y);
+
+        let mut current_y = y;
+        for line in text_block.lines.iter() {
+            layer.set_text_matrix(TextMatrix::Translate(
+                x + line.line_metrics.left.into(),
+                current_y - line.line_metrics.ascent.into(),
+            ));
+
+            for span in line.rich_text.0.iter() {
+                let font = self
+                    .fonts
+                    .get(&span.font_id)
+                    .ok_or(InternalServerError::FontIdNotLoaded)?;
+
+                // TODO: I believe every time we set this, it adds more data to
+                // the PDF, so we should probably optimize to only update the
+                // styles when something has changed (keep track of last state)
+                layer.set_font(font, span.size.0);
+                layer.write_text(span.text.clone(), font);
+            }
+
+            current_y -= line.line_metrics.height.into();
         }
 
         layer.end_text_section();

@@ -1,8 +1,15 @@
 mod conversions;
 
+#[derive(Debug, Clone)]
 pub struct Size<T> {
     pub width: T,
     pub height: T,
+}
+
+#[derive(Debug, Clone)]
+pub struct Point<T> {
+    pub x: T,
+    pub y: T,
 }
 
 impl<T> From<(T, T)> for Size<T> {
@@ -17,7 +24,7 @@ impl<T> From<(T, T)> for Size<T> {
 #[derive(Debug, PartialEq)]
 pub struct Mm(pub f64);
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub struct Pt(pub f64);
 
 impl From<f64> for Pt {
