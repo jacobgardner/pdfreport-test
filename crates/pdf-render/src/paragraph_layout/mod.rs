@@ -22,23 +22,23 @@ pub struct LineMetrics {
     pub left: Pt,
 }
 
-struct RenderedTextLine {
-    rich_text: RichText,
-    line_metrics: LineMetrics,
+pub struct RenderedTextLine {
+    pub rich_text: RichText,
+    pub line_metrics: LineMetrics,
 }
 
-struct RenderedTextBlock {
+pub struct RenderedTextBlock {
     // block_metrics: BlockMetrics
-    lines: Vec<RenderedTextLine>,
+    pub lines: Vec<RenderedTextLine>,
 }
 
-struct ParagraphLayout {
+pub struct ParagraphLayout {
     skia_font_collection: skia_safe::textlayout::FontCollection,
     fonts: HashMap<FontId, String>,
 }
 
 // TODO: rename
-struct LayoutStyle {
+pub struct LayoutStyle {
     // align:
 }
 
@@ -88,6 +88,8 @@ impl ParagraphLayout {
     ) -> Result<RenderedTextBlock, DocumentGenerationError> {
         let mut paragraph_style = ParagraphStyle::new();
         let mut default_style = TextStyle::new();
+        
+        default_style.set_font_families(&["Inter"]);
 
         paragraph_style.set_text_align(TextAlign::Left);
 

@@ -5,9 +5,10 @@
 
 use bytes::Bytes;
 use doc_structure::FontFamilyInfo;
-use document_builder::{DocumentBuilder};
+use document_builder::DocumentBuilder;
 use fonts::{FontAttributes, FontCollection, FontFamilyCollection, FontStyle, FontWeight};
 use geometry::Pt;
+use paragraph_layout::{ParagraphLayout, LayoutStyle};
 use print_pdf_writer::PrintPdfWriter;
 use rich_text::{RichText, RichTextSpan};
 use std::io::Write;
@@ -18,11 +19,11 @@ pub mod error;
 mod fonts;
 pub mod geometry;
 pub mod page_sizes;
+pub mod paragraph_layout;
 pub mod print_pdf_writer;
 pub mod rich_text;
-pub mod paragraph_layout;
 
-use error::{DocumentGenerationError};
+use error::DocumentGenerationError;
 
 static TEMP_FONT_BYTES: &[u8] =
     include_bytes!("../../../assets/fonts/inter-static/Inter-Regular.ttf");
@@ -40,7 +41,7 @@ pub fn load_fonts_from_doc_structure(
 
             font_family.add_font(font_info.attributes, Bytes::from(f))?;
         }
-        
+
         font_collection.add_family(font_family)?;
     }
 
@@ -54,6 +55,10 @@ pub fn build_pdf_from_dom<W: Write>(
     let mut pdf_writer = PrintPdfWriter::new(&doc_structure.document_title, page_sizes::LETTER);
 
     let font_collection = load_fonts_from_doc_structure(&doc_structure.fonts)?;
+
+    let mut paragraph_layout = ParagraphLayout::new();
+    paragraph_layout.load_fonts(&font_collection)?;
+    
 
     pdf_writer.load_fonts(&font_collection)?;
 
@@ -98,8 +103,12 @@ pub fn build_pdf_from_dom<W: Write>(
             size: Pt(8.),
         },
     ]);
-
-    pdf_builder.write_line(line)?;
+    
+    let text_block = paragraph_layout.calculate_layout(LayoutStyle {}, &line, Pt(200.))?;
+    
+    for line in text_block.lines {
+        pdf_builder.write_line(line.rich_text)?;
+    }
 
     pdf_builder.into_inner().save(pdf_doc_writer)
 }
