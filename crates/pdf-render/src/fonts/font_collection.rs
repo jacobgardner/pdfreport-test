@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use crate::error::{DocumentGenerationError, UserInputError};
 
-use super::{FontAttributes, FontData, FontFamilyCollection};
+use super::{FontAttributes, FontData, FontFamilyCollection, FontId};
 
 #[derive(Default)]
 pub struct FontCollection {
@@ -20,6 +20,14 @@ impl FontCollection {
         Self {
             families: HashMap::new(),
         }
+    }
+
+    pub fn get_font(&self, font_id: FontId) -> Option<&FontData> {
+        self.families
+            .iter()
+            .flat_map(|(_, font_family)| font_family.as_ref().iter())
+            .find(|&(_, font)| font.font_id() == font_id)
+            .map(|(_, data)| data)
     }
 
     pub fn add_family(
@@ -57,6 +65,10 @@ impl FontCollection {
 
 #[cfg(test)]
 mod tests {
+    use bytes::Bytes;
+
+    use crate::fonts::FontStyle;
+
     use super::*;
 
     #[test]
@@ -68,6 +80,30 @@ mod tests {
             .lookup_font("Inter", &FontAttributes::default())
             .unwrap()
             .font_id();
+    }
+
+    #[test]
+    fn lookup_font_by_key() {
+        let mut font_collection = FontCollection::new();
+        let mut family1 = FontFamilyCollection::new("Inter");
+
+        let fid1 = family1
+            .add_font(FontAttributes::default(), Bytes::from("1"))
+            .unwrap();
+        let fid2 = family1
+            .add_font(
+                FontAttributes {
+                    style: FontStyle::Italic,
+                    ..Default::default()
+                },
+                Bytes::from("2"),
+            )
+            .unwrap();
+
+        font_collection.add_family(family1).unwrap();
+        
+        assert_eq!(font_collection.get_font(fid2).unwrap().as_bytes(), b"2");
+        assert_eq!(font_collection.get_font(fid1).unwrap().as_bytes(), b"1");
     }
 
     #[test]

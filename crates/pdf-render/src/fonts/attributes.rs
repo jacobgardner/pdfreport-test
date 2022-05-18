@@ -3,8 +3,8 @@ use serde::Deserialize;
 
 #[derive(Default, Debug, Copy, Clone, Hash, PartialEq, Eq)]
 pub struct FontAttributes {
-    weight: FontWeight,
-    style: FontStyle, // Italic/Normal/Oblique
+    pub weight: FontWeight,
+    pub style: FontStyle, // Italic/Normal/Oblique
 }
 
 #[derive(Hash, Eq, PartialEq, Debug, Clone, Copy, FromPrimitive, Deserialize)]

@@ -24,11 +24,18 @@ impl FontFamilyCollection {
             fonts_by_attribute: HashMap::new(),
         }
     }
-    
+
     pub fn family_name(&self) -> &String {
         &self.family_name
     }
-    
+
+    pub fn get_font(&self, font_id: FontId) -> Option<&FontData> {
+        self.fonts_by_attribute
+            .iter()
+            .find(|&(_, font)| font.font_id() == font_id)
+            .map(|(_, data)| data)
+    }
+
     pub fn get_font_by_attribute(
         &self,
         attributes: &FontAttributes,
