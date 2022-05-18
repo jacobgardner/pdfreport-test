@@ -1,4 +1,4 @@
-use crate::{error::DocumentGenerationError, fonts::FontId};
+use crate::{error::DocumentGenerationError, fonts::FontId, rich_text::RichTextLine};
 
 pub use self::document_writer::DocumentWriter;
 
@@ -10,15 +10,13 @@ mod document_writer;
 
 impl<Writer: DocumentWriter> DocumentBuilder<Writer> {
     pub fn new(raw_document_writer: Writer) -> Self {
-        Self { raw_document_writer }
+        Self {
+            raw_document_writer,
+        }
     }
 
-    pub fn write_line(
-        &mut self,
-        font_id: FontId,
-        line: &str,
-    ) -> Result<&mut Self, DocumentGenerationError> {
-        self.raw_document_writer.write_line(font_id, line)?;
+    pub fn write_line(&mut self, line: RichTextLine) -> Result<&mut Self, DocumentGenerationError> {
+        self.raw_document_writer.write_line(line)?;
 
         Ok(self)
     }
@@ -49,10 +47,15 @@ mod tests {
     impl DocumentWriter for MockDocWriter {
         fn write_line(
             &mut self,
-            font_id: FontId,
-            line: &str,
+            line: RichTextLine,
         ) -> Result<&mut MockDocWriter, DocumentGenerationError> {
-            self.lines.push(line.to_owned());
+            self.lines.push(
+                line.0
+                    .iter()
+                    .map(|span| span.text.clone())
+                    .collect::<Vec<String>>()
+                    .join(" "),
+            );
 
             Ok(self)
         }

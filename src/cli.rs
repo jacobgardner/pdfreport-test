@@ -1,6 +1,6 @@
 use std::fs::{self, File};
 
-use pdf_render::{build_pdf_from_dom, dom::DocStructure};
+use pdf_render::{build_pdf_from_dom, doc_structure::DocStructure};
 
 pub fn main() {
     let example_json = fs::read_to_string("./assets/example.json").unwrap();

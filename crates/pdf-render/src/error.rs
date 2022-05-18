@@ -13,6 +13,9 @@ pub enum InternalServerError {
         family_name: String,
         attributes: FontAttributes,
     },
+
+    #[error("FontId does not match any loaded font.")]
+    FontIdNotLoaded,
 }
 
 #[derive(Error, Debug)]
@@ -34,6 +37,7 @@ pub enum UserInputError {
 
     #[error("Font family, {family_name}, was registered more than once")]
     NonUniqueFontFamily { family_name: String },
+
 }
 
 #[derive(Error, Debug)]

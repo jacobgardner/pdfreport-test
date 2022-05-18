@@ -1,9 +1,11 @@
 use num_derive::FromPrimitive;
 use serde::Deserialize;
 
-#[derive(Default, Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Deserialize, Default, Debug, Copy, Clone, Hash, PartialEq, Eq)]
 pub struct FontAttributes {
+    #[serde(default)]
     pub weight: FontWeight,
+    #[serde(default)]
     pub style: FontStyle, // Italic/Normal/Oblique
 }
 

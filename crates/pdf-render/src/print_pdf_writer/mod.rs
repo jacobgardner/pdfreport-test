@@ -1,23 +1,29 @@
-use std::{collections::HashMap, io::{BufWriter, Write}};
+use std::{
+    collections::HashMap,
+    io::{BufWriter, Write},
+};
 
-use printpdf::{IndirectFontRef, PdfDocument, PdfDocumentReference};
+use printpdf::{IndirectFontRef, PdfDocument, PdfDocumentReference, PdfLayerIndex, PdfPageIndex};
 
 use crate::{
-    error::{InternalServerError, DocumentGenerationError},
+    document_builder::DocumentWriter,
+    error::{DocumentGenerationError, InternalServerError},
     fonts::{FontCollection, FontId},
-    geometry::{Mm, Size}, document_builder::DocumentWriter,
+    geometry::{Mm, Size},
+    rich_text::RichTextLine,
 };
 
 pub struct PrintPdfWriter {
     raw_pdf_doc: PdfDocumentReference,
-    font_families: HashMap<FontId, IndirectFontRef>,
+    fonts: HashMap<FontId, IndirectFontRef>,
+    page_layer_indices: Vec<(PdfPageIndex, Vec<PdfLayerIndex>)>,
 }
 
 impl PrintPdfWriter {
     pub fn new(doc_title: &str, page_size: impl Into<Size<Mm>>) -> Self {
         let dimensions = page_size.into();
 
-        let (doc, _, _) = PdfDocument::new(
+        let (doc, page_index, layer_index) = PdfDocument::new(
             doc_title,
             dimensions.width.into(),
             dimensions.height.into(),
@@ -26,14 +32,17 @@ impl PrintPdfWriter {
 
         Self {
             raw_pdf_doc: doc,
-            font_families: HashMap::new(),
+            fonts: HashMap::new(),
+            page_layer_indices: vec![(page_index, vec![layer_index])],
         }
     }
 
-    fn load_fonts(
+    pub fn load_fonts(
         &mut self,
         font_collection: &FontCollection,
     ) -> Result<&mut Self, DocumentGenerationError> {
+        // TODO: Lazily add fonts as they are used so we don't end up embedding
+        // fonts we don't actually need
         for (family_name, font_family) in font_collection.as_ref().iter() {
             for (attributes, data) in font_family.as_ref().iter() {
                 let indirect_font_ref = self
@@ -45,7 +54,7 @@ impl PrintPdfWriter {
                         attributes: *attributes,
                     })?;
 
-                self.font_families.insert(data.font_id(), indirect_font_ref);
+                self.fonts.insert(data.font_id(), indirect_font_ref);
             }
         }
 
@@ -69,12 +78,31 @@ impl PrintPdfWriter {
 }
 
 impl DocumentWriter for PrintPdfWriter {
-    fn write_line(
-        &mut self,
-        font_id: FontId,
-        pdf_line: &str,
-    ) -> Result<&mut Self, DocumentGenerationError> {
-        // self.font_families.get(font_id)
+    fn write_line(&mut self, pdf_line: RichTextLine) -> Result<&mut Self, DocumentGenerationError> {
+        let pdf_line: RichTextLine = pdf_line.into();
+
+        let (page_index, layers) = &self.page_layer_indices[0];
+        let first_layer = layers[0];
+
+        let page = self.raw_pdf_doc.get_page(*page_index);
+        let layer = page.get_layer(first_layer);
+
+        layer.begin_text_section();
+        layer.set_text_cursor(printpdf::Mm(0.), printpdf::Mm(100.));
+        for span in pdf_line.0.iter() {
+            let font = self
+                .fonts
+                .get(&span.font_id)
+                .ok_or_else(|| InternalServerError::FontIdNotLoaded)?;
+
+            // TODO: I believe every time we set this, it adds more data to
+            // the PDF, so we should probably optimize to only update the
+            // styles when something has changed (keep track of last state)
+            layer.set_font(font, span.size);
+            layer.write_text(span.text.clone(), font);
+        }
+
+        layer.end_text_section();
 
         Ok(self)
     }

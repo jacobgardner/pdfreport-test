@@ -1,97 +1,98 @@
 {
   "filename": "example.pdf",
-  "document_title": "Example PDF",
+  "documentTitle": "Example PDF",
   "fonts": [
     {
       "family_name": "Inter",
       "fonts": [
         {
-          "source": "https://github.com/jacobgardner/pdfreport-test/blob/main/assets/fonts/inter-static/Inter-Bold.ttf?raw=true",
+          "source": "./assets/fonts/inter-static/Inter-Bold.ttf",
           "weight": "Bold",
-          "style": "Normal"
+          "style": "Normal"           
+
         },
         {
-          "source": "https://github.com/jacobgardner/pdfreport-test/blob/main/assets/fonts/inter-static/Inter-Thin-BETA.ttf?raw=true",
+          "source": "./assets/fonts/inter-static/Inter-Thin-BETA.ttf",
           "weight": "Thin",
           "style": "Normal"
         },
         {
-          "source": "https://github.com/jacobgardner/pdfreport-test/blob/main/assets/fonts/inter-static/Inter-SemiBold.ttf?raw=true",
+          "source": "./assets/fonts/inter-static/Inter-SemiBold.ttf",
           "weight": "SemiBold",
           "style": "Normal"
         },
         {
-          "source": "https://github.com/jacobgardner/pdfreport-test/blob/main/assets/fonts/inter-static/Inter-ThinItalic-BETA.ttf?raw=true",
+          "source": "./assets/fonts/inter-static/Inter-ThinItalic-BETA.ttf",
           "weight": "Thin",
           "style": "Italic"
         },
         {
-          "source": "https://github.com/jacobgardner/pdfreport-test/blob/main/assets/fonts/inter-static/Inter-SemiBoldItalic.ttf?raw=true",
+          "source": "./assets/fonts/inter-static/Inter-SemiBoldItalic.ttf",
           "weight": "SemiBold",
           "style": "Italic"
         },
         {
-          "source": "https://github.com/jacobgardner/pdfreport-test/blob/main/assets/fonts/inter-static/Inter-ExtraLight-BETA.ttf?raw=true",
+          "source": "./assets/fonts/inter-static/Inter-ExtraLight-BETA.ttf",
           "weight": "ExtraLight",
           "style": "Normal"
         },
         {
-          "source": "https://github.com/jacobgardner/pdfreport-test/blob/main/assets/fonts/inter-static/Inter-ExtraBoldItalic.ttf?raw=true",
+          "source": "./assets/fonts/inter-static/Inter-ExtraBoldItalic.ttf",
           "weight": "ExtraBold",
           "style": "Italic"
         },
         {
-          "source": "https://github.com/jacobgardner/pdfreport-test/blob/main/assets/fonts/inter-static/Inter-Light-BETA.ttf?raw=true",
+          "source": "./assets/fonts/inter-static/Inter-Light-BETA.ttf",
           "weight": "Light",
           "style": "Normal"
         },
         {
-          "source": "https://github.com/jacobgardner/pdfreport-test/blob/main/assets/fonts/inter-static/Inter-UI-BlackItalic.ttf?raw=true",
+          "source": "./assets/fonts/inter-static/Inter-UI-BlackItalic.ttf",
           "weight": "Black",
           "style": "Italic"
         },
         {
-          "source": "https://github.com/jacobgardner/pdfreport-test/blob/main/assets/fonts/inter-static/Inter-BoldItalic.ttf?raw=true",
+          "source": "./assets/fonts/inter-static/Inter-BoldItalic.ttf",
           "weight": "Bold",
           "style": "Italic"
         },
         {
-          "source": "https://github.com/jacobgardner/pdfreport-test/blob/main/assets/fonts/inter-static/Inter-Regular.ttf?raw=true",
+          "source": "./assets/fonts/inter-static/Inter-Regular.ttf",
           "weight": "Regular",
           "style": "Normal"
         },
         {
-          "source": "https://github.com/jacobgardner/pdfreport-test/blob/main/assets/fonts/inter-static/Inter-Italic.ttf?raw=true",
+          "source": "./assets/fonts/inter-static/Inter-Italic.ttf",
           "weight": "Regular",
           "style": "Italic"
         },
         {
-          "source": "https://github.com/jacobgardner/pdfreport-test/blob/main/assets/fonts/inter-static/Inter-ExtraLightItalic-BETA.ttf?raw=true",
+          "source": "./assets/fonts/inter-static/Inter-ExtraLightItalic-BETA.ttf",
           "weight": "ExtraLight",
           "style": "Italic"
         },
         {
-          "source": "https://github.com/jacobgardner/pdfreport-test/blob/main/assets/fonts/inter-static/Inter-LightItalic-BETA.ttf?raw=true",
+          "source": "./assets/fonts/inter-static/Inter-LightItalic-BETA.ttf",
           "weight": "Light",
           "style": "Italic"
         },
         {
-          "source": "https://github.com/jacobgardner/pdfreport-test/blob/main/assets/fonts/inter-static/Inter-ExtraBold.ttf?raw=true",
+          "source": "./assets/fonts/inter-static/Inter-ExtraBold.ttf",
           "weight": "ExtraBold",
           "style": "Normal"
         },
         {
-          "source": "https://github.com/jacobgardner/pdfreport-test/blob/main/assets/fonts/inter-static/Inter-Medium.ttf?raw=true",
+          "source": "./assets/fonts/inter-static/Inter-Medium.ttf",
           "weight": "Medium",
           "style": "Normal"
         },
         {
-          "source": "https://github.com/jacobgardner/pdfreport-test/blob/main/assets/fonts/inter-static/Inter-Black.ttf?raw=true",
+          "source": "./assets/fonts/inter-static/Inter-Black.ttf",
           "weight": "Black",
           "style": "Normal"
         },
         {
-          "source": "https://github.com/jacobgardner/pdfreport-test/blob/main/assets/fonts/inter-static/Inter-MediumItalic.ttf?raw=true",
+          "source": "./assets/fonts/inter-static/Inter-MediumItalic.ttf",
           "weight": "Medium",
           "style": "Italic"
         }
