@@ -1,16 +1,13 @@
 [package]
-name = "pdf-render"
+name = "pdf-writer"
 version = "0.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
-
 [dependencies]
-serde = { version = "*", features = ["derive"] }
-thiserror = "*"
 printpdf = "*"
-num = "*"
-num-traits = "*"
-num-derive = "*"
-bytes = "*"
+thiserror = "*"
+
+
+document-render = { path = "../document-render"}

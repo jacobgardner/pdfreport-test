@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::error::{PdfGenerationError, UserInputError};
+use crate::error::{DocumentGenerationError, UserInputError};
 
 use super::{FontAttributes, FontData, FontFamilyCollection};
 
@@ -20,7 +20,7 @@ impl FontCollection {
         &self,
         family_name: &str,
         attributes: &FontAttributes,
-    ) -> Result<&FontData, PdfGenerationError> {
+    ) -> Result<&FontData, DocumentGenerationError> {
         let family_collection =
             self.families
                 .get(family_name)

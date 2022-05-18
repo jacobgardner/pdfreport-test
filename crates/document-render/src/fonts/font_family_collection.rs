@@ -2,13 +2,13 @@ use std::collections::HashMap;
 
 use bytes::Bytes;
 
-use crate::error::{PdfGenerationError, UserInputError};
+use crate::error::{DocumentGenerationError, UserInputError};
 
 use super::{FontAttributes, FontData, FontId};
 
 pub struct FontFamilyCollection {
     family_name: String,
-    pub(crate) fonts_by_attribute: HashMap<FontAttributes, FontData>,
+    pub fonts_by_attribute: HashMap<FontAttributes, FontData>,
 }
 
 impl FontFamilyCollection {
@@ -22,7 +22,7 @@ impl FontFamilyCollection {
     pub fn get_font_by_attribute(
         &self,
         attributes: &FontAttributes,
-    ) -> Result<&FontData, PdfGenerationError> {
+    ) -> Result<&FontData, DocumentGenerationError> {
         Ok(self.fonts_by_attribute.get(attributes).ok_or_else(|| {
             UserInputError::FontAttributesNotOnFamily {
                 family_name: self.family_name.to_owned(),
@@ -35,7 +35,7 @@ impl FontFamilyCollection {
         &mut self,
         attributes: FontAttributes,
         bytes: Bytes,
-    ) -> Result<FontId, PdfGenerationError> {
+    ) -> Result<FontId, DocumentGenerationError> {
         let new_font_id = FontId::new();
 
         if self
