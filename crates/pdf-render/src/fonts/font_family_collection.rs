@@ -7,8 +7,14 @@ use crate::error::{DocumentGenerationError, UserInputError};
 use super::{FontAttributes, FontData, FontId};
 
 pub struct FontFamilyCollection {
-    pub(super) family_name: String,
-    pub(crate) fonts_by_attribute: HashMap<FontAttributes, FontData>,
+    family_name: String,
+    fonts_by_attribute: HashMap<FontAttributes, FontData>,
+}
+
+impl AsRef<HashMap<FontAttributes, FontData>> for FontFamilyCollection {
+    fn as_ref(&self) -> &HashMap<FontAttributes, FontData> {
+        &self.fonts_by_attribute
+    }
 }
 
 impl FontFamilyCollection {
@@ -18,7 +24,11 @@ impl FontFamilyCollection {
             fonts_by_attribute: HashMap::new(),
         }
     }
-
+    
+    pub fn family_name(&self) -> &String {
+        &self.family_name
+    }
+    
     pub fn get_font_by_attribute(
         &self,
         attributes: &FontAttributes,

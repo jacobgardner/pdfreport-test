@@ -34,8 +34,8 @@ impl PrintPdfWriter {
         &mut self,
         font_collection: &FontCollection,
     ) -> Result<&mut Self, DocumentGenerationError> {
-        for (family_name, font_family) in font_collection.families.iter() {
-            for (attributes, data) in font_family.fonts_by_attribute.iter() {
+        for (family_name, font_family) in font_collection.as_ref().iter() {
+            for (attributes, data) in font_family.as_ref().iter() {
                 let indirect_font_ref = self
                     .raw_pdf_doc
                     .add_external_font(data.as_bytes())

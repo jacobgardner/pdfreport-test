@@ -6,7 +6,13 @@ use super::{FontAttributes, FontData, FontFamilyCollection};
 
 #[derive(Default)]
 pub struct FontCollection {
-    pub families: HashMap<String, FontFamilyCollection>,
+    families: HashMap<String, FontFamilyCollection>,
+}
+
+impl AsRef<HashMap<String, FontFamilyCollection>> for FontCollection {
+    fn as_ref(&self) -> &HashMap<String, FontFamilyCollection> {
+        &self.families
+    }
 }
 
 impl FontCollection {
@@ -20,7 +26,7 @@ impl FontCollection {
         &mut self,
         family_collection: FontFamilyCollection,
     ) -> Result<&mut Self, DocumentGenerationError> {
-        let family_name = family_collection.family_name.clone();
+        let family_name = family_collection.family_name().clone();
 
         if self
             .families
