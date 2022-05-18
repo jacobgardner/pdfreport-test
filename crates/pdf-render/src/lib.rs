@@ -1,3 +1,8 @@
+// TODO: Remove these once we have more stuff implemented
+#![allow(unused_variables)]
+#![allow(unused_mut)]
+#![allow(dead_code)]
+
 use document_builder::DocumentBuilder;
 use print_pdf_writer::{PrintPdfWriter};
 use std::io::Write;
