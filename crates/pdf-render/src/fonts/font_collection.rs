@@ -67,7 +67,7 @@ impl FontCollection {
 mod tests {
     use bytes::Bytes;
 
-    use crate::fonts::FontStyle;
+    use crate::fonts::FontSlant;
 
     use super::*;
 
@@ -82,7 +82,7 @@ mod tests {
         let fid2 = family1
             .add_font(
                 FontAttributes {
-                    style: FontStyle::Italic,
+                    style: FontSlant::Italic,
                     ..Default::default()
                 },
                 Bytes::from("2"),
@@ -104,7 +104,7 @@ mod tests {
                 .lookup_font(
                     "Inter",
                     &FontAttributes {
-                        style: FontStyle::Italic,
+                        style: FontSlant::Italic,
                         ..Default::default()
                     }
                 )
@@ -125,7 +125,7 @@ mod tests {
         let fid2 = family1
             .add_font(
                 FontAttributes {
-                    style: FontStyle::Italic,
+                    style: FontSlant::Italic,
                     ..Default::default()
                 },
                 Bytes::from("2"),

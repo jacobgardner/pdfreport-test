@@ -6,8 +6,8 @@
 use bytes::Bytes;
 use doc_structure::FontFamilyInfo;
 use document_builder::DocumentBuilder;
-use fonts::{FontAttributes, FontCollection, FontFamilyCollection, FontStyle, FontWeight};
-use paragraph_layout::{LayoutStyle, ParagraphLayout};
+use fonts::{FontAttributes, FontCollection, FontFamilyCollection, FontSlant, FontWeight};
+use paragraph_layout::{ParagraphLayout, ParagraphStyle};
 use print_pdf_writer::PrintPdfWriter;
 use rich_text::{RichText, RichTextSpan};
 use std::io::Write;
@@ -53,8 +53,11 @@ pub fn build_pdf_from_dom<W: Write>(
     pdf_doc_writer: W,
 ) -> Result<W, DocumentGenerationError> {
     let font_collection = load_fonts_from_doc_structure(&doc_structure.fonts)?;
-    let mut pdf_writer = PrintPdfWriter::new(&doc_structure.document_title, page_sizes::LETTER, &font_collection);
-
+    let mut pdf_writer = PrintPdfWriter::new(
+        &doc_structure.document_title,
+        page_sizes::LETTER,
+        &font_collection,
+    );
 
     let mut paragraph_layout = ParagraphLayout::new();
     paragraph_layout.load_fonts(&font_collection)?;
@@ -77,7 +80,7 @@ pub fn build_pdf_from_dom<W: Write>(
         .lookup_font(
             "Inter",
             &FontAttributes {
-                style: FontStyle::Italic,
+                style: FontSlant::Italic,
                 ..Default::default()
             },
         )?
@@ -87,23 +90,27 @@ pub fn build_pdf_from_dom<W: Write>(
 
     let line = RichText(vec![
         RichTextSpan {
+            font_family: "Inter".to_owned(),
             size: Pt(32.),
             attributes: FontAttributes::bold(),
             .."The quick brown".into()
         },
         RichTextSpan {
+            font_family: "Inter".to_owned(),
             attributes: FontAttributes::default(),
             size: Pt(15.),
             .." fox jumps over the".into()
         },
         RichTextSpan {
+            font_family: "Inter".to_owned(),
             size: Pt(8.),
             attributes: FontAttributes::italic(),
             .." lazy dog".into()
         },
     ]);
 
-    let text_block = paragraph_layout.calculate_layout(LayoutStyle {}, &line, Pt(200.))?;
+    let text_block =
+        paragraph_layout.calculate_layout(ParagraphStyle::default(), &line, Pt(200.))?;
 
     pdf_builder.write_text_block(
         text_block,

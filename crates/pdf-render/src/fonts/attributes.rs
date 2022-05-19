@@ -6,13 +6,13 @@ pub struct FontAttributes {
     #[serde(default)]
     pub weight: FontWeight,
     #[serde(default)]
-    pub style: FontStyle, // Italic/Normal/Oblique
+    pub style: FontSlant, // Italic/Normal/Oblique
 }
 
 impl FontAttributes {
     pub fn italic() -> Self {
         Self {
-            style: FontStyle::Italic,
+            style: FontSlant::Italic,
             ..Default::default()
         }
     }
@@ -26,22 +26,22 @@ impl FontAttributes {
 }
 
 #[derive(Hash, Eq, PartialEq, Debug, Clone, Copy, FromPrimitive, Deserialize)]
-pub enum FontStyle {
+pub enum FontSlant {
     Normal,
     Italic,
 }
 
-impl Default for FontStyle {
+impl Default for FontSlant {
     fn default() -> Self {
-        FontStyle::Normal
+        FontSlant::Normal
     }
 }
 
-impl From<&str> for FontStyle {
+impl From<&str> for FontSlant {
     fn from(s: &str) -> Self {
         match s.to_lowercase().as_str() {
-            "italic" => FontStyle::Italic,
-            _ => FontStyle::Normal,
+            "italic" => FontSlant::Italic,
+            _ => FontSlant::Normal,
         }
     }
 }

@@ -21,6 +21,11 @@ pub enum InternalServerError {
     SkiaTypefaceFailure {
         family_name: String,
         attributes: FontAttributes
+    },
+    
+    #[error("Font face not loaded into text layout engine: {family_name}")]
+    FontFamilyNotRegisteredForLayoutEngine {
+        family_name: String
     }
 }
 

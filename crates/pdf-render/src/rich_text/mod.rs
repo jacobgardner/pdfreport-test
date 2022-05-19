@@ -1,6 +1,6 @@
 use crate::{
     error::DocumentGenerationError,
-    fonts::{FontAttributes, FontId},
+    fonts::FontAttributes,
     values::{Color, Pt},
 };
 
@@ -8,6 +8,7 @@ use crate::{
 pub struct RichTextSpan {
     pub text: String,
     pub attributes: FontAttributes,
+    // TODO: Probably not efficient to store a full string every time
     pub font_family: String,
     pub size: Pt,
     pub color: Color,
@@ -99,8 +100,6 @@ mod tests {
 
     #[test]
     fn substr_works() {
-        let font_id = FontId::new();
-
         let line = RichText(vec![
             RichTextSpan {
                 // 15 characters

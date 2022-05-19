@@ -1,55 +1,35 @@
-use std::collections::HashMap;
+use std::collections::HashSet;
 
+mod layout_style;
+mod line_metrics;
 mod styles;
+mod text_block;
 
-use skia_safe::{
-    textlayout::{ParagraphBuilder, ParagraphStyle, TextAlign, TextStyle, TypefaceFontProvider},
-    Data, FontMgr, Typeface,
-};
+pub use layout_style::{ParagraphStyle, TextAlign};
+pub use line_metrics::LineMetrics;
+pub use text_block::{RenderedTextBlock, RenderedTextLine};
+
+use skia_layout::{ParagraphBuilder, TypefaceFontProvider};
+use skia_safe::textlayout as skia_layout;
+use skia_safe::{Data, FontMgr, Typeface};
 
 use crate::{
     error::{DocumentGenerationError, InternalServerError},
-    fonts::{FontCollection, FontId},
+    fonts::FontCollection,
     rich_text::RichText,
     values::Pt,
 };
 
-#[derive(Debug)]
-pub struct LineMetrics {
-    pub ascent: Pt,
-    pub descent: Pt,
-    pub baseline: Pt,
-    pub height: Pt,
-    pub width: Pt,
-    pub left: Pt,
-}
-
-pub struct RenderedTextLine {
-    pub rich_text: RichText,
-    pub line_metrics: LineMetrics,
-}
-
-#[derive(Default)]
-pub struct RenderedTextBlock {
-    // block_metrics: BlockMetrics
-    pub lines: Vec<RenderedTextLine>,
-}
-
 pub struct ParagraphLayout {
-    skia_font_collection: skia_safe::textlayout::FontCollection,
-    fonts: HashMap<FontId, String>,
-}
-
-// TODO: rename
-pub struct LayoutStyle {
-    // align:
+    skia_font_collection: skia_layout::FontCollection,
+    font_families: HashSet<String>,
 }
 
 impl ParagraphLayout {
     pub fn new() -> Self {
         Self {
-            skia_font_collection: skia_safe::textlayout::FontCollection::new(),
-            fonts: HashMap::new(),
+            skia_font_collection: skia_layout::FontCollection::new(),
+            font_families: HashSet::new(),
         }
     }
 
@@ -61,7 +41,7 @@ impl ParagraphLayout {
 
         for (family_name, font_family) in font_collection.as_ref().iter() {
             for (attributes, data) in font_family.as_ref().iter() {
-                self.fonts.insert(data.font_id(), family_name.clone());
+                self.font_families.insert(family_name.clone());
 
                 let data = Data::new_copy(data.as_bytes());
                 let typeface = Typeface::from_data(data, None).ok_or_else(|| {
@@ -83,38 +63,21 @@ impl ParagraphLayout {
         Ok(self)
     }
 
-    fn get_font_family(&self, font_id: FontId) -> Result<&String, DocumentGenerationError> {
-        Ok(self
-            .fonts
-            .get(&font_id)
-            .ok_or_else(|| InternalServerError::FontIdNotLoaded)?)
-    }
-
     pub fn calculate_layout(
         &self,
-        layout_style: LayoutStyle,
+        layout_style: ParagraphStyle,
         rich_text: &RichText,
         width: Pt,
     ) -> Result<RenderedTextBlock, DocumentGenerationError> {
-        let mut paragraph_style = ParagraphStyle::new();
-        let mut default_style = TextStyle::new();
+        let mut paragraph_style = skia_layout::ParagraphStyle::new();
 
-        if let Some(span) = rich_text.0.first() {
-            // TODO: Ensure this font family is loaded
-            default_style.set_font_families(&[&span.font_family]);
-        } else {
-            return Ok(RenderedTextBlock::default());
-        }
-
-        paragraph_style.set_text_align(TextAlign::Left);
+        paragraph_style.set_text_align(layout_style.align.into());
 
         let mut paragraph_builder =
             ParagraphBuilder::new(&paragraph_style, self.skia_font_collection.clone());
 
         for span in rich_text.0.iter() {
-            let mut span_style = default_style.clone();
-
-            span_style.set_font_size(span.size.0 as f32);
+            let mut span_style = self.layout_style_from_span(span)?;
 
             paragraph_builder.push_style(&span_style);
             paragraph_builder.add_text(&span.text);
@@ -133,18 +96,5 @@ impl ParagraphLayout {
         }
 
         Ok(rendered_text_block)
-    }
-}
-
-impl<'a> From<&skia_safe::textlayout::LineMetrics<'a>> for LineMetrics {
-    fn from(metrics: &skia_safe::textlayout::LineMetrics) -> Self {
-        Self {
-            ascent: metrics.ascent.into(),
-            descent: metrics.descent.into(),
-            baseline: metrics.baseline.into(),
-            height: metrics.height.into(),
-            width: metrics.width.into(),
-            left: metrics.left.into(),
-        }
     }
 }
