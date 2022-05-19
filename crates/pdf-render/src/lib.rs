@@ -11,7 +11,7 @@ use paragraph_layout::{ParagraphLayout, ParagraphStyle};
 use print_pdf_writer::PrintPdfWriter;
 use rich_text::{RichText, RichTextSpan};
 use std::io::Write;
-use values::{Point, Pt};
+use values::{Point, Pt, Color};
 
 pub mod doc_structure;
 pub mod document_builder;
@@ -90,18 +90,21 @@ pub fn build_pdf_from_dom<W: Write>(
 
     let line = RichText(vec![
         RichTextSpan {
+            color: Color::try_from("Pink")?,
             font_family: "Inter".to_owned(),
             size: Pt(32.),
             attributes: FontAttributes::bold(),
             .."The quick brown".into()
         },
         RichTextSpan {
+            color: Color::try_from("gray")?,
             font_family: "Inter".to_owned(),
             attributes: FontAttributes::default(),
             size: Pt(15.),
             .." fox jumps over the".into()
         },
         RichTextSpan {
+            color: Color::try_from("#00cc00")?,
             font_family: "Inter".to_owned(),
             size: Pt(8.),
             attributes: FontAttributes::italic(),

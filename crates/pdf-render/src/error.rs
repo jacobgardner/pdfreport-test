@@ -49,6 +49,12 @@ pub enum UserInputError {
     #[error("Font family, {family_name}, was registered more than once")]
     NonUniqueFontFamily { family_name: String },
 
+    #[error("Cannot parse font-color: {source}")]
+    ColorParseError {
+        #[from]
+        source: color_processing::ParseError,
+    },
+
 }
 
 #[derive(Error, Debug)]

@@ -156,6 +156,7 @@ impl<'a> DocumentWriter for PrintPdfWriter<'a> {
                 // the PDF, so we should probably optimize to only update the
                 // styles when something has changed (keep track of last state)
                 layer.set_font(font, span.size.0);
+                layer.set_fill_color(span.color.clone().into());
                 layer.write_text(span.text.clone(), font);
             }
 

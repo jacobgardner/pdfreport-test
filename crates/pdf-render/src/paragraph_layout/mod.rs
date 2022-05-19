@@ -25,6 +25,12 @@ pub struct ParagraphLayout {
     font_families: HashSet<String>,
 }
 
+impl Default for ParagraphLayout {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl ParagraphLayout {
     pub fn new() -> Self {
         Self {
@@ -47,7 +53,7 @@ impl ParagraphLayout {
                 let typeface = Typeface::from_data(data, None).ok_or_else(|| {
                     InternalServerError::SkiaTypefaceFailure {
                         family_name: family_name.clone(),
-                        attributes: attributes.clone(),
+                        attributes: *attributes,
                     }
                 })?;
 

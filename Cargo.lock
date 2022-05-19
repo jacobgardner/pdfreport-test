@@ -397,6 +397,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "color_processing"
+version = "0.6.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "275692afb55bf54dc24a0bff8a2a3fccaf99bd59f7b963d9d1882a164f7e3d4f"
+dependencies = [
+ "lazy_static",
+ "regex",
+]
+
+[[package]]
 name = "const_fn"
 version = "0.4.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1132,6 +1142,7 @@ name = "pdf-render"
 version = "0.1.0"
 dependencies = [
  "bytes",
+ "color_processing",
  "num",
  "num-derive",
  "num-traits",
