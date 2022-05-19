@@ -22,6 +22,7 @@ pub mod paragraph_layout;
 pub mod print_pdf_writer;
 pub mod rich_text;
 pub mod values;
+mod block_layout;
 
 use error::DocumentGenerationError;
 
