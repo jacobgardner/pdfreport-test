@@ -16,17 +16,15 @@ pub enum InternalServerError {
 
     #[error("FontId does not match any loaded font.")]
     FontIdNotLoaded,
-    
+
     #[error("Unable to associate font data with skia typeface for family, {family_name} w/ attributes: {attributes:?}")]
     SkiaTypefaceFailure {
         family_name: String,
-        attributes: FontAttributes
+        attributes: FontAttributes,
     },
-    
+
     #[error("Font face not loaded into text layout engine: {family_name}")]
-    FontFamilyNotRegisteredForLayoutEngine {
-        family_name: String
-    }
+    FontFamilyNotRegisteredForLayoutEngine { family_name: String },
 }
 
 #[derive(Error, Debug)]
@@ -55,6 +53,8 @@ pub enum UserInputError {
         source: color_processing::ParseError,
     },
 
+    #[error("Style name does not exist on stylesheet: {style_name}")]
+    StyleDoesNotExist { style_name: String },
 }
 
 #[derive(Error, Debug)]

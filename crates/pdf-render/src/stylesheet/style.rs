@@ -79,7 +79,8 @@ impl Default for BorderStyle {
     fn default() -> Self {
         Self {
             width: 0.,
-            ..Default::default()
+            color: Default::default(),
+            radius: Default::default(),
         }
     }
 }
@@ -196,7 +197,11 @@ impl Default for Style {
             background_color: Color::white(),
             width: String::from("auto"),
             height: String::from("auto"),
-            ..Default::default()
+            border: Default::default(),
+            font: Default::default(),
+            margin: Default::default(),
+            padding: Default::default(),
+            flex: Default::default(),
         }
     }
 }
