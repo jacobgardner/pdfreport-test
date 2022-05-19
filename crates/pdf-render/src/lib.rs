@@ -113,7 +113,7 @@ pub fn build_pdf_from_dom<W: Write>(
     ]);
 
     let text_block =
-        paragraph_layout.calculate_layout(ParagraphStyle::default(), &line, Pt(200.))?;
+        paragraph_layout.calculate_layout(ParagraphStyle::default(), &line, Pt(250.))?;
 
     pdf_builder.write_text_block(
         text_block,
