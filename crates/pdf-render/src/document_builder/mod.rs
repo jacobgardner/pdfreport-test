@@ -1,9 +1,15 @@
-use crate::{error::DocumentGenerationError, rich_text::RichText, paragraph_layout::RenderedTextBlock, values::{Point, Pt}};
+use crate::{
+    error::DocumentGenerationError,
+    paragraph_layout::RenderedTextBlock,
+    rich_text::RichText,
+    values::{Point, Pt},
+};
 
 pub use self::document_writer::DocumentWriter;
 
 pub struct DocumentBuilder<Writer: DocumentWriter> {
     raw_document_writer: Writer,
+    draw_debug_lines: bool,
 }
 
 mod document_writer;
@@ -12,7 +18,14 @@ impl<Writer: DocumentWriter> DocumentBuilder<Writer> {
     pub fn new(raw_document_writer: Writer) -> Self {
         Self {
             raw_document_writer,
+            draw_debug_lines: false,
         }
+    }
+
+    pub fn enable_debug_lines(&mut self, value: bool) -> &mut Self {
+        self.draw_debug_lines = value;
+
+        self
     }
 
     pub fn write_text_block(
@@ -20,8 +33,9 @@ impl<Writer: DocumentWriter> DocumentBuilder<Writer> {
         text_block: RenderedTextBlock,
         position: Point<Pt>,
     ) -> Result<&mut Self, DocumentGenerationError> {
-        self.raw_document_writer.write_text_block(text_block, position)?;
-        
+        self.raw_document_writer
+            .write_text_block(text_block, position)?;
+
         Ok(self)
     }
 

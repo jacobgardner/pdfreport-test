@@ -17,6 +17,14 @@ pub struct ParagraphStyle {
     pub align: TextAlign,
 }
 
+impl ParagraphStyle {
+    pub fn center() -> Self {
+        Self {
+            align: TextAlign::Center,
+        }
+    }
+}
+
 impl From<TextAlign> for skia_layout::TextAlign {
     fn from(align: TextAlign) -> Self {
         match align {
