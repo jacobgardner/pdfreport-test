@@ -14,15 +14,16 @@ use std::io::Write;
 use values::{Point, Pt, Color};
 
 pub mod doc_structure;
-pub mod document_builder;
+mod document_builder;
 pub mod error;
 mod fonts;
-pub mod page_sizes;
-pub mod paragraph_layout;
-pub mod print_pdf_writer;
-pub mod rich_text;
-pub mod values;
+mod page_sizes;
+mod paragraph_layout;
+mod print_pdf_writer;
+mod rich_text;
+mod values;
 mod block_layout;
+mod stylesheet;
 
 use error::DocumentGenerationError;
 

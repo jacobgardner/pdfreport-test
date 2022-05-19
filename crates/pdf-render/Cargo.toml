@@ -15,5 +15,8 @@ num-traits = "*"
 num-derive = "*"
 bytes = "*"
 skia-safe = { version =  "*", features = ["textlayout"] }
+
 color_processing = "*"
 polyhorn-yoga = "*"
+
+optional-merge-derive = { path = "../optional-merge-derive" }

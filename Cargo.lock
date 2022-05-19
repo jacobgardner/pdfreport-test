@@ -1226,6 +1226,7 @@ dependencies = [
  "num",
  "num-derive",
  "num-traits",
+ "optional-merge-derive",
  "polyhorn-yoga",
  "printpdf",
  "serde",

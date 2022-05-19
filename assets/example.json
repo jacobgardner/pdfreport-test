@@ -99,7 +99,7 @@
       ]
     }
   ],
-  "styles": {
+  "stylesheet": {
     "root": {
       "font": {
         "family": "Inter"

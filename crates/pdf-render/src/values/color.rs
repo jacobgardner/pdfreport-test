@@ -1,19 +1,37 @@
+use serde::Deserialize;
+
 use crate::error::UserInputError;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Deserialize, Debug, Clone, PartialEq)]
+#[serde(try_from = "&str")]
 pub struct Color {
     r: f64,
     g: f64,
     b: f64,
 }
 
-impl Default for Color {
-    fn default() -> Self {
+
+impl Color {
+    pub fn white() -> Self {
+        Self {
+            r: 1.,
+            g: 1.,
+            b: 1.,
+        }
+    }
+
+    pub fn black() -> Self {
         Self {
             r: 0.,
             g: 0.,
             b: 0.,
         }
+    }
+}
+
+impl Default for Color {
+    fn default() -> Self {
+        Self::black()
     }
 }
 

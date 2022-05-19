@@ -24,7 +24,9 @@ impl DomNode {
         }
     }
 
-    pub fn children(&self) -> &[DomNode] {
+    // This does not return children that are not considered block elements
+    //  for the layout engine TextNodes, Strings, etc.
+    pub fn block_children(&self) -> &[DomNode] {
         match self {
             DomNode::Styled(node) => &node.children,
             _ => &[],
@@ -35,16 +37,16 @@ impl DomNode {
         // This should be safe from panic as well because the
         // current_node MUST have come from the parent
         let current_index = self
-            .children()
+            .block_children()
             .iter()
             .position(|node| std::ptr::eq(node, target_node))
             .unwrap();
 
-        self.children().get(current_index + 1)
+        self.block_children().get(current_index + 1)
     }
 
-    pub fn has_children(&self) -> bool {
-        !self.children().is_empty()
+    pub fn has_block_children(&self) -> bool {
+        !self.block_children().is_empty()
     }
 
     pub fn block_iter(&self) -> BlockDomNodeIterator {
@@ -72,8 +74,8 @@ impl<'a> Iterator for BlockDomNodeIterator<'a> {
             None
         };
 
-        if current_node.has_children() {
-            self.current_stack.push(&current_node.children()[0]);
+        if current_node.has_block_children() {
+            self.current_stack.push(&current_node.block_children()[0]);
         } else {
             let mut found_node = false;
 

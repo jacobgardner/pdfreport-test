@@ -1,8 +1,10 @@
 use optional_merge_derive::MergeOptional;
 use serde::Deserialize;
 
-use crate::rich_text::{FontStyle, FontWeight};
-
+use crate::{
+    fonts::{FontSlant, FontWeight},
+    values::Color,
+};
 
 macro_rules! primitive_merge  {
     ($name : ident) => {
@@ -32,7 +34,7 @@ impl<T: Merges + Clone> Merges for Option<T> {
     }
 }
 
-primitive_merge!(f32, String, Direction, FlexWrap, FlexAlign, FontStyle, FontWeight);
+primitive_merge!(f32, String, Direction, FlexWrap, FlexAlign, FontSlant, FontWeight, Color);
 
 pub trait Merges: Sized + Clone {
     fn merge(&self, rhs: &Self) -> Self;
@@ -77,8 +79,7 @@ impl Default for BorderStyle {
     fn default() -> Self {
         Self {
             width: 0.,
-            color: String::from("#000000"),
-            radius: BorderRadiusStyle::default(),
+            ..Default::default()
         }
     }
 }
@@ -155,7 +156,7 @@ impl Default for EdgeStyle {
 pub struct FontStyles {
     pub family: String,
     pub size: f32,
-    pub style: FontStyle,
+    pub style: FontSlant,
     pub weight: FontWeight,
 }
 
@@ -164,7 +165,7 @@ impl Default for FontStyles {
         Self {
             family: String::from("sans-serif"),
             size: 12.,
-            style: FontStyle::Normal,
+            style: FontSlant::Normal,
             weight: FontWeight::Regular,
         }
     }
@@ -191,15 +192,11 @@ pub struct Style {
 impl Default for Style {
     fn default() -> Self {
         Self {
-            border: BorderStyle::default(),
-            color: String::from("#000000"),
-            background_color: String::from("#FFFFFF"),
-            flex: FlexStyle::default(),
-            margin: EdgeStyle::default(),
-            padding: EdgeStyle::default(),
+            color: Color::black(),
+            background_color: Color::white(),
             width: String::from("auto"),
             height: String::from("auto"),
-            font: FontStyles::default(),
+            ..Default::default()
         }
     }
 }

@@ -12,14 +12,16 @@ pub use image_node::ImageNode;
 pub use text_node::{TextChild, TextNode};
 pub use fonts::FontFamilyInfo;
 
+use crate::stylesheet::Stylesheet;
+
 
 #[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct DocStructure {
     pub filename: String,
     pub document_title: String,
 
     pub fonts: Vec<FontFamilyInfo>,
-    // pub styles: HashMap<String, MergeableStyle>,
+    pub stylesheet: Stylesheet,
     pub root: DomNode,
 }
