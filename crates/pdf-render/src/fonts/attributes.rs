@@ -9,6 +9,22 @@ pub struct FontAttributes {
     pub style: FontStyle, // Italic/Normal/Oblique
 }
 
+impl FontAttributes {
+    pub fn italic() -> Self {
+        Self {
+            style: FontStyle::Italic,
+            ..Default::default()
+        }
+    }
+
+    pub fn bold() -> Self {
+        Self {
+            weight: FontWeight::Bold,
+            ..Default::default()
+        }
+    }
+}
+
 #[derive(Hash, Eq, PartialEq, Debug, Clone, Copy, FromPrimitive, Deserialize)]
 pub enum FontStyle {
     Normal,

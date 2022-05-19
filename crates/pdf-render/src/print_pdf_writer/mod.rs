@@ -3,25 +3,32 @@ use std::{
     io::{BufWriter, Write},
 };
 
-use printpdf::{IndirectFontRef, PdfDocument, PdfDocumentReference, PdfLayerIndex, PdfPageIndex, TextMatrix};
+use printpdf::{
+    IndirectFontRef, PdfDocument, PdfDocumentReference, PdfLayerIndex, PdfPageIndex, TextMatrix,
+};
 
 use crate::{
     document_builder::DocumentWriter,
     error::{DocumentGenerationError, InternalServerError},
     fonts::{FontCollection, FontId},
-    geometry::{Mm, Point, Pt, Size},
     paragraph_layout::RenderedTextBlock,
     rich_text::RichText,
+    values::{Mm, Point, Pt, Size},
 };
 
-pub struct PrintPdfWriter {
+pub struct PrintPdfWriter<'a> {
     raw_pdf_doc: PdfDocumentReference,
     fonts: HashMap<FontId, IndirectFontRef>,
     page_layer_indices: Vec<(PdfPageIndex, Vec<PdfLayerIndex>)>,
+    font_collection: &'a FontCollection,
 }
 
-impl PrintPdfWriter {
-    pub fn new(doc_title: &str, page_size: impl Into<Size<Mm>>) -> Self {
+impl<'a> PrintPdfWriter<'a> {
+    pub fn new(
+        doc_title: &str,
+        page_size: impl Into<Size<Mm>>,
+        font_collection: &'a FontCollection,
+    ) -> Self {
         let dimensions = page_size.into();
 
         let (doc, page_index, layer_index) = PdfDocument::new(
@@ -35,6 +42,7 @@ impl PrintPdfWriter {
             raw_pdf_doc: doc,
             fonts: HashMap::new(),
             page_layer_indices: vec![(page_index, vec![layer_index])],
+            font_collection,
         }
     }
 
@@ -78,7 +86,7 @@ impl PrintPdfWriter {
     }
 }
 
-impl DocumentWriter for PrintPdfWriter {
+impl<'a> DocumentWriter for PrintPdfWriter<'a> {
     fn write_line(&mut self, pdf_line: RichText) -> Result<&mut Self, DocumentGenerationError> {
         let (page_index, layers) = &self.page_layer_indices[0];
         let first_layer = layers[0];
@@ -88,10 +96,15 @@ impl DocumentWriter for PrintPdfWriter {
 
         layer.begin_text_section();
         layer.set_text_cursor(printpdf::Mm(0.), printpdf::Mm(100.));
+
         for span in pdf_line.0.iter() {
             let font = self
+                .font_collection
+                .lookup_font(&span.font_family, &span.attributes)?;
+
+            let font = self
                 .fonts
-                .get(&span.font_id)
+                .get(&font.font_id())
                 .ok_or(InternalServerError::FontIdNotLoaded)?;
 
             // TODO: I believe every time we set this, it adds more data to
@@ -131,8 +144,12 @@ impl DocumentWriter for PrintPdfWriter {
 
             for span in line.rich_text.0.iter() {
                 let font = self
+                    .font_collection
+                    .lookup_font(&span.font_family, &span.attributes)?;
+
+                let font = self
                     .fonts
-                    .get(&span.font_id)
+                    .get(&font.font_id())
                     .ok_or(InternalServerError::FontIdNotLoaded)?;
 
                 // TODO: I believe every time we set this, it adds more data to

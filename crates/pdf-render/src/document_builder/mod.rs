@@ -1,4 +1,4 @@
-use crate::{error::DocumentGenerationError, rich_text::RichText, paragraph_layout::RenderedTextBlock, geometry::{Point, Pt}};
+use crate::{error::DocumentGenerationError, rich_text::RichText, paragraph_layout::RenderedTextBlock, values::{Point, Pt}};
 
 pub use self::document_writer::DocumentWriter;
 
@@ -73,7 +73,7 @@ mod tests {
         fn write_text_block(
             &mut self,
             text_block: crate::paragraph_layout::RenderedTextBlock,
-            position: crate::geometry::Point<crate::geometry::Pt>,
+            position: crate::values::Point<crate::values::Pt>,
         ) -> Result<&mut Self, DocumentGenerationError> {
             todo!()
         }

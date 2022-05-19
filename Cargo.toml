@@ -34,3 +34,8 @@ serde_json = "*"
 pdf-render = { path = "crates/pdf-render" }
 
 optional-merge-derive = { path = "crates/optional-merge-derive" }
+
+# All dependencies are built with optimizations allowing for 
+# faster pdf authoring in develop builds
+[profile.dev.package."*"]
+opt-level = 3

@@ -1,5 +1,5 @@
 
-use crate::geometry::{Size, Mm};
+use crate::values::{Size, Mm};
 
 // Apparently this is different from letter
 pub const A4: Size<Mm> = Size {

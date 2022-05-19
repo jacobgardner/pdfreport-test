@@ -7,21 +7,21 @@ use bytes::Bytes;
 use doc_structure::FontFamilyInfo;
 use document_builder::DocumentBuilder;
 use fonts::{FontAttributes, FontCollection, FontFamilyCollection, FontStyle, FontWeight};
-use geometry::{Pt, Point};
-use paragraph_layout::{ParagraphLayout, LayoutStyle};
+use paragraph_layout::{LayoutStyle, ParagraphLayout};
 use print_pdf_writer::PrintPdfWriter;
 use rich_text::{RichText, RichTextSpan};
 use std::io::Write;
+use values::{Point, Pt};
 
 pub mod doc_structure;
 pub mod document_builder;
 pub mod error;
 mod fonts;
-pub mod geometry;
 pub mod page_sizes;
 pub mod paragraph_layout;
 pub mod print_pdf_writer;
 pub mod rich_text;
+pub mod values;
 
 use error::DocumentGenerationError;
 
@@ -52,13 +52,12 @@ pub fn build_pdf_from_dom<W: Write>(
     doc_structure: &doc_structure::DocStructure,
     pdf_doc_writer: W,
 ) -> Result<W, DocumentGenerationError> {
-    let mut pdf_writer = PrintPdfWriter::new(&doc_structure.document_title, page_sizes::LETTER);
-
     let font_collection = load_fonts_from_doc_structure(&doc_structure.fonts)?;
+    let mut pdf_writer = PrintPdfWriter::new(&doc_structure.document_title, page_sizes::LETTER, &font_collection);
+
 
     let mut paragraph_layout = ParagraphLayout::new();
     paragraph_layout.load_fonts(&font_collection)?;
-    
 
     pdf_writer.load_fonts(&font_collection)?;
 
@@ -88,29 +87,32 @@ pub fn build_pdf_from_dom<W: Write>(
 
     let line = RichText(vec![
         RichTextSpan {
-            text: "The quick brown".to_owned(),
-            font_id: bold,
             size: Pt(32.),
+            attributes: FontAttributes::bold(),
+            .."The quick brown".into()
         },
         RichTextSpan {
-            text: " fox jumps over the".to_owned(),
-            font_id: regular,
+            attributes: FontAttributes::default(),
             size: Pt(15.),
+            .." fox jumps over the".into()
         },
         RichTextSpan {
-            text: " lazy dog".to_owned(),
-            font_id: italic,
             size: Pt(8.),
+            attributes: FontAttributes::italic(),
+            .." lazy dog".into()
         },
     ]);
-    
+
     let text_block = paragraph_layout.calculate_layout(LayoutStyle {}, &line, Pt(200.))?;
-    
-    pdf_builder.write_text_block(text_block, Point {
-        x: Pt(10.),
-        y: Pt(600.),
-    })?;
-    
+
+    pdf_builder.write_text_block(
+        text_block,
+        Point {
+            x: Pt(10.),
+            y: Pt(600.),
+        },
+    )?;
+
     // for line in text_block.lines {
     //     pdf_builder.write_line(line.rich_text)?;
     // }

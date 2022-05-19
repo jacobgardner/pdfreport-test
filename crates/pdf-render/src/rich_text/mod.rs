@@ -1,24 +1,31 @@
-use crate::{error::DocumentGenerationError, fonts::FontId, geometry::Pt};
+use crate::{
+    error::DocumentGenerationError,
+    fonts::{FontAttributes, FontId},
+    values::{Color, Pt},
+};
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Default, Clone, Debug, PartialEq)]
 pub struct RichTextSpan {
     pub text: String,
-    pub font_id: FontId,
+    pub attributes: FontAttributes,
+    pub font_family: String,
     pub size: Pt,
+    pub color: Color,
+}
+
+impl From<&str> for RichTextSpan {
+    fn from(raw_str: &str) -> Self {
+        RichTextSpan {
+            text: raw_str.to_owned(),
+            ..Default::default()
+        }
+    }
 }
 
 #[derive(Debug, PartialEq)]
 pub struct RichText(pub Vec<RichTextSpan>);
 
 impl RichText {
-    pub fn from_str(raw_string: &str, font_id: FontId, size: impl Into<Pt>) -> Self {
-        Self(vec![RichTextSpan {
-            text: raw_string.to_owned(),
-            font_id,
-            size: size.into(),
-        }])
-    }
-
     pub fn substr(
         &self,
         line_start_index: usize,
@@ -69,7 +76,7 @@ impl RichText {
 
             rich_text
                 .0
-                .extend(self.0[start_span_index+1..end_span_index].iter().cloned());
+                .extend(self.0[start_span_index + 1..end_span_index].iter().cloned());
 
             let (end_span, start, end) = span_data[end_span_index];
             rich_text.0.push(RichTextSpan {
@@ -88,6 +95,8 @@ impl RichText {
 mod tests {
     use super::*;
 
+    // TODO: Add tests for substr out side of range
+
     #[test]
     fn substr_works() {
         let font_id = FontId::new();
@@ -95,21 +104,18 @@ mod tests {
         let line = RichText(vec![
             RichTextSpan {
                 // 15 characters
-                text: "The quick brown".to_owned(),
-                font_id,
                 size: Pt(32.),
+                .."The quick brown".into()
             },
             RichTextSpan {
                 // 19 characters
-                text: " fox jumps over the".to_owned(),
-                font_id,
                 size: Pt(15.),
+                .." fox jumps over the".into()
             },
             RichTextSpan {
                 // 9 characters
-                text: " lazy dog".to_owned(),
-                font_id,
                 size: Pt(8.),
+                .." lazy dog".into()
             },
         ]);
 
@@ -119,33 +125,29 @@ mod tests {
         assert_eq!(
             line.substr(0, 10).unwrap(),
             RichText(vec![RichTextSpan {
-                text: "The quick ".to_owned(),
-                font_id,
-                size: Pt(32.)
+                size: Pt(32.),
+                .."The quick ".into()
             }])
         );
         assert_eq!(
             line.substr(16, 20).unwrap(),
             RichText(vec![RichTextSpan {
-                text: "fox ".to_owned(),
-                font_id,
-                size: Pt(15.)
+                size: Pt(15.),
+                .."fox ".into()
             }])
         );
         assert_eq!(
             line.substr(15, 20).unwrap(),
             RichText(vec![RichTextSpan {
-                text: " fox ".to_owned(),
-                font_id,
-                size: Pt(15.)
+                size: Pt(15.),
+                .." fox ".into()
             }])
         );
         assert_eq!(
             line.substr(15, 34).unwrap(),
             RichText(vec![RichTextSpan {
-                text: " fox jumps over the".to_owned(),
-                font_id,
-                size: Pt(15.)
+                size: Pt(15.),
+                .." fox jumps over the".into()
             }])
         );
 
@@ -155,9 +157,8 @@ mod tests {
         assert_eq!(
             line.substr(10, 43).unwrap().0[0],
             RichTextSpan {
-                text: "brown".to_owned(),
-                font_id,
                 size: Pt(32.),
+                .."brown".into()
             }
         );
 
@@ -169,9 +170,8 @@ mod tests {
         assert_eq!(
             line.substr(0, 18).unwrap().0[1],
             RichTextSpan {
-                text: " fo".to_owned(),
-                font_id,
                 size: Pt(15.),
+                .." fo".into()
             }
         );
     }

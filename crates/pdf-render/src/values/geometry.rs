@@ -1,4 +1,3 @@
-mod conversions;
 
 #[derive(Debug, Clone)]
 pub struct Size<T> {
@@ -24,7 +23,7 @@ impl<T> From<(T, T)> for Size<T> {
 #[derive(Debug, PartialEq)]
 pub struct Mm(pub f64);
 
-#[derive(Copy, Clone, Debug, PartialEq)]
+#[derive(Default, Copy, Clone, Debug, PartialEq)]
 pub struct Pt(pub f64);
 
 impl From<f64> for Pt {

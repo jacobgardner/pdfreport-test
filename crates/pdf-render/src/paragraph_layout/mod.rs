@@ -1,5 +1,7 @@
 use std::collections::HashMap;
 
+mod styles;
+
 use skia_safe::{
     textlayout::{ParagraphBuilder, ParagraphStyle, TextAlign, TextStyle, TypefaceFontProvider},
     Data, FontMgr, Typeface,
@@ -8,8 +10,8 @@ use skia_safe::{
 use crate::{
     error::{DocumentGenerationError, InternalServerError},
     fonts::{FontCollection, FontId},
-    geometry::Pt,
     rich_text::RichText,
+    values::Pt,
 };
 
 #[derive(Debug)]
@@ -27,6 +29,7 @@ pub struct RenderedTextLine {
     pub line_metrics: LineMetrics,
 }
 
+#[derive(Default)]
 pub struct RenderedTextBlock {
     // block_metrics: BlockMetrics
     pub lines: Vec<RenderedTextLine>,
@@ -80,6 +83,13 @@ impl ParagraphLayout {
         Ok(self)
     }
 
+    fn get_font_family(&self, font_id: FontId) -> Result<&String, DocumentGenerationError> {
+        Ok(self
+            .fonts
+            .get(&font_id)
+            .ok_or_else(|| InternalServerError::FontIdNotLoaded)?)
+    }
+
     pub fn calculate_layout(
         &self,
         layout_style: LayoutStyle,
@@ -89,7 +99,12 @@ impl ParagraphLayout {
         let mut paragraph_style = ParagraphStyle::new();
         let mut default_style = TextStyle::new();
 
-        default_style.set_font_families(&["Inter"]);
+        if let Some(span) = rich_text.0.first() {
+            // TODO: Ensure this font family is loaded
+            default_style.set_font_families(&[&span.font_family]);
+        } else {
+            return Ok(RenderedTextBlock::default());
+        }
 
         paragraph_style.set_text_align(TextAlign::Left);
 
