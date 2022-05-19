@@ -1,9 +1,11 @@
 use serde::Deserialize;
 
-use super::DomNode;
+use super::{DomNode, NodeId};
 
 #[derive(Default, Deserialize, Debug)]
 pub struct StyledNode {
+    #[serde(skip)]
+    pub node_id: NodeId,
     #[serde(default)]
     pub styles: Vec<String>,
     pub children: Vec<DomNode>,

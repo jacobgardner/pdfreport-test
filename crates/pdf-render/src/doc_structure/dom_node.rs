@@ -1,6 +1,6 @@
 use serde::Deserialize;
 
-use super::{ImageNode, StyledNode, TextNode};
+use super::{ImageNode, NodeId, StyledNode, TextNode};
 
 #[derive(Deserialize, Debug)]
 #[serde(tag = "type")]
@@ -21,6 +21,14 @@ impl DomNode {
             DomNode::Styled(node) => &node.styles[..],
             DomNode::Text(node) => &node.styles[..],
             DomNode::Image(node) => &node.styles[..],
+        }
+    }
+
+    pub fn node_id(&self) -> NodeId {
+        match self {
+            DomNode::Styled(node) => node.node_id,
+            DomNode::Text(node) => node.node_id,
+            DomNode::Image(node) => node.node_id,
         }
     }
 
@@ -146,10 +154,13 @@ mod tests {
                         &["C"],
                     )),
                     Styled(StyledNode::with_children(
-                        vec![Text(TextNode::with_children(vec![
-                            TextChild::Content("Test string".to_owned()),
-                            TextChild::TextNode(TextNode::with_children(vec![], &["G"])),
-                        ], &["F"]))],
+                        vec![Text(TextNode::with_children(
+                            vec![
+                                TextChild::Content("Test string".to_owned()),
+                                TextChild::TextNode(TextNode::with_children(vec![], &["G"])),
+                            ],
+                            &["F"],
+                        ))],
                         &["E"],
                     )),
                 ],

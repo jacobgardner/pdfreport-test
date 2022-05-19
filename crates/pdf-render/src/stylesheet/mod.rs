@@ -10,6 +10,7 @@ use crate::error::{DocumentGenerationError, UserInputError};
 
 #[derive(Deserialize, Debug, Default)]
 pub struct Stylesheet {
+    #[serde(flatten)]
     style_lookup: HashMap<String, MergeableStyle>,
     #[serde(skip)]
     default_style: Style,

@@ -1,7 +1,11 @@
 use serde::Deserialize;
 
+use super::NodeId;
+
 #[derive(Default, Deserialize, Debug, Clone)]
 pub struct TextNode {
+    #[serde(skip)]
+    pub node_id: NodeId,
     #[serde(default)]
     pub styles: Vec<String>,
     pub children: Vec<TextChild>,

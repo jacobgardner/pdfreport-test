@@ -24,6 +24,7 @@ mod rich_text;
 mod values;
 mod block_layout;
 mod stylesheet;
+mod utils;
 
 use error::DocumentGenerationError;
 

@@ -12,7 +12,7 @@ pub use image_node::ImageNode;
 pub use text_node::{TextChild, TextNode};
 pub use fonts::FontFamilyInfo;
 
-use crate::stylesheet::Stylesheet;
+use crate::{stylesheet::Stylesheet, utils::unique_id::create_id};
 
 
 #[derive(Debug, Deserialize)]
@@ -25,3 +25,5 @@ pub struct DocStructure {
     pub stylesheet: Stylesheet,
     pub root: DomNode,
 }
+
+create_id!(NodeId);
