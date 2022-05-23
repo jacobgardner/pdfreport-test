@@ -15,6 +15,7 @@ num-traits = "*"
 num-derive = "*"
 bytes = "*"
 skia-safe = { version =  "*", features = ["textlayout"] }
+ts-rs = { version = "*", features = ["format"] }
 
 color_processing = "*"
 polyhorn-yoga = "*"

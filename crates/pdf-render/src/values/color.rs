@@ -1,15 +1,16 @@
 use serde::Deserialize;
+use ts_rs::TS;
 
 use crate::error::UserInputError;
 
-#[derive(Deserialize, Debug, Clone, PartialEq)]
+#[derive(TS, Deserialize, Debug, Clone, PartialEq)]
 #[serde(try_from = "&str")]
+#[ts(export, export_to="Color")]
 pub struct Color {
     r: f64,
     g: f64,
     b: f64,
 }
-
 
 impl Color {
     pub fn white() -> Self {

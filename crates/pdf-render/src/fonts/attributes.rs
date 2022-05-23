@@ -1,5 +1,6 @@
 use num_derive::FromPrimitive;
 use serde::Deserialize;
+use ts_rs::TS;
 
 #[derive(Deserialize, Default, Debug, Copy, Clone, Hash, PartialEq, Eq)]
 pub struct FontAttributes {
@@ -25,7 +26,8 @@ impl FontAttributes {
     }
 }
 
-#[derive(Hash, Eq, PartialEq, Debug, Clone, Copy, FromPrimitive, Deserialize)]
+#[derive(TS, Hash, Eq, PartialEq, Debug, Clone, Copy, FromPrimitive, Deserialize)]
+#[ts(export)]
 pub enum FontSlant {
     Normal,
     Italic,
@@ -46,7 +48,8 @@ impl From<&str> for FontSlant {
     }
 }
 
-#[derive(Hash, Eq, PartialEq, Debug, Clone, Copy, FromPrimitive, Deserialize)]
+#[derive(TS, Hash, Eq, PartialEq, Debug, Clone, Copy, FromPrimitive, Deserialize)]
+#[ts(export)]
 pub enum FontWeight {
     Thin = 100,
     ExtraLight = 200,

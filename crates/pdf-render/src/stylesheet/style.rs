@@ -1,5 +1,6 @@
 use optional_merge_derive::MergeOptional;
 use serde::Deserialize;
+use ts_rs::TS;
 
 use crate::{
     fonts::{FontSlant, FontWeight},
@@ -85,20 +86,23 @@ impl Default for BorderStyle {
     }
 }
 
-#[derive(Deserialize, Clone, Copy, PartialEq, Debug)]
+#[derive(TS, Deserialize, Clone, Copy, PartialEq, Debug)]
+#[ts(export)]
 pub enum Direction {
     Column,
     Row,
 }
 
-#[derive(Deserialize, Clone, Copy, PartialEq, Debug)]
+#[derive(TS, Deserialize, Clone, Copy, PartialEq, Debug)]
+#[ts(export)]
 pub enum FlexWrap {
     NoWrap,
     Wrap,
     WrapReverse,
 }
 
-#[derive(Deserialize, Clone, Copy, PartialEq, Debug)]
+#[derive(TS, Deserialize, Clone, Copy, PartialEq, Debug)]
+#[ts(export)]
 pub enum FlexAlign {
     Auto,
     FlexStart,
@@ -171,6 +175,7 @@ impl Default for FontStyles {
         }
     }
 }
+
 
 #[derive(MergeOptional, Clone, Debug, PartialEq)]
 pub struct Style {
