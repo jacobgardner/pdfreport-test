@@ -19,16 +19,6 @@ pub struct MergeableField {
     nested: bool,
 }
 
-// #[derive(Debug, FromDeriveInput)]
-// #[darling(attributes(mergeable), supports(struct_named))]
-// pub struct MergeableStruct {
-//   ident: Ident,
-//   data: darling::ast::Data<darling::util::Ignored, MergeableField>,
-//   #[darling(default)]
-//   use_null_in_serde: bool,
-
-// }
-
 #[derive(Clone, FromMeta, Debug)]
 #[darling(default)]
 pub struct FieldOptions {

@@ -5,7 +5,6 @@ use crate::error::UserInputError;
 
 #[derive(TS, Deserialize, Debug, Clone, PartialEq)]
 #[serde(try_from = "&str")]
-#[ts(export, export_to="Color")]
 pub struct Color {
     r: f64,
     g: f64,

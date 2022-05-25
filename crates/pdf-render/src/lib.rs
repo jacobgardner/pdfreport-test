@@ -3,6 +3,7 @@
 #![allow(unused_mut)]
 #![allow(dead_code)]
 
+use block_layout::{yoga_layout::YogaLayout, layout_engine::LayoutEngine};
 use bytes::Bytes;
 use doc_structure::FontFamilyInfo;
 use document_builder::DocumentBuilder;
@@ -61,6 +62,11 @@ pub fn build_pdf_from_dom<W: Write>(
         page_sizes::LETTER,
         &font_collection,
     );
+    
+    let stylesheet = &doc_structure.stylesheet;
+    
+    let mut layout_engine = YogaLayout::new();
+    layout_engine.build_node_layout(&doc_structure.root, &stylesheet)?;
 
     let mut paragraph_layout = ParagraphLayout::new();
     paragraph_layout.load_fonts(&font_collection)?;

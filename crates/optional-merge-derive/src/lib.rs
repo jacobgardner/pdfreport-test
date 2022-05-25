@@ -74,6 +74,7 @@ pub fn mergeable(
     input: proc_macro::TokenStream,
 ) -> proc_macro::TokenStream {
     let mut original_ast: DeriveInput = syn::parse(input).unwrap();
+    
     // let receiver = MergeableStruct::from_derive_input(&original_ast).unwrap();
 
     let attr_args = parse_macro_input!(attr as AttributeArgs);
@@ -160,8 +161,8 @@ pub fn mergeable(
         }
     } else {
         unimplemented!()
-    };
-
+    }; 
+    
     let token_stream = quote! {
 
         #original_ast

@@ -1,55 +1,13 @@
 // use oldlib::MergeOptional;
+use merges::Merges;
 use optional_merge_derive::mergeable;
 use serde::Deserialize;
 use ts_rs::TS;
-use merges::Merges;
 
 use crate::{
     fonts::{FontSlant, FontWeight},
     values::Color,
 };
-
-// macro_rules! primitive_merge  {
-//     ($name : ident) => {
-//         impl Merges for Option<$name> {
-//             fn merge(&self, rhs: &Self) -> Self {
-//                 rhs.as_ref().or(self.as_ref()).map(|f| f.clone())
-//             }
-//         }
-//     };
-//     ($name: ident, $($remain:ident),+) => {
-//         primitive_merge!($name);
-//         primitive_merge!($($remain),+);
-//     }
-// }
-
-// impl<T: Merges + Clone> Merges for Option<T> {
-//     fn merge(&self, rhs: &Self) -> Self {
-//         if let Some(lhs) = self {
-//             if let Some(rhs) = rhs {
-//                 Some(lhs.merge(rhs))
-//             } else {
-//                 self.clone()
-//             }
-//         } else {
-//             rhs.clone()
-//         }
-//     }
-// }
-
-// primitive_merge!(f32, String, Direction, FlexWrap, FlexAlign, FontSlant, FontWeight, Color);
-
-// pub trait Merges: Sized + Clone {
-//     fn merge(&self, rhs: &Self) -> Self;
-
-//     fn merge_optional(&self, rhs: &Option<Self>) -> Option<Self> {
-//         if let Some(op) = rhs {
-//             Some(self.merge(op))
-//         } else {
-//             Some(self.clone())
-//         }
-//     }
-// }
 
 #[mergeable]
 #[derive(Clone, Debug, PartialEq)]
@@ -182,7 +140,6 @@ impl Default for FontStyles {
         }
     }
 }
-
 
 #[mergeable]
 #[derive(Clone, Debug, PartialEq)]

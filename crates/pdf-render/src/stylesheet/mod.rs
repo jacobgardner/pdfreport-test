@@ -4,7 +4,7 @@ use serde::Deserialize;
 
 mod style;
 
-use style::{MergeableStyle, Style};
+pub use style::{MergeableStyle, Style, Direction, FlexWrap};
 
 use crate::error::{DocumentGenerationError, UserInputError};
 
