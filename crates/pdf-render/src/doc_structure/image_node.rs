@@ -2,7 +2,7 @@ use serde::Deserialize;
 
 use super::NodeId;
 
-#[derive(Deserialize, Debug)]
+#[derive(Clone, Deserialize, Debug)]
 pub struct ImageNode {
     #[serde(skip)]
     pub node_id: NodeId,

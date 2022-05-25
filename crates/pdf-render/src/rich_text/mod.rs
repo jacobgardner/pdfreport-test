@@ -4,6 +4,8 @@ use crate::{
     values::{Color, Pt},
 };
 
+pub mod dom_node_conversion;
+
 #[derive(Default, Clone, Debug, PartialEq)]
 pub struct RichTextSpan {
     pub text: String,
@@ -23,7 +25,7 @@ impl From<&str> for RichTextSpan {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct RichText(pub Vec<RichTextSpan>);
 
 impl RichText {

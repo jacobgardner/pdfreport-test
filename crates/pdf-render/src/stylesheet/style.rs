@@ -133,7 +133,8 @@ pub struct FontStyles {
 impl Default for FontStyles {
     fn default() -> Self {
         Self {
-            family: String::from("sans-serif"),
+            // TODO: Don't use Inter
+            family: String::from("Inter"),
             size: 12.,
             style: FontSlant::Normal,
             weight: FontWeight::Regular,

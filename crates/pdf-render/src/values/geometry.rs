@@ -1,3 +1,4 @@
+use std::ops::Sub;
 
 #[derive(Debug, Clone)]
 pub struct Size<T> {
@@ -32,3 +33,19 @@ impl From<f64> for Pt {
     }
 }
 
+
+const MM_TO_PT: f64 = 2.8346456692913;
+
+impl From<Mm> for Pt {
+    fn from(mm: Mm) -> Self {
+        Pt(mm.0 * MM_TO_PT)
+    }
+}
+
+impl Sub for Pt {
+    type Output = Pt;
+
+    fn sub(self, rhs: Self) -> Self::Output {
+        Pt(self.0 - rhs.0)
+    }
+}
