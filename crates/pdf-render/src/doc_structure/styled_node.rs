@@ -2,7 +2,7 @@ use serde::Deserialize;
 
 use super::{DomNode, NodeId};
 
-#[derive(Default, Deserialize, Debug)]
+#[derive(Clone, Default, Deserialize, Debug)]
 pub struct StyledNode {
     #[serde(skip)]
     pub node_id: NodeId,

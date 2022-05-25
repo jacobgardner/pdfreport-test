@@ -1,0 +1,778 @@
+extern crate proc_macro;
+
+use proc_macro::TokenStream;
+use proc_macro2::Span;
+use quote::{quote, ToTokens};
+use std::str::FromStr;
+use syn::{self, Attribute, Data, Fields, Type, Token};
+
+const FIELD_ATTR: &str = "merge";
+
+#[proc_macro_derive(MergeOptional, attributes(merge))]
+pub fn mergeable(input: TokenStream) -> TokenStream {
+    let mut ast: syn::DeriveInput = syn::parse(input).unwrap();
+    let original_ast = ast.clone();
+
+    if let Data::Struct(s) = &mut ast.data {
+        if let Fields::Named(named_fields) = &mut s.fields {
+            named_fields.named.iter_mut().for_each(|field| {
+                let nested_pos = field.attrs.iter().position(|a| a.path.is_ident(FIELD_ATTR));
+                // let ty = f.ty.clone();
+                let mergeable_type: syn::Type = if let Some(pos) = nested_pos {
+                    field.attrs.remove(pos);
+                    let ty_name = format!("Mergeable{}", field.ty.to_token_stream());
+                    Type::Verbatim(proc_macro2::TokenStream::from_str(&ty_name).unwrap())
+                } else {
+                    field.ty.clone()
+                };
+
+                
+                let s: syn::ItemStruct = syn::parse2(quote! {
+                    struct test {
+                        #[serde(skip_serializing_if = "Option::is_none")]
+                        field: Option<String>
+                    }
+                }).unwrap();
+                
+                let skip_optional_attribute = if let syn::Fields::Named(fields) = s.fields {
+                    fields.named[0].attrs[0].clone()
+                } else {
+                    unreachable!();
+                };
+
+                field.attrs.push(skip_optional_attribute);
+                field.ty = Type::Verbatim(quote! { Option< #mergeable_type > });
+            });
+        }
+    } else {
+        unimplemented!()
+    }
+
+    let merge_fields = if let Data::Struct(s) = &original_ast.data {
+        if let Fields::Named(named_fields) = &s.fields {
+            named_fields.named.iter().map(|field| {
+                let name = field.clone().ident;
+
+                quote! {
+                    #name: self.#name.merge(&rhs.#name)
+                }
+            })
+        } else {
+            unimplemented!()
+        }
+    } else {
+        unimplemented!()
+    };
+
+    let to_mergeable = if let Data::Struct(s) = &original_ast.data {
+        if let Fields::Named(named_fields) = &s.fields {
+            named_fields.named.iter().map(|field| {
+                let is_nested = field.attrs.iter().any(|a| a.path.is_ident(FIELD_ATTR));
+                let name = field.clone().ident;
+
+                if is_nested {
+                    quote! {
+                        #name: Some(orig.#name.into())
+                    }
+                } else {
+                    quote! {
+                        #name: Some(orig.#name)
+                    }
+                }
+            })
+        } else {
+            unimplemented!()
+        }
+    } else {
+        unimplemented!()
+    };
+
+    let to_unwrapped = if let Data::Struct(s) = &original_ast.data {
+        if let Fields::Named(named_fields) = &s.fields {
+            named_fields.named.iter().map(|field| {
+                let is_nested = field.attrs.iter().any(|a| a.path.is_ident(FIELD_ATTR));
+                let name = field.clone().ident;
+
+                if is_nested {
+                    quote! {
+                        #name: orig.#name.unwrap().into()
+                    }
+                } else {
+                    quote! {
+                        #name: orig.#name.unwrap()
+                    }
+                }
+            })
+        } else {
+            unimplemented!()
+        }
+    } else {
+        unimplemented!()
+    };
+
+    let name = original_ast.ident.clone();
+    // let rename_str = proc_macro2::TokenStream::from_str(&format!("rename=\"{name}\"")).unwrap();
+    let mergeable_name = syn::Ident::new(&format!("Mergeable{}", name), Span::call_site());
+    ast.ident = mergeable_name.clone();
+
+    let token_stream: TokenStream = quote! {
+        #[derive(TS, PartialEq, Deserialize, Clone, Debug, Default)]
+        #[serde(rename_all = "camelCase", deny_unknown_fields)]
+        #ast
+
+        impl From<#name> for #mergeable_name {
+            fn from(orig: #name) -> #mergeable_name {
+                Self {
+                    #(#to_mergeable),*
+                }
+            }
+        }
+
+        impl From<#mergeable_name> for #name {
+            fn from(orig: #mergeable_name) -> #name {
+                Self {
+                    #(#to_unwrapped),*
+                }
+            }
+        }
+
+
+        impl Merges for #mergeable_name {
+            fn merge(&self, rhs: &Self) -> Self {
+                Self {
+                    #(#merge_fields),*
+                }
+            }
+        }
+
+    }
+    .into();
+
+    token_stream
+}
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn it_works() {
+        let result = 2 + 2;
+        assert_eq!(result, 4);
+    }
+}
+
+
+
+
+#![feature(prelude_import)]
+#[prelude_import]
+use std::prelude::rust_2021::*;
+#[macro_use]
+extern crate std;
+use optional_merge_derive::mergeable;
+use serde::Deserialize;
+struct NestedStruct {}
+#[automatically_derived]
+#[allow(unused_qualifications)]
+impl ::core::fmt::Debug for NestedStruct {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter) -> ::core::fmt::Result {
+        match *self {
+            NestedStruct {} => {
+                let debug_trait_builder =
+                    &mut ::core::fmt::Formatter::debug_struct(f, "NestedStruct");
+                ::core::fmt::DebugStruct::finish(debug_trait_builder)
+            }
+        }
+    }
+}
+#[automatically_derived]
+#[allow(unused_qualifications)]
+impl ::core::clone::Clone for NestedStruct {
+    #[inline]
+    fn clone(&self) -> NestedStruct {
+        match *self {
+            NestedStruct {} => NestedStruct {},
+        }
+    }
+}
+struct MergeableNestedStruct {}
+#[automatically_derived]
+#[allow(unused_qualifications)]
+impl ::core::fmt::Debug for MergeableNestedStruct {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter) -> ::core::fmt::Result {
+        match *self {
+            MergeableNestedStruct {} => {
+                let debug_trait_builder =
+                    &mut ::core::fmt::Formatter::debug_struct(f, "MergeableNestedStruct");
+                ::core::fmt::DebugStruct::finish(debug_trait_builder)
+            }
+        }
+    }
+}
+#[automatically_derived]
+#[allow(unused_qualifications)]
+impl ::core::clone::Clone for MergeableNestedStruct {
+    #[inline]
+    fn clone(&self) -> MergeableNestedStruct {
+        match *self {
+            MergeableNestedStruct {} => MergeableNestedStruct {},
+        }
+    }
+}
+#[automatically_derived]
+#[allow(unused_qualifications)]
+impl ::core::default::Default for MergeableNestedStruct {
+    #[inline]
+    fn default() -> MergeableNestedStruct {
+        MergeableNestedStruct {}
+    }
+}
+#[doc(hidden)]
+#[allow(non_upper_case_globals, unused_attributes, unused_qualifications)]
+const _: () = {
+    #[allow(unused_extern_crates, clippy::useless_attribute)]
+    extern crate serde as _serde;
+    #[automatically_derived]
+    impl<'de> _serde::Deserialize<'de> for MergeableNestedStruct {
+        fn deserialize<__D>(__deserializer: __D) -> _serde::__private::Result<Self, __D::Error>
+        where
+            __D: _serde::Deserializer<'de>,
+        {
+            #[allow(non_camel_case_types)]
+            enum __Field {
+                __ignore,
+            }
+            struct __FieldVisitor;
+            impl<'de> _serde::de::Visitor<'de> for __FieldVisitor {
+                type Value = __Field;
+                fn expecting(
+                    &self,
+                    __formatter: &mut _serde::__private::Formatter,
+                ) -> _serde::__private::fmt::Result {
+                    _serde::__private::Formatter::write_str(__formatter, "field identifier")
+                }
+                fn visit_u64<__E>(self, __value: u64) -> _serde::__private::Result<Self::Value, __E>
+                where
+                    __E: _serde::de::Error,
+                {
+                    match __value {
+                        _ => _serde::__private::Ok(__Field::__ignore),
+                    }
+                }
+                fn visit_str<__E>(
+                    self,
+                    __value: &str,
+                ) -> _serde::__private::Result<Self::Value, __E>
+                where
+                    __E: _serde::de::Error,
+                {
+                    match __value {
+                        _ => _serde::__private::Ok(__Field::__ignore),
+                    }
+                }
+                fn visit_bytes<__E>(
+                    self,
+                    __value: &[u8],
+                ) -> _serde::__private::Result<Self::Value, __E>
+                where
+                    __E: _serde::de::Error,
+                {
+                    match __value {
+                        _ => _serde::__private::Ok(__Field::__ignore),
+                    }
+                }
+            }
+            impl<'de> _serde::Deserialize<'de> for __Field {
+                #[inline]
+                fn deserialize<__D>(
+                    __deserializer: __D,
+                ) -> _serde::__private::Result<Self, __D::Error>
+                where
+                    __D: _serde::Deserializer<'de>,
+                {
+                    _serde::Deserializer::deserialize_identifier(__deserializer, __FieldVisitor)
+                }
+            }
+            struct __Visitor<'de> {
+                marker: _serde::__private::PhantomData<MergeableNestedStruct>,
+                lifetime: _serde::__private::PhantomData<&'de ()>,
+            }
+            impl<'de> _serde::de::Visitor<'de> for __Visitor<'de> {
+                type Value = MergeableNestedStruct;
+                fn expecting(
+                    &self,
+                    __formatter: &mut _serde::__private::Formatter,
+                ) -> _serde::__private::fmt::Result {
+                    _serde::__private::Formatter::write_str(
+                        __formatter,
+                        "struct MergeableNestedStruct",
+                    )
+                }
+                #[inline]
+                fn visit_seq<__A>(
+                    self,
+                    _: __A,
+                ) -> _serde::__private::Result<Self::Value, __A::Error>
+                where
+                    __A: _serde::de::SeqAccess<'de>,
+                {
+                    _serde::__private::Ok(MergeableNestedStruct {})
+                }
+                #[inline]
+                fn visit_map<__A>(
+                    self,
+                    mut __map: __A,
+                ) -> _serde::__private::Result<Self::Value, __A::Error>
+                where
+                    __A: _serde::de::MapAccess<'de>,
+                {
+                    while let _serde::__private::Some(__key) =
+                        match _serde::de::MapAccess::next_key::<__Field>(&mut __map) {
+                            _serde::__private::Ok(__val) => __val,
+                            _serde::__private::Err(__err) => {
+                                return _serde::__private::Err(__err);
+                            }
+                        }
+                    {
+                        match __key {
+                            _ => {
+                                let _ = match _serde::de::MapAccess::next_value::<
+                                    _serde::de::IgnoredAny,
+                                >(&mut __map)
+                                {
+                                    _serde::__private::Ok(__val) => __val,
+                                    _serde::__private::Err(__err) => {
+                                        return _serde::__private::Err(__err);
+                                    }
+                                };
+                            }
+                        }
+                    }
+                    _serde::__private::Ok(MergeableNestedStruct {})
+                }
+            }
+            const FIELDS: &'static [&'static str] = &[];
+            _serde::Deserializer::deserialize_struct(
+                __deserializer,
+                "MergeableNestedStruct",
+                FIELDS,
+                __Visitor {
+                    marker: _serde::__private::PhantomData::<MergeableNestedStruct>,
+                    lifetime: _serde::__private::PhantomData,
+                },
+            )
+        }
+    }
+};
+impl From<NestedStruct> for MergeableNestedStruct {
+    fn from(orig: NestedStruct) -> MergeableNestedStruct {
+        Self {}
+    }
+}
+impl From<MergeableNestedStruct> for NestedStruct {
+    fn from(orig: MergeableNestedStruct) -> NestedStruct {
+        Self {}
+    }
+}
+impl merges::Merges for MergeableNestedStruct {
+    fn merge(&self, rhs: &Self) -> Self {
+        Self {}
+    }
+}
+
+struct TestStruct {
+    bool_test: bool,
+    nested_struct: NestedStruct,
+}
+
+#[automatically_derived]
+#[allow(unused_qualifications)]
+impl ::core::fmt::Debug for TestStruct {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter) -> ::core::fmt::Result {
+        match *self {
+            TestStruct {
+                bool_test: ref __self_0_0,
+                nested_struct: ref __self_0_1,
+            } => {
+                let debug_trait_builder =
+                    &mut ::core::fmt::Formatter::debug_struct(f, "TestStruct");
+                let _ = ::core::fmt::DebugStruct::field(
+                    debug_trait_builder,
+                    "bool_test",
+                    &&(*__self_0_0),
+                );
+                let _ = ::core::fmt::DebugStruct::field(
+                    debug_trait_builder,
+                    "nested_struct",
+                    &&(*__self_0_1),
+                );
+                ::core::fmt::DebugStruct::finish(debug_trait_builder)
+            }
+        }
+    }
+}
+#[automatically_derived]
+#[allow(unused_qualifications)]
+impl ::core::clone::Clone for TestStruct {
+    #[inline]
+    fn clone(&self) -> TestStruct {
+        match *self {
+            TestStruct {
+                bool_test: ref __self_0_0,
+                nested_struct: ref __self_0_1,
+            } => TestStruct {
+                bool_test: ::core::clone::Clone::clone(&(*__self_0_0)),
+                nested_struct: ::core::clone::Clone::clone(&(*__self_0_1)),
+            },
+        }
+    }
+}
+struct MergeableTestStruct {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    bool_test: Option<bool>,
+    #[serde(skip_serializing_if= "Option::is_none")]
+    nested_struct: Option<NestedStruct>,
+}
+
+#[automatically_derived]
+#[allow(unused_qualifications)]
+impl ::core::fmt::Debug for MergeableTestStruct {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter) -> ::core::fmt::Result {
+        match *self {
+            MergeableTestStruct {
+                bool_test: ref __self_0_0,
+                nested_struct: ref __self_0_1,
+            } => {
+                let debug_trait_builder =
+                    &mut ::core::fmt::Formatter::debug_struct(f, "MergeableTestStruct");
+                let _ = ::core::fmt::DebugStruct::field(
+                    debug_trait_builder,
+                    "bool_test",
+                    &&(*__self_0_0),
+                );
+                let _ = ::core::fmt::DebugStruct::field(
+                    debug_trait_builder,
+                    "nested_struct",
+                    &&(*__self_0_1),
+                );
+                ::core::fmt::DebugStruct::finish(debug_trait_builder)
+            }
+        }
+    }
+}
+#[automatically_derived]
+#[allow(unused_qualifications)]
+impl ::core::clone::Clone for MergeableTestStruct {
+    #[inline]
+    fn clone(&self) -> MergeableTestStruct {
+        match *self {
+            MergeableTestStruct {
+                bool_test: ref __self_0_0,
+                nested_struct: ref __self_0_1,
+            } => MergeableTestStruct {
+                bool_test: ::core::clone::Clone::clone(&(*__self_0_0)),
+                nested_struct: ::core::clone::Clone::clone(&(*__self_0_1)),
+            },
+        }
+    }
+}
+#[automatically_derived]
+#[allow(unused_qualifications)]
+impl ::core::default::Default for MergeableTestStruct {
+    #[inline]
+    fn default() -> MergeableTestStruct {
+        MergeableTestStruct {
+            bool_test: ::core::default::Default::default(),
+            nested_struct: ::core::default::Default::default(),
+        }
+    }
+}
+#[doc(hidden)]
+#[allow(non_upper_case_globals, unused_attributes, unused_qualifications)]
+const _: () = {
+    #[allow(unused_extern_crates, clippy::useless_attribute)]
+    extern crate serde as _serde;
+    #[automatically_derived]
+    impl<'de> _serde::Deserialize<'de> for MergeableTestStruct {
+        fn deserialize<__D>(__deserializer: __D) -> _serde::__private::Result<Self, __D::Error>
+        where
+            __D: _serde::Deserializer<'de>,
+        {
+            #[allow(non_camel_case_types)]
+            enum __Field {
+                __field0,
+                __field1,
+                __ignore,
+            }
+            struct __FieldVisitor;
+            impl<'de> _serde::de::Visitor<'de> for __FieldVisitor {
+                type Value = __Field;
+                fn expecting(
+                    &self,
+                    __formatter: &mut _serde::__private::Formatter,
+                ) -> _serde::__private::fmt::Result {
+                    _serde::__private::Formatter::write_str(__formatter, "field identifier")
+                }
+                fn visit_u64<__E>(self, __value: u64) -> _serde::__private::Result<Self::Value, __E>
+                where
+                    __E: _serde::de::Error,
+                {
+                    match __value {
+                        0u64 => _serde::__private::Ok(__Field::__field0),
+                        1u64 => _serde::__private::Ok(__Field::__field1),
+                        _ => _serde::__private::Ok(__Field::__ignore),
+                    }
+                }
+                fn visit_str<__E>(
+                    self,
+                    __value: &str,
+                ) -> _serde::__private::Result<Self::Value, __E>
+                where
+                    __E: _serde::de::Error,
+                {
+                    match __value {
+                        "bool_test" => _serde::__private::Ok(__Field::__field0),
+                        "nested_struct" => _serde::__private::Ok(__Field::__field1),
+                        _ => _serde::__private::Ok(__Field::__ignore),
+                    }
+                }
+                fn visit_bytes<__E>(
+                    self,
+                    __value: &[u8],
+                ) -> _serde::__private::Result<Self::Value, __E>
+                where
+                    __E: _serde::de::Error,
+                {
+                    match __value {
+                        b"bool_test" => _serde::__private::Ok(__Field::__field0),
+                        b"nested_struct" => _serde::__private::Ok(__Field::__field1),
+                        _ => _serde::__private::Ok(__Field::__ignore),
+                    }
+                }
+            }
+            impl<'de> _serde::Deserialize<'de> for __Field {
+                #[inline]
+                fn deserialize<__D>(
+                    __deserializer: __D,
+                ) -> _serde::__private::Result<Self, __D::Error>
+                where
+                    __D: _serde::Deserializer<'de>,
+                {
+                    _serde::Deserializer::deserialize_identifier(__deserializer, __FieldVisitor)
+                }
+            }
+            struct __Visitor<'de> {
+                marker: _serde::__private::PhantomData<MergeableTestStruct>,
+                lifetime: _serde::__private::PhantomData<&'de ()>,
+            }
+            impl<'de> _serde::de::Visitor<'de> for __Visitor<'de> {
+                type Value = MergeableTestStruct;
+                fn expecting(
+                    &self,
+                    __formatter: &mut _serde::__private::Formatter,
+                ) -> _serde::__private::fmt::Result {
+                    _serde::__private::Formatter::write_str(
+                        __formatter,
+                        "struct MergeableTestStruct",
+                    )
+                }
+                #[inline]
+                fn visit_seq<__A>(
+                    self,
+                    mut __seq: __A,
+                ) -> _serde::__private::Result<Self::Value, __A::Error>
+                where
+                    __A: _serde::de::SeqAccess<'de>,
+                {
+                    let __field0 =
+                        match match _serde::de::SeqAccess::next_element::<Option<bool>>(&mut __seq)
+                        {
+                            _serde::__private::Ok(__val) => __val,
+                            _serde::__private::Err(__err) => {
+                                return _serde::__private::Err(__err);
+                            }
+                        } {
+                            _serde::__private::Some(__value) => __value,
+                            _serde::__private::None => {
+                                return _serde::__private::Err(_serde::de::Error::invalid_length(
+                                    0usize,
+                                    &"struct MergeableTestStruct with 2 elements",
+                                ));
+                            }
+                        };
+                    let __field1 = match match _serde::de::SeqAccess::next_element::<
+                        Option<NestedStruct>,
+                    >(&mut __seq)
+                    {
+                        _serde::__private::Ok(__val) => __val,
+                        _serde::__private::Err(__err) => {
+                            return _serde::__private::Err(__err);
+                        }
+                    } {
+                        _serde::__private::Some(__value) => __value,
+                        _serde::__private::None => {
+                            return _serde::__private::Err(_serde::de::Error::invalid_length(
+                                1usize,
+                                &"struct MergeableTestStruct with 2 elements",
+                            ));
+                        }
+                    };
+                    _serde::__private::Ok(MergeableTestStruct {
+                        bool_test: __field0,
+                        nested_struct: __field1,
+                    })
+                }
+                #[inline]
+                fn visit_map<__A>(
+                    self,
+                    mut __map: __A,
+                ) -> _serde::__private::Result<Self::Value, __A::Error>
+                where
+                    __A: _serde::de::MapAccess<'de>,
+                {
+                    let mut __field0: _serde::__private::Option<Option<bool>> =
+                        _serde::__private::None;
+                    let mut __field1: _serde::__private::Option<Option<NestedStruct>> =
+                        _serde::__private::None;
+                    while let _serde::__private::Some(__key) =
+                        match _serde::de::MapAccess::next_key::<__Field>(&mut __map) {
+                            _serde::__private::Ok(__val) => __val,
+                            _serde::__private::Err(__err) => {
+                                return _serde::__private::Err(__err);
+                            }
+                        }
+                    {
+                        match __key {
+                            __Field::__field0 => {
+                                if _serde::__private::Option::is_some(&__field0) {
+                                    return _serde::__private::Err(
+                                        <__A::Error as _serde::de::Error>::duplicate_field(
+                                            "bool_test",
+                                        ),
+                                    );
+                                }
+                                __field0 = _serde::__private::Some(
+                                    match _serde::de::MapAccess::next_value::<Option<bool>>(
+                                        &mut __map,
+                                    ) {
+                                        _serde::__private::Ok(__val) => __val,
+                                        _serde::__private::Err(__err) => {
+                                            return _serde::__private::Err(__err);
+                                        }
+                                    },
+                                );
+                            }
+                            __Field::__field1 => {
+                                if _serde::__private::Option::is_some(&__field1) {
+                                    return _serde::__private::Err(
+                                        <__A::Error as _serde::de::Error>::duplicate_field(
+                                            "nested_struct",
+                                        ),
+                                    );
+                                }
+                                __field1 = _serde::__private::Some(
+                                    match _serde::de::MapAccess::next_value::<Option<NestedStruct>>(
+                                        &mut __map,
+                                    ) {
+                                        _serde::__private::Ok(__val) => __val,
+                                        _serde::__private::Err(__err) => {
+                                            return _serde::__private::Err(__err);
+                                        }
+                                    },
+                                );
+                            }
+                            _ => {
+                                let _ = match _serde::de::MapAccess::next_value::<
+                                    _serde::de::IgnoredAny,
+                                >(&mut __map)
+                                {
+                                    _serde::__private::Ok(__val) => __val,
+                                    _serde::__private::Err(__err) => {
+                                        return _serde::__private::Err(__err);
+                                    }
+                                };
+                            }
+                        }
+                    }
+                    let __field0 = match __field0 {
+                        _serde::__private::Some(__field0) => __field0,
+                        _serde::__private::None => {
+                            match _serde::__private::de::missing_field("bool_test") {
+                                _serde::__private::Ok(__val) => __val,
+                                _serde::__private::Err(__err) => {
+                                    return _serde::__private::Err(__err);
+                                }
+                            }
+                        }
+                    };
+                    let __field1 = match __field1 {
+                        _serde::__private::Some(__field1) => __field1,
+                        _serde::__private::None => {
+                            match _serde::__private::de::missing_field("nested_struct") {
+                                _serde::__private::Ok(__val) => __val,
+                                _serde::__private::Err(__err) => {
+                                    return _serde::__private::Err(__err);
+                                }
+                            }
+                        }
+                    };
+                    _serde::__private::Ok(MergeableTestStruct {
+                        bool_test: __field0,
+                        nested_struct: __field1,
+                    })
+                }
+            }
+            const FIELDS: &'static [&'static str] = &["bool_test", "nested_struct"];
+            _serde::Deserializer::deserialize_struct(
+                __deserializer,
+                "MergeableTestStruct",
+                FIELDS,
+                __Visitor {
+                    marker: _serde::__private::PhantomData::<MergeableTestStruct>,
+                    lifetime: _serde::__private::PhantomData,
+                },
+            )
+        }
+    }
+};
+impl From<TestStruct> for MergeableTestStruct {
+    fn from(orig: TestStruct) -> MergeableTestStruct {
+        Self {
+            bool_test: Some(orig.bool_test),
+            nested_struct: Some(orig.nested_struct),
+        }
+    }
+}
+impl From<MergeableTestStruct> for TestStruct {
+    fn from(orig: MergeableTestStruct) -> TestStruct {
+        Self {
+            bool_test: orig.bool_test.unwrap(),
+            nested_struct: orig.nested_struct.unwrap(),
+        }
+    }
+}
+impl merges::Merges for MergeableTestStruct {
+    fn merge(&self, rhs: &Self) -> Self {
+        Self {
+            bool_test: merges::primitive_merge(&self.bool_test, &rhs.bool_test),
+            nested_struct: merges::primitive_merge(&self.nested_struct, &rhs.nested_struct),
+        }
+    }
+}
+extern crate test;
+    desc: test::TestDesc {
+        name: test::StaticTestName("test_unmerged"),
+        ignore: false,
+    desc: test::TestDesc {
+        name: test::StaticTestName("test_unmerged"),
+        ignore: false,
+        allow_fail: false,
+        bool_test: true,
+        nested_struct: NestedStruct {},
+    };
+    let merged = MergeableTestStruct::default();
+}
+#[rustc_main]
+pub fn main() -> () {
+    extern crate test;
+    test::test_main_static(&[&test_unmerged])
+}

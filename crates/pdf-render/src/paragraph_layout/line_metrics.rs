@@ -1,7 +1,7 @@
 use crate::values::Pt;
 use skia_safe::textlayout as skia_layout;
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct LineMetrics {
     pub ascent: Pt,
     pub descent: Pt,
