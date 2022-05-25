@@ -14,6 +14,9 @@ use syn::{
 };
 
 fn build_skip_optional_attr() -> Attribute {
+
+    // FIXME: There's a better way to build up an Attribute than this,
+    //  but I'll find it later
     let struct_with_attr: syn::ItemStruct = syn::parse2(quote! {
         struct test {
             #[serde(skip_serializing_if = "Option::is_none")]
@@ -71,15 +74,12 @@ pub fn mergeable(
     input: proc_macro::TokenStream,
 ) -> proc_macro::TokenStream {
     let mut original_ast: DeriveInput = syn::parse(input).unwrap();
-    let receiver = MergeableStruct::from_derive_input(&original_ast).unwrap();
+    // let receiver = MergeableStruct::from_derive_input(&original_ast).unwrap();
 
     let attr_args = parse_macro_input!(attr as AttributeArgs);
     let global_options = FieldOptions::from_list(&attr_args).expect("Global options could not parse attr list");
-    
-    println!("Options: {global_options:?}");
 
     let field_options = extract_field_attrs(&mut original_ast);
-    println!("Field Options: {field_options:?}");
 
     let mut mergeable_ast = original_ast.clone();
     let unmergeable_name = original_ast.ident.clone();

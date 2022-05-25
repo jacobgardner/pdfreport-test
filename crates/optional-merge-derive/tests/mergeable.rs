@@ -1,17 +1,17 @@
 use optional_merge_derive::mergeable;
 use serde::Deserialize;
 
-// #[mergeable]
-// #[derive(Debug, Clone)]
-// struct NestedStruct {}
+#[mergeable]
+#[derive(Debug, Clone)]
+struct NestedStruct {}
 
-// #[mergeable(rename = "poop")]
-// #[derive(Debug, Clone)]
-// struct TestStruct {
-//     bool_test: bool,
-//     #[mergeable(nested)]
-//     nested_struct: NestedStruct,
-// }
+#[mergeable(rename = "poop")]
+#[derive(Debug, Clone)]
+struct TestStruct {
+    bool_test: bool,
+    #[mergeable(nested)]
+    nested_struct: NestedStruct,
+}
 
 
 #[test]

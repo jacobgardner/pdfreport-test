@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use darling::FromMeta;
+use darling::{FromField, FromMeta};
 use proc_macro::TokenStream;
 use quote::ToTokens;
 use syn::{
@@ -13,21 +13,21 @@ use crate::config::FIELD_ATTR;
 #[derive(Debug, FromField)]
 #[darling(attributes(mergeable))]
 pub struct MergeableField {
-  ident: Option<Ident>,
-  ty: Type,
-  #[darling(default)]
-  nested: bool,  
+    ident: Option<syn::Ident>,
+    ty: Type,
+    #[darling(default)]
+    nested: bool,
 }
 
-#[derive(Debug, FromDeriveInput)]
-#[darling(attributes(mergeable), supports(struct_named))]
-pub struct MergeableStruct {
-  ident: Ident,
-  data: darling::ast::Data<darling::util::Ignored, MergeableField>,
-  #[darling(default)] 
-  use_null_in_serde: bool,
-  
-}
+// #[derive(Debug, FromDeriveInput)]
+// #[darling(attributes(mergeable), supports(struct_named))]
+// pub struct MergeableStruct {
+//   ident: Ident,
+//   data: darling::ast::Data<darling::util::Ignored, MergeableField>,
+//   #[darling(default)]
+//   use_null_in_serde: bool,
+
+// }
 
 #[derive(Clone, FromMeta, Debug)]
 #[darling(default)]
@@ -35,6 +35,16 @@ pub struct FieldOptions {
     pub rename: Option<String>,
     pub use_null_in_serde: bool,
     pub is_nested: bool,
+}
+
+impl From<MergeableField> for FieldOptions {
+    fn from(field: MergeableField) -> Self {
+        Self {
+            rename: None,
+            use_null_in_serde: false,
+            is_nested: field.nested,
+        }
+    }
 }
 
 #[derive(Debug)]
@@ -45,30 +55,8 @@ impl FieldsOptions {
         Self(HashMap::new())
     }
 
-    pub fn insert_by_attr(&mut self, field: &Field, attribute: Attribute) {
-        let tokens = attribute.to_token_stream().into();
-
-        let mut args = None;
-
-        // FIXME: Hack to get around parse_macro_input!
-        let parse_stuff = |args: &mut Option<AttributeArgs>| {
-          let new_args = parse_macro_input!(tokens as AttributeArgs);
-          
-          args.replace(new_args);
-          
-          TokenStream::new()
-        };
-        
-        let result = parse_stuff(&mut args);
-        println!("Parse result: {:?}", result);
-        
-        println!("A");
-        let args = args.unwrap();
-        
-        FieldOptions::from
-        
-        let options = FieldOptions::from_list(&args).unwrap();
-        println!("B");
+    pub fn insert_by_field(&mut self, field: &Field) {
+        let mergeable_field = MergeableField::from_field(&field).unwrap();
 
         self.insert(
             field
@@ -76,7 +64,7 @@ impl FieldsOptions {
                 .clone()
                 .expect("Expected named field to have ident")
                 .to_string(),
-            options,
+            mergeable_field.into(),
         );
     }
 
@@ -176,9 +164,9 @@ pub fn extract_field_attrs(ast: &mut DeriveInput) -> FieldsOptions {
                     .position(|attr| attr.path.is_ident(FIELD_ATTR));
 
                 if let Some(index) = mergeable_attr_index {
-                    let field_attr = field.attrs.remove(index);
+                    field_options.insert_by_field(&field);
 
-                    field_options.insert_by_attr(&field, field_attr);
+                    field.attrs.remove(index);
                 }
             }
         } else {

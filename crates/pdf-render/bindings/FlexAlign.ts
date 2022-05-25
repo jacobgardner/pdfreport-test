@@ -1,7 +1,2 @@
-export type FlexAlign =
-  | "Auto"
-  | "FlexStart"
-  | "FlexEnd"
-  | "Center"
-  | "Baseline"
-  | "Stretch";
+
+export type FlexAlign = "Auto" | "FlexStart" | "FlexEnd" | "Center" | "Baseline" | "Stretch";

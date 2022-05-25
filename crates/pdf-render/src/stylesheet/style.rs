@@ -2,6 +2,7 @@
 use optional_merge_derive::mergeable;
 use serde::Deserialize;
 use ts_rs::TS;
+use merges::Merges;
 
 use crate::{
     fonts::{FontSlant, FontWeight},
