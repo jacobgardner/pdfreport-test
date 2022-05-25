@@ -1,4 +1,5 @@
-use optional_merge_derive::MergeOptional;
+// use oldlib::MergeOptional;
+use optional_merge_derive::mergeable;
 use serde::Deserialize;
 use ts_rs::TS;
 
@@ -7,49 +8,50 @@ use crate::{
     values::Color,
 };
 
-macro_rules! primitive_merge  {
-    ($name : ident) => {
-        impl Merges for Option<$name> {
-            fn merge(&self, rhs: &Self) -> Self {
-                rhs.as_ref().or(self.as_ref()).map(|f| f.clone())
-            }
-        }
-    };
-    ($name: ident, $($remain:ident),+) => {
-        primitive_merge!($name);
-        primitive_merge!($($remain),+);
-    }
-}
+// macro_rules! primitive_merge  {
+//     ($name : ident) => {
+//         impl Merges for Option<$name> {
+//             fn merge(&self, rhs: &Self) -> Self {
+//                 rhs.as_ref().or(self.as_ref()).map(|f| f.clone())
+//             }
+//         }
+//     };
+//     ($name: ident, $($remain:ident),+) => {
+//         primitive_merge!($name);
+//         primitive_merge!($($remain),+);
+//     }
+// }
 
-impl<T: Merges + Clone> Merges for Option<T> {
-    fn merge(&self, rhs: &Self) -> Self {
-        if let Some(lhs) = self {
-            if let Some(rhs) = rhs {
-                Some(lhs.merge(rhs))
-            } else {
-                self.clone()
-            }
-        } else {
-            rhs.clone()
-        }
-    }
-}
+// impl<T: Merges + Clone> Merges for Option<T> {
+//     fn merge(&self, rhs: &Self) -> Self {
+//         if let Some(lhs) = self {
+//             if let Some(rhs) = rhs {
+//                 Some(lhs.merge(rhs))
+//             } else {
+//                 self.clone()
+//             }
+//         } else {
+//             rhs.clone()
+//         }
+//     }
+// }
 
-primitive_merge!(f32, String, Direction, FlexWrap, FlexAlign, FontSlant, FontWeight, Color);
+// primitive_merge!(f32, String, Direction, FlexWrap, FlexAlign, FontSlant, FontWeight, Color);
 
-pub trait Merges: Sized + Clone {
-    fn merge(&self, rhs: &Self) -> Self;
+// pub trait Merges: Sized + Clone {
+//     fn merge(&self, rhs: &Self) -> Self;
 
-    fn merge_optional(&self, rhs: &Option<Self>) -> Option<Self> {
-        if let Some(op) = rhs {
-            Some(self.merge(op))
-        } else {
-            Some(self.clone())
-        }
-    }
-}
+//     fn merge_optional(&self, rhs: &Option<Self>) -> Option<Self> {
+//         if let Some(op) = rhs {
+//             Some(self.merge(op))
+//         } else {
+//             Some(self.clone())
+//         }
+//     }
+// }
 
-#[derive(MergeOptional, Clone, Debug, PartialEq)]
+#[mergeable]
+#[derive(Clone, Debug, PartialEq)]
 pub struct BorderRadiusStyle {
     pub top_right: f32,
     pub bottom_right: f32,
@@ -68,11 +70,12 @@ impl Default for BorderRadiusStyle {
     }
 }
 
-#[derive(MergeOptional, Clone, Debug, PartialEq)]
+#[mergeable]
+#[derive(Clone, Debug, PartialEq)]
 pub struct BorderStyle {
     pub width: f32,
     pub color: Color,
-    #[nested]
+    #[mergeable(nested)]
     pub radius: BorderRadiusStyle,
 }
 
@@ -112,7 +115,8 @@ pub enum FlexAlign {
     Stretch,
 }
 
-#[derive(MergeOptional, Clone, Debug, PartialEq)]
+#[mergeable]
+#[derive(Clone, Debug, PartialEq)]
 pub struct FlexStyle {
     // Add other attributes as needed...
     pub direction: Direction,
@@ -138,7 +142,8 @@ impl Default for FlexStyle {
     }
 }
 
-#[derive(MergeOptional, Clone, Debug, PartialEq)]
+#[mergeable]
+#[derive(Clone, Debug, PartialEq)]
 pub struct EdgeStyle {
     pub top: f32,
     pub right: f32,
@@ -157,7 +162,8 @@ impl Default for EdgeStyle {
     }
 }
 
-#[derive(MergeOptional, Clone, Debug, PartialEq)]
+#[mergeable]
+#[derive(Clone, Debug, PartialEq)]
 pub struct FontStyles {
     pub family: String,
     pub size: f32,
@@ -177,19 +183,20 @@ impl Default for FontStyles {
 }
 
 
-#[derive(MergeOptional, Clone, Debug, PartialEq)]
+#[mergeable]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Style {
-    #[nested]
+    #[mergeable(nested)]
     pub border: BorderStyle,
-    #[nested]
+    #[mergeable(nested)]
     pub font: FontStyles,
     pub color: Color,
-    #[nested]
+    #[mergeable(nested)]
     pub margin: EdgeStyle,
-    #[nested]
+    #[mergeable(nested)]
     pub padding: EdgeStyle,
     pub background_color: Color,
-    #[nested]
+    #[mergeable(nested)]
     pub flex: FlexStyle,
     pub width: String,
     pub height: String,

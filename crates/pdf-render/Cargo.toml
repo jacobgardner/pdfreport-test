@@ -21,3 +21,4 @@ color_processing = "*"
 polyhorn-yoga = "*"
 
 optional-merge-derive = { path = "../optional-merge-derive" }
+merges = { path = "../merges" }

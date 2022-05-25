@@ -1,74 +1,109 @@
 extern crate proc_macro;
 
-use proc_macro::TokenStream;
-use proc_macro2::Span;
+mod config;
+mod field_options;
+
+use darling::FromMeta;
+use field_options::{extract_field_attrs, FieldOptions, FieldsOptions};
+use proc_macro2::{Span, TokenStream};
 use quote::{quote, ToTokens};
-use std::str::FromStr;
-use syn::{self, Attribute, Data, Fields, Type, Token};
+use std::{collections::HashMap, str::FromStr};
+use syn::{
+    self, parse::Parse, parse_macro_input, punctuated::Punctuated, token::Paren, Attribute,
+    AttributeArgs, Data, DeriveInput, Expr, ExprTuple, Field, Fields, Token, Type,
+};
 
-#[proc_macro_derive(MergeOptional, attributes(nested))]
-pub fn mergeable(input: TokenStream) -> TokenStream {
-    let mut ast: syn::DeriveInput = syn::parse(input).unwrap();
-    let original_ast = ast.clone();
+fn build_skip_optional_attr() -> Attribute {
+    let struct_with_attr: syn::ItemStruct = syn::parse2(quote! {
+        struct test {
+            #[serde(skip_serializing_if = "Option::is_none")]
+            field: Option<String>
+        }
+    })
+    .unwrap();
 
-    if let Data::Struct(s) = &mut ast.data {
-        if let Fields::Named(named_fields) = &mut s.fields {
+    if let syn::Fields::Named(fields) = struct_with_attr.fields {
+        fields
+            .named
+            .into_iter()
+            .next()
+            .expect("Expected named fields to have 1 field")
+            .attrs
+            .into_iter()
+            .next()
+            .expect("Expected first named attribute to have attached attribute")
+    } else {
+        unreachable!();
+    }
+}
+
+fn convert_fields_to_optional(
+    ast: &mut DeriveInput,
+    fields_options: &FieldsOptions,
+    global_options: &FieldOptions,
+) {
+    if let Data::Struct(mergeable_struct) = &mut ast.data {
+        if let Fields::Named(named_fields) = &mut mergeable_struct.fields {
             named_fields.named.iter_mut().for_each(|field| {
-                let nested_pos = field.attrs.iter().position(|a| a.path.is_ident("nested"));
-                // let ty = f.ty.clone();
-                let mergeable_type: syn::Type = if let Some(pos) = nested_pos {
-                    field.attrs.remove(pos);
+                let field_options = fields_options.get_by_field(&field);
+
+                let mergeable_type = if field_options.is_nested {
                     let ty_name = format!("Mergeable{}", field.ty.to_token_stream());
                     Type::Verbatim(proc_macro2::TokenStream::from_str(&ty_name).unwrap())
                 } else {
                     field.ty.clone()
                 };
 
-                
-                let s: syn::ItemStruct = syn::parse2(quote! {
-                    struct test {
-                        #[serde(skip_serializing_if = "Option::is_none")]
-                        field: Option<String>
-                    }
-                }).unwrap();
-                
-                let skip_optional_attribute = if let syn::Fields::Named(fields) = s.fields {
-                    fields.named[0].attrs[0].clone()
-                } else {
-                    unreachable!();
-                };
-                // let field: syn::Expr = syn::parse2(optional_attribute).unwrap();
-                // field.attrs.push()
-
-                // // let p: syn::parse::ParseStream = syn::parse2(optional_attribute.into()).unwrap();
-                
-                // let attrib = syn::Attribute {
-                //     pound_token: syn::token::Pound::default(),
-                //     style: syn::AttrStyle::Outer,
-                //     bracket_token: syn::token::Bracket::default(), 
-                // };
-                // // let a = p.call(syn::Attribute::parse_outer).unwrap();
-                // // syn::Attribute::parse_outer(p)
-                // // syn::parse::ParseStream::
-                // // let a = syn::Attribute {
-                // //     pound_token: syn::Pound
-                // // };
-
-                field.attrs.push(skip_optional_attribute);
+                if !global_options.use_null_in_serde {
+                    field.attrs.push(build_skip_optional_attr());
+                }
                 field.ty = Type::Verbatim(quote! { Option< #mergeable_type > });
             });
         }
     } else {
         unimplemented!()
     }
+}
+
+#[proc_macro_attribute]
+pub fn mergeable(
+    attr: proc_macro::TokenStream,
+    input: proc_macro::TokenStream,
+) -> proc_macro::TokenStream {
+    let mut original_ast: DeriveInput = syn::parse(input).unwrap();
+    let receiver = MergeableStruct::from_derive_input(&original_ast).unwrap();
+
+    let attr_args = parse_macro_input!(attr as AttributeArgs);
+    let global_options = FieldOptions::from_list(&attr_args).expect("Global options could not parse attr list");
+    
+    println!("Options: {global_options:?}");
+
+    let field_options = extract_field_attrs(&mut original_ast);
+    println!("Field Options: {field_options:?}");
+
+    let mut mergeable_ast = original_ast.clone();
+    let unmergeable_name = original_ast.ident.clone();
+    let mergeable_name =
+        syn::Ident::new(&format!("Mergeable{}", unmergeable_name), Span::call_site());
+
+    mergeable_ast.ident = mergeable_name.clone();
+
+    convert_fields_to_optional(&mut mergeable_ast, &field_options, &global_options);
 
     let merge_fields = if let Data::Struct(s) = &original_ast.data {
         if let Fields::Named(named_fields) = &s.fields {
             named_fields.named.iter().map(|field| {
-                let name = field.clone().ident;
+                let field_options = field_options.get_by_field(&field);
+                let name = field.clone().ident.unwrap();
 
-                quote! {
-                    #name: self.#name.merge(&rhs.#name)
+                if field_options.is_nested {
+                    quote! {
+                        #name: merges::nested_merge(&self.#name, &rhs.#name)
+                    }
+                } else {
+                    quote! {
+                        #name: merges::primitive_merge(&self.#name, &rhs.#name)
+                    }
                 }
             })
         } else {
@@ -81,7 +116,9 @@ pub fn mergeable(input: TokenStream) -> TokenStream {
     let to_mergeable = if let Data::Struct(s) = &original_ast.data {
         if let Fields::Named(named_fields) = &s.fields {
             named_fields.named.iter().map(|field| {
-                let is_nested = field.attrs.iter().any(|a| a.path.is_ident("nested"));
+                let field_options = field_options.get_by_field(&field);
+                let is_nested = field_options.is_nested;
+
                 let name = field.clone().ident;
 
                 if is_nested {
@@ -104,7 +141,8 @@ pub fn mergeable(input: TokenStream) -> TokenStream {
     let to_unwrapped = if let Data::Struct(s) = &original_ast.data {
         if let Fields::Named(named_fields) = &s.fields {
             named_fields.named.iter().map(|field| {
-                let is_nested = field.attrs.iter().any(|a| a.path.is_ident("nested"));
+                let field_options = field_options.get_by_field(&field);
+                let is_nested = field_options.is_nested;
                 let name = field.clone().ident;
 
                 if is_nested {
@@ -124,28 +162,23 @@ pub fn mergeable(input: TokenStream) -> TokenStream {
         unimplemented!()
     };
 
-    let name = original_ast.ident.clone();
-    // let quoted_name = format!("\"{name}\"");
-    let rename_str = proc_macro2::TokenStream::from_str(&format!("rename=\"{name}\"")).unwrap();
-    let mergeable_name = syn::Ident::new(&format!("Mergeable{}", name), Span::call_site());
-    ast.ident = mergeable_name.clone();
+    let token_stream = quote! {
 
-    let token_stream: TokenStream = quote! {
-        #[derive(TS, PartialEq, Deserialize, Clone, Debug, Default)]
-        #[ts(export, #rename_str)]
-        #[serde(rename_all = "camelCase", deny_unknown_fields)]
-        #ast
+        #original_ast
 
-        impl From<#name> for #mergeable_name {
-            fn from(orig: #name) -> #mergeable_name {
+        #[derive(Default, Deserialize)]
+        #mergeable_ast
+
+       impl From<#unmergeable_name> for #mergeable_name {
+            fn from(orig: #unmergeable_name) -> #mergeable_name {
                 Self {
                     #(#to_mergeable),*
                 }
             }
         }
 
-        impl From<#mergeable_name> for #name {
-            fn from(orig: #mergeable_name) -> #name {
+        impl From<#mergeable_name> for #unmergeable_name {
+            fn from(orig: #mergeable_name) -> #unmergeable_name {
                 Self {
                     #(#to_unwrapped),*
                 }
@@ -153,7 +186,7 @@ pub fn mergeable(input: TokenStream) -> TokenStream {
         }
 
 
-        impl Merges for #mergeable_name {
+        impl merges::Merges for #mergeable_name {
             fn merge(&self, rhs: &Self) -> Self {
                 Self {
                     #(#merge_fields),*
@@ -161,17 +194,11 @@ pub fn mergeable(input: TokenStream) -> TokenStream {
             }
         }
 
-    }
-    .into();
 
-    token_stream
-}
 
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {
-        let result = 2 + 2;
-        assert_eq!(result, 4);
-    }
+
+
+    };
+
+    token_stream.into()
 }
