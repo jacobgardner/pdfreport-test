@@ -12,7 +12,7 @@ use polyhorn_yoga as yoga;
 
 use crate::stylesheet::Style;
 
-use yoga::{Edge, FlexDirection, StyleUnit};
+use yoga::{Edge, FlexDirection, MeasureMode, NodeRef, Size, StyleUnit};
 
 pub struct YogaLayout {}
 
@@ -22,6 +22,27 @@ impl YogaLayout {
     }
 }
 
+struct NodeContext<'a> {
+    dom_node: &'a DomNode
+}
+
+extern "C" fn measure_func(
+    node_ref: NodeRef,
+    width: f32,
+    width_measure_mode: MeasureMode,
+    height: f32,
+    height_measure_mode: MeasureMode,
+) -> Size {
+    let context = yoga::Node::get_context(&node_ref)
+        .unwrap()
+        .downcast_ref::<NodeContext>()
+        .unwrap();
+
+    println!("NODE CONTEXT: {:?}", context.dom_node);
+
+    unimplemented!();
+}
+
 impl LayoutEngine for YogaLayout {
     fn build_node_layout(
         &mut self,
@@ -29,7 +50,7 @@ impl LayoutEngine for YogaLayout {
         stylesheet: &Stylesheet,
     ) -> Result<(), DocumentGenerationError> {
         let mut yoga_nodes_by_id: HashMap<NodeId, yoga::Node> = HashMap::new();
-
+        
         for (node, parent) in root_node.block_iter() {
             let style = stylesheet.get_style(
                 &node
@@ -40,6 +61,13 @@ impl LayoutEngine for YogaLayout {
             )?;
 
             let mut layout_node = yoga::Node::from(style);
+
+            if let DomNode::Text(text_node) = node {
+                let context = yoga::Context::new(NodeContext { dom_node: &node });
+
+                layout_node.set_context(Some(context));
+                layout_node.set_measure_func(Some(measure_func));
+            }
 
             if let Some(parent) = parent {
                 let parent_yoga_node = yoga_nodes_by_id
@@ -55,10 +83,9 @@ impl LayoutEngine for YogaLayout {
         let root_yoga_node = yoga_nodes_by_id.get_mut(&root_node.node_id()).unwrap();
 
         root_yoga_node.calculate_layout(100., 100., yoga::Direction::LTR);
-        
+
         for (_, yoga_node) in yoga_nodes_by_id.iter() {
             println!("Layout is {:?}", yoga_node.get_layout());
-
         }
 
         todo!()
