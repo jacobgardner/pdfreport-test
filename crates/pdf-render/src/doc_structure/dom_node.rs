@@ -29,7 +29,7 @@ impl DomNode {
         }
     }
 
-    pub fn block_iter<'a>(&'a self) -> TreeIterator<'a, Self> {
+    pub fn block_iter(&self) -> TreeIterator<Self> {
         TreeIterator::new(self)
     }
 }

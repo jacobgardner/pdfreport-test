@@ -1,15 +1,11 @@
 use std::collections::HashMap;
 
 use darling::{FromField, FromMeta};
-use proc_macro::TokenStream;
-use quote::ToTokens;
-use syn::{
-    parse::Parse, parse_macro_input, punctuated::Punctuated, token::Paren, Attribute,
-    AttributeArgs, Data, DeriveInput, Expr, ExprParen, ExprTuple, Field, Fields, Token, Type,
-};
+use syn::{Data, DeriveInput, Field, Fields, Type};
 
 use crate::config::FIELD_ATTR;
 
+#[allow(dead_code)]
 #[derive(Debug, FromField)]
 #[darling(attributes(mergeable))]
 pub struct MergeableField {
@@ -19,7 +15,7 @@ pub struct MergeableField {
     nested: bool,
 }
 
-#[derive(Clone, FromMeta, Debug)]
+#[derive(Clone, FromMeta, Debug, Default)]
 #[darling(default)]
 pub struct FieldOptions {
     pub rename: Option<String>,
@@ -37,7 +33,7 @@ impl From<MergeableField> for FieldOptions {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct FieldsOptions(HashMap<String, FieldOptions>);
 
 impl FieldsOptions {
@@ -46,7 +42,7 @@ impl FieldsOptions {
     }
 
     pub fn insert_by_field(&mut self, field: &Field) {
-        let mergeable_field = MergeableField::from_field(&field).unwrap();
+        let mergeable_field = MergeableField::from_field(field).unwrap();
 
         self.insert(
             field
@@ -74,16 +70,6 @@ impl FieldsOptions {
 
     pub fn get(&self, field_name: &str) -> FieldOptions {
         self.0.get(field_name).cloned().unwrap_or_default()
-    }
-}
-
-impl Default for FieldOptions {
-    fn default() -> Self {
-        Self {
-            rename: None,
-            use_null_in_serde: false,
-            is_nested: false,
-        }
     }
 }
 
@@ -154,7 +140,7 @@ pub fn extract_field_attrs(ast: &mut DeriveInput) -> FieldsOptions {
                     .position(|attr| attr.path.is_ident(FIELD_ATTR));
 
                 if let Some(index) = mergeable_attr_index {
-                    field_options.insert_by_field(&field);
+                    field_options.insert_by_field(field);
 
                     field.attrs.remove(index);
                 }

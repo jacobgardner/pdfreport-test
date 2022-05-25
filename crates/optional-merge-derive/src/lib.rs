@@ -5,16 +5,12 @@ mod field_options;
 
 use darling::FromMeta;
 use field_options::{extract_field_attrs, FieldOptions, FieldsOptions};
-use proc_macro2::{Span, TokenStream};
+use proc_macro2::Span;
 use quote::{quote, ToTokens};
-use std::{collections::HashMap, str::FromStr};
-use syn::{
-    self, parse::Parse, parse_macro_input, punctuated::Punctuated, token::Paren, Attribute,
-    AttributeArgs, Data, DeriveInput, Expr, ExprTuple, Field, Fields, Token, Type,
-};
+use std::str::FromStr;
+use syn::{self, parse_macro_input, Attribute, AttributeArgs, Data, DeriveInput, Fields, Type};
 
 fn build_skip_optional_attr() -> Attribute {
-
     // FIXME: There's a better way to build up an Attribute than this,
     //  but I'll find it later
     let struct_with_attr: syn::ItemStruct = syn::parse2(quote! {
@@ -48,7 +44,7 @@ fn convert_fields_to_optional(
     if let Data::Struct(mergeable_struct) = &mut ast.data {
         if let Fields::Named(named_fields) = &mut mergeable_struct.fields {
             named_fields.named.iter_mut().for_each(|field| {
-                let field_options = fields_options.get_by_field(&field);
+                let field_options = fields_options.get_by_field(field);
 
                 let mergeable_type = if field_options.is_nested {
                     let ty_name = format!("Mergeable{}", field.ty.to_token_stream());
@@ -74,11 +70,12 @@ pub fn mergeable(
     input: proc_macro::TokenStream,
 ) -> proc_macro::TokenStream {
     let mut original_ast: DeriveInput = syn::parse(input).unwrap();
-    
+
     // let receiver = MergeableStruct::from_derive_input(&original_ast).unwrap();
 
     let attr_args = parse_macro_input!(attr as AttributeArgs);
-    let global_options = FieldOptions::from_list(&attr_args).expect("Global options could not parse attr list");
+    let global_options =
+        FieldOptions::from_list(&attr_args).expect("Global options could not parse attr list");
 
     let field_options = extract_field_attrs(&mut original_ast);
 
@@ -94,7 +91,7 @@ pub fn mergeable(
     let merge_fields = if let Data::Struct(s) = &original_ast.data {
         if let Fields::Named(named_fields) = &s.fields {
             named_fields.named.iter().map(|field| {
-                let field_options = field_options.get_by_field(&field);
+                let field_options = field_options.get_by_field(field);
                 let name = field.clone().ident.unwrap();
 
                 if field_options.is_nested {
@@ -117,7 +114,7 @@ pub fn mergeable(
     let to_mergeable = if let Data::Struct(s) = &original_ast.data {
         if let Fields::Named(named_fields) = &s.fields {
             named_fields.named.iter().map(|field| {
-                let field_options = field_options.get_by_field(&field);
+                let field_options = field_options.get_by_field(field);
                 let is_nested = field_options.is_nested;
 
                 let name = field.clone().ident;
@@ -142,7 +139,7 @@ pub fn mergeable(
     let to_unwrapped = if let Data::Struct(s) = &original_ast.data {
         if let Fields::Named(named_fields) = &s.fields {
             named_fields.named.iter().map(|field| {
-                let field_options = field_options.get_by_field(&field);
+                let field_options = field_options.get_by_field(field);
                 let is_nested = field_options.is_nested;
                 let name = field.clone().ident;
 
@@ -161,8 +158,8 @@ pub fn mergeable(
         }
     } else {
         unimplemented!()
-    }; 
-    
+    };
+
     let token_stream = quote! {
 
         #original_ast

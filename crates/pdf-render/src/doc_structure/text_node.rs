@@ -35,7 +35,7 @@ impl TextNode {
 }
 
 impl TextChild {
-    pub fn iter<'a>(&'a self) -> TreeIterator<'a, Self> {
+    pub fn iter(&self) -> TreeIterator<Self> {
         TreeIterator::new(self)
     }
 }

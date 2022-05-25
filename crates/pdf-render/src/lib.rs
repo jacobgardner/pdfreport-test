@@ -7,12 +7,11 @@ use block_layout::{layout_engine::LayoutEngine, yoga_layout::YogaLayout};
 use bytes::Bytes;
 use doc_structure::{FontFamilyInfo, NodeId};
 use document_builder::DocumentBuilder;
-use fonts::{FontAttributes, FontCollection, FontFamilyCollection, FontSlant, FontWeight};
-use paragraph_layout::{ParagraphLayout, ParagraphStyle};
+use fonts::{FontCollection, FontFamilyCollection};
+use paragraph_layout::ParagraphLayout;
 use print_pdf_writer::PrintPdfWriter;
-use rich_text::{RichText, RichTextSpan};
-use std::{collections::HashMap, io::Write, rc::Rc, thread::current};
-use values::{Color, Point, Pt};
+use std::{collections::HashMap, io::Write, rc::Rc};
+use values::{Point, Pt};
 
 mod block_layout;
 pub mod doc_structure;
@@ -73,11 +72,8 @@ pub fn build_pdf_from_dom<W: Write>(
     let paragraph_layout = Rc::new(paragraph_layout);
 
     let mut layout_engine = YogaLayout::new();
-    let layout_nodes = layout_engine.build_node_layout(
-        &doc_structure.root,
-        &stylesheet,
-        paragraph_layout.clone(),
-    )?;
+    let layout_nodes =
+        layout_engine.build_node_layout(&doc_structure.root, stylesheet, paragraph_layout)?;
 
     pdf_writer.load_fonts(&font_collection)?;
 

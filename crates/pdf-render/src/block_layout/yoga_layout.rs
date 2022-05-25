@@ -1,4 +1,4 @@
-use std::{collections::HashMap, hash::Hash, rc::Rc};
+use std::{collections::HashMap, rc::Rc};
 
 use crate::{
     doc_structure::{DomNode, NodeId},
@@ -6,7 +6,7 @@ use crate::{
     page_sizes,
     paragraph_layout::{ParagraphLayout, ParagraphStyle, RenderedTextBlock},
     rich_text::{dom_node_conversion::dom_node_to_rich_text, RichText},
-    stylesheet::{Direction, Stylesheet},
+    stylesheet::Stylesheet,
     values::Pt,
 };
 
@@ -16,8 +16,7 @@ use polyhorn_yoga as yoga;
 
 use crate::stylesheet::Style;
 
-use yoga::{Edge, FlexDirection, MeasureMode, NodeRef, Size, StyleUnit, style};
-use yoga::prelude::*;
+use yoga::{Edge, MeasureMode, NodeRef, Size, StyleUnit};
 
 pub struct YogaLayout {}
 
@@ -85,7 +84,7 @@ impl LayoutEngine for YogaLayout {
             let mut layout_node = yoga::Node::from(node_style);
 
             if let DomNode::Text(text_node) = node {
-                let rich_text = dom_node_to_rich_text(text_node, &parent, &stylesheet)?;
+                let rich_text = dom_node_to_rich_text(text_node, &parent, stylesheet)?;
 
                 // TODO: Can we do this without cloning???
                 let context = yoga::Context::new(NodeContext {
