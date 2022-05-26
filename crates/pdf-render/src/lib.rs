@@ -82,6 +82,8 @@ pub fn build_pdf_from_dom<W: Write>(
 
             let rich_text = dom_node_to_rich_text(text_node, &parent, stylesheet)?;
 
+            // FIXME: We already calculated the text block in the yoga layout
+            // engine. Either re-use that or pass it into the layout engine?
             let text_block = paragraph_layout
                 .calculate_layout(ParagraphStyle::default(), &rich_text, layout.width)
                 .unwrap();
