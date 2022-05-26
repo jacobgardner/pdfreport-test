@@ -1,4 +1,3 @@
-// use oldlib::MergeOptional;
 use merges::Merges;
 use optional_merge_derive::mergeable;
 use serde::Deserialize;
@@ -8,6 +7,8 @@ use crate::{
     fonts::{FontSlant, FontWeight},
     values::Color,
 };
+
+use super::FontStyles;
 
 #[mergeable]
 #[derive(TS, Clone, Debug, PartialEq)]
@@ -19,7 +20,7 @@ pub struct BorderRadiusStyle {
     pub top_left: f32,
 }
 
-impl Default for BorderRadiusStyle {
+impl Default for BorderRadiusStyle::Unmergeable {
     fn default() -> Self {
         Self {
             top_right: 0.,
@@ -41,7 +42,7 @@ pub struct BorderStyle {
     pub radius: BorderRadiusStyle,
 }
 
-impl Default for BorderStyle {
+impl Default for BorderStyle::Unmergeable {
     fn default() -> Self {
         Self {
             width: 0.,
@@ -91,7 +92,7 @@ pub struct FlexStyle {
     pub basis: String,
 }
 
-impl Default for FlexStyle {
+impl Default for FlexStyle::Unmergeable {
     fn default() -> Self {
         Self {
             direction: Direction::Column,
@@ -115,7 +116,7 @@ pub struct EdgeStyle {
     pub left: f32,
 }
 
-impl Default for EdgeStyle {
+impl Default for EdgeStyle::Unmergeable {
     fn default() -> Self {
         Self {
             top: 0.,
@@ -126,27 +127,6 @@ impl Default for EdgeStyle {
     }
 }
 
-#[mergeable]
-#[derive(TS, Clone, Debug, PartialEq)]
-#[ts(export)]
-pub struct FontStyles {
-    pub family: String,
-    pub size: f32,
-    pub style: FontSlant,
-    pub weight: FontWeight,
-}
-
-impl Default for FontStyles {
-    fn default() -> Self {
-        Self {
-            // TODO: Don't use Inter
-            family: String::from("Inter"),
-            size: 12.,
-            style: FontSlant::Normal,
-            weight: FontWeight::Regular,
-        }
-    }
-}
 
 #[mergeable]
 #[derive(TS, Clone, Debug, PartialEq)]
@@ -170,7 +150,7 @@ pub struct Style {
     pub height: String,
 }
 
-impl Default for Style {
+impl Default for Style::Unmergeable {
     fn default() -> Self {
         Self {
             color: Color::black(),
@@ -186,11 +166,11 @@ impl Default for Style {
     }
 }
 
-impl Style {
-    pub fn merge_style(&self, rhs: &MergeableStyle) -> Style {
-        let base: MergeableStyle = MergeableStyle::from(self.clone());
+impl Style::Unmergeable {
+    pub fn merge_style(&self, rhs: &Style::Mergeable) -> Style::Unmergeable {
+        let base = Style::Mergeable::from(self.clone());
 
-        let merged: MergeableStyle = base.merge(rhs);
+        let merged: Style::Mergeable = base.merge(rhs);
 
         merged.into()
     }

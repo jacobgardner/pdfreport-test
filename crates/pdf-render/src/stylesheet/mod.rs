@@ -6,25 +6,27 @@ use std::collections::HashMap;
 use serde::Deserialize;
 
 mod style;
+mod font_styles;
 
-pub use style::{Direction, FlexWrap, MergeableStyle, Style};
+pub use style::{Direction, FlexWrap, Style};
+pub use font_styles::FontStyles;
 
 use crate::error::{DocumentGenerationError, UserInputError};
 
 #[derive(Deserialize, Debug, Default)]
 pub struct Stylesheet {
     #[serde(flatten)]
-    style_lookup: HashMap<String, MergeableStyle>,
+    style_lookup: HashMap<String, Style::Mergeable>,
     #[serde(skip)]
-    default_style: Style,
+    default_style: Style::Unmergeable,
 }
 
 impl Stylesheet {
     pub fn get_style(
         &self,
-        base_style: Style,
+        base_style: Style::Unmergeable,
         class_names: &[String],
-    ) -> Result<Style, DocumentGenerationError> {
+    ) -> Result<Style::Unmergeable, DocumentGenerationError> {
         class_names
             .iter()
             .map(|class_name| (class_name, self.style_lookup.get(class_name)))
@@ -50,7 +52,7 @@ mod tests {
             style_lookup: [
                 (
                     "a".to_owned(),
-                    MergeableStyle {
+                    Style::Mergeable {
                         color: Some(Color::white()),
                         width: Some("a".to_owned()),
                         ..Default::default()
@@ -58,21 +60,21 @@ mod tests {
                 ),
                 (
                     "b".to_owned(),
-                    MergeableStyle {
+                    Style::Mergeable {
                         height: Some("b".to_owned()),
                         ..Default::default()
                     },
                 ),
                 (
                     "c".to_owned(),
-                    MergeableStyle {
+                    Style::Mergeable {
                         width: Some("c".to_owned()),
                         ..Default::default()
                     },
                 ),
                 (
                     "d".to_owned(),
-                    MergeableStyle {
+                    Style::Mergeable {
                         height: Some("d".to_owned()),
                         width: Some("d".to_owned()),
                         color: Some(Color::white()),
@@ -86,25 +88,25 @@ mod tests {
         };
 
         assert_eq!(
-            stylesheet.get_style(Style::default(), &[]).unwrap(),
-            Style::default()
+            stylesheet.get_style(Default::default(), &[]).unwrap(),
+            Default::default()
         );
         assert_eq!(
-            stylesheet.get_style(Style::default(), &["a".to_owned()]).unwrap(),
-            Style {
+            stylesheet.get_style(Default::default(), &["a".to_owned()]).unwrap(),
+            Style::Unmergeable {
                 color: Color::white(),
                 width: String::from("a"),
-                ..Style::default()
+                ..Default::default()
             }
         );
 
         assert_eq!(
-            stylesheet.get_style(Style::default(), &["a".to_owned(), "b".to_owned()]).unwrap(),
-            Style {
+            stylesheet.get_style(Default::default(), &["a".to_owned(), "b".to_owned()]).unwrap(),
+            Style::Unmergeable {
                 color: Color::white(),
                 height: String::from("b"),
                 width: String::from("a"),
-                ..Style::default()
+                ..Default::default()
             }
         );
         

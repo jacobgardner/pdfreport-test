@@ -1,11 +1,11 @@
 use optional_merge_derive::mergeable;
-use serde::Deserialize;
+use merges::Merges;
 
 #[mergeable]
 #[derive(Debug, Clone)]
 struct NestedStruct {}
 
-#[mergeable(rename = "poop")]
+#[mergeable]
 #[derive(Debug, Clone)]
 struct TestStruct {
     bool_test: bool,
@@ -16,10 +16,10 @@ struct TestStruct {
 
 #[test]
 fn test_unmerged() {
-    let original = TestStruct {
+    let original = TestStruct::Unmergeable {
         bool_test: true,
-        nested_struct: NestedStruct {},
+        nested_struct: NestedStruct::Unmergeable {},
     };
 
-    let merged = MergeableTestStruct::default();
+    let merged = TestStruct::Mergeable::default();
 }

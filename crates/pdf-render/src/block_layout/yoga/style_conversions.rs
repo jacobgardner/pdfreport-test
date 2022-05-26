@@ -25,8 +25,8 @@ impl From<FlexWrap> for Wrap {
     }
 }
 
-impl From<Style> for yoga::Node {
-    fn from(style: Style) -> Self {
+impl From<Style::Unmergeable> for yoga::Node {
+    fn from(style: Style::Unmergeable) -> Self {
         let mut layout_node = yoga::Node::new();
 
         // TODO: Look into flex_styles! macro to clean this up

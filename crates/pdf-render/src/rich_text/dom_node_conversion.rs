@@ -11,9 +11,9 @@ pub fn dom_node_to_rich_text(
   let parent_style = if let Some(parent_node) = parent_node {
     // FIXME: This does not take into account the parent relying on ancestors'
     // default styles
-    stylesheet.get_style(Style::default(), parent_node.styles())?
+    stylesheet.get_style(Default::default(), parent_node.styles())?
   } else {
-    Style::default()
+    Default::default()
   };
   
   let text_node_style = stylesheet.get_style(parent_style, text_node.styles() )?;

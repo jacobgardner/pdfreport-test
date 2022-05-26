@@ -104,7 +104,7 @@ impl LayoutEngine for YogaLayout {
         paragraph_layout: Rc<ParagraphLayout>,
     ) -> Result<(), DocumentGenerationError> {
         for (node, parent) in root_node.block_iter() {
-            let node_style = stylesheet.get_style(Style::default(), node.styles())?;
+            let node_style = stylesheet.get_style(Default::default(), node.styles())?;
 
             let mut layout_node = yoga::Node::from(node_style);
 
@@ -140,11 +140,7 @@ impl LayoutEngine for YogaLayout {
 
         let root_yoga_node = self.yoga_nodes_by_id.get_mut(&root_node.node_id()).unwrap();
 
-        root_yoga_node.calculate_layout(
-            page_width.0 as f32,
-            yoga::Undefined,
-            yoga::Direction::LTR,
-        );
+        root_yoga_node.calculate_layout(page_width.0 as f32, yoga::Undefined, yoga::Direction::LTR);
 
         Ok(())
     }
