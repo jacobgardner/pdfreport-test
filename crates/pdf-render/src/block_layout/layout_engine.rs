@@ -9,7 +9,7 @@ use crate::{
 
 /// The absolute position of the node relative to 
 /// the top of the PDF document. (This does NOT include pagination)
-#[derive(Default)]
+#[derive(Debug, Default)]
 pub struct NodeLayout {
     pub left: Pt,
     pub right: Pt,

@@ -23,7 +23,7 @@ impl Default for FlexStyle::Unmergeable {
         Self {
             direction: Direction::Column,
             wrap: FlexWrap::NoWrap,
-            align_items: FlexAlign::Auto,
+            align_items: FlexAlign::Stretch,
             align_self: FlexAlign::Auto,
             grow: 0.,
             shrink: 1.,
