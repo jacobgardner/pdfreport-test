@@ -21,4 +21,17 @@ impl RenderedTextBlock {
             .iter()
             .fold(0., |acc, line| acc + line.line_metrics.height.0))
     }
+
+    pub fn width(&self) -> Pt {
+        self.lines
+            .iter()
+            .max_by(|&x, &y| {
+                x.line_metrics
+                    .width
+                    .partial_cmp(&y.line_metrics.width)
+                    .expect("Lines should always have a non-inf size")
+            })
+            .map(|line| line.line_metrics.width)
+            .unwrap_or(Pt(0.))
+    }
 }

@@ -24,7 +24,7 @@ impl<T> From<(T, T)> for Size<T> {
 #[derive(Debug, PartialEq)]
 pub struct Mm(pub f64);
 
-#[derive(Default, Copy, Clone, Debug, PartialEq)]
+#[derive(Default, Copy, Clone, Debug, PartialEq, PartialOrd)]
 pub struct Pt(pub f64);
 
 impl From<f64> for Pt {

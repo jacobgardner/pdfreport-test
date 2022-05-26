@@ -57,6 +57,7 @@ extern "C" fn measure_func(
     match text_block {
         Ok(text_block) => {
             let height = text_block.height().0 as f32;
+            let width = text_block.width().0 as f32;
 
             context.text_block = Some(text_block);
 
