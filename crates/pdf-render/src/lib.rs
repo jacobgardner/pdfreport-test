@@ -1,20 +1,14 @@
-// TODO: Remove these once we have more stuff implemented
-#![allow(unused_variables)]
-#![allow(unused_mut)]
-#![allow(dead_code)]
-
 #![doc = include_str!("../README.md")]
-
 
 use block_layout::{layout_engine::LayoutEngine, yoga::YogaLayout};
 use bytes::Bytes;
-use doc_structure::{DomNode, FontFamilyInfo, NodeId};
+use doc_structure::{DomNode, FontFamilyInfo};
 use document_builder::DocumentBuilder;
 use fonts::{FontCollection, FontFamilyCollection};
 use paragraph_layout::{ParagraphLayout, ParagraphStyle};
 use print_pdf_writer::PrintPdfWriter;
 use rich_text::dom_node_conversion::dom_node_to_rich_text;
-use std::{collections::HashMap, io::Write, rc::Rc};
+use std::{io::Write, rc::Rc};
 use values::{Point, Pt};
 
 pub mod block_layout;
@@ -31,9 +25,6 @@ pub mod utils;
 pub mod values;
 
 use error::DocumentGenerationError;
-
-static TEMP_FONT_BYTES: &[u8] =
-    include_bytes!("../../../assets/fonts/inter-static/Inter-Regular.ttf");
 
 pub fn load_fonts_from_doc_structure(
     fonts: &[FontFamilyInfo],
@@ -84,10 +75,6 @@ pub fn build_pdf_from_dom<W: Write>(
     pdf_writer.load_fonts(&font_collection)?;
 
     let mut pdf_builder = DocumentBuilder::new(pdf_writer);
-
-    let mut node_parents: HashMap<NodeId, NodeId> = HashMap::new();
-
-    println!("============================");
 
     for (node, parent) in doc_structure.root.block_iter() {
         if let DomNode::Text(text_node) = node {

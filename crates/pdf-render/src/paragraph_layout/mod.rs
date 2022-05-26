@@ -87,7 +87,7 @@ impl ParagraphLayout {
             ParagraphBuilder::new(&paragraph_style, self.skia_font_collection.clone());
 
         for span in rich_text.0.iter() {
-            let mut span_style = self.layout_style_from_span(span)?;
+            let span_style = self.layout_style_from_span(span)?;
 
             paragraph_builder.push_style(&span_style);
             paragraph_builder.add_text(&span.text);

@@ -27,8 +27,6 @@ impl ParagraphLayout {
         span_style.set_font_size(span.size.0 as f32);
 
         if !self.font_families.contains(&span.font_family) {
-            let font_family = span.font_family.clone();
-            let text = span.text.clone();
             return Err(
                 InternalServerError::FontFamilyNotRegisteredForLayoutEngine {
                     family_name: span.font_family.clone(),

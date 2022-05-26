@@ -27,8 +27,6 @@ use crate::error::{DocumentGenerationError, UserInputError};
 pub struct Stylesheet {
     #[serde(flatten)]
     style_lookup: HashMap<String, Style::Mergeable>,
-    #[serde(skip)]
-    default_style: Style::Unmergeable,
 }
 
 impl Stylesheet {

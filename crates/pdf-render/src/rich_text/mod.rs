@@ -37,8 +37,6 @@ impl RichText {
         line_start_index: usize,
         line_end_index: usize,
     ) -> Result<RichText, DocumentGenerationError> {
-        let mut current_span_offset = 0;
-
         let span_data: Vec<(&RichTextSpan, usize, usize)> = self
             .0
             .iter()
@@ -64,7 +62,7 @@ impl RichText {
         let rich = if start_span_index == end_span_index {
             // Same span!
 
-            let (span, start, end) = span_data[start_span_index];
+            let (span, start, _) = span_data[start_span_index];
 
             RichText(vec![RichTextSpan {
                 text: span.text[line_start_index - start..line_end_index - start].to_owned(),
@@ -73,7 +71,7 @@ impl RichText {
         } else {
             let mut rich_text = RichText(vec![]);
 
-            let (start_span, start, end) = span_data[start_span_index];
+            let (start_span, start, _) = span_data[start_span_index];
 
             rich_text.0.push(RichTextSpan {
                 text: start_span.text[line_start_index - start..].to_owned(),
@@ -84,7 +82,7 @@ impl RichText {
                 .0
                 .extend(self.0[start_span_index + 1..end_span_index].iter().cloned());
 
-            let (end_span, start, end) = span_data[end_span_index];
+            let (end_span, start, _) = span_data[end_span_index];
             rich_text.0.push(RichTextSpan {
                 text: end_span.text[0..line_end_index - start].to_owned(),
                 ..end_span.clone()

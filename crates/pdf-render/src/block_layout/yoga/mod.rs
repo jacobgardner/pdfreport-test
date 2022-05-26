@@ -34,12 +34,13 @@ impl YogaLayout {
 }
 
 // TODO: Implement for images as well
+// TODO: We should *PROBABLY* respect the measure mode
 extern "C" fn measure_func(
     node_ref: NodeRef,
     width: f32,
-    width_measure_mode: MeasureMode,
-    height: f32,
-    height_measure_mode: MeasureMode,
+    _width_measure_mode: MeasureMode,
+    _height: f32,
+    _height_measure_mode: MeasureMode,
 ) -> Size {
     let context = yoga::Node::get_context_mut(&node_ref)
         .unwrap()
