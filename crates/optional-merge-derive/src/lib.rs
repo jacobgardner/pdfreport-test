@@ -8,42 +8,12 @@ use field_options::{extract_field_attrs, FieldOptions, FieldsOptions};
 use proc_macro2::Span;
 use quote::{quote, ToTokens};
 use std::str::FromStr;
-use syn::{self, parse_macro_input, Attribute, AttributeArgs, Data, DeriveInput, Fields, Type};
+use syn::{
+    self, parse_macro_input, parse_quote, Attribute, AttributeArgs, Data, DeriveInput, Fields, Type,
+};
 
 fn build_skip_optional_attr() -> Attribute {
-    
-    // let attr = Attribute {
-    //     pound_token: todo!(),
-    //     style: todo!(),
-    //     bracket_token: todo!(),
-    //     path: todo!(),
-    //     tokens: todo!(),
-    // };
-
-    
-    // FIXME: There's a better way to build up an Attribute than this,
-    //  but I'll find it later
-    let struct_with_attr: syn::ItemStruct = syn::parse2(quote! {
-        struct test {
-            #[serde(skip_serializing_if = "Option::is_none")]
-            field: Option<String>
-        }
-    })
-    .unwrap();
-
-    if let syn::Fields::Named(fields) = struct_with_attr.fields {
-        fields
-            .named
-            .into_iter()
-            .next()
-            .expect("Expected named fields to have 1 field")
-            .attrs
-            .into_iter()
-            .next()
-            .expect("Expected first named attribute to have attached attribute")
-    } else {
-        unreachable!();
-    }
+    parse_quote! { #[serde(skip_serializing_if = "Option::is_none")] }
 }
 
 fn convert_fields_to_optional(
@@ -66,7 +36,7 @@ fn convert_fields_to_optional(
                 if !global_options.use_null_in_serde {
                     field.attrs.push(build_skip_optional_attr());
                 }
-                field.ty = Type::Verbatim(quote! { Option< #mergeable_type > });
+                field.ty = parse_quote! { Option< #mergeable_type > };
             });
         }
     } else {
@@ -80,8 +50,6 @@ pub fn mergeable(
     input: proc_macro::TokenStream,
 ) -> proc_macro::TokenStream {
     let mut original_ast: DeriveInput = syn::parse(input).unwrap();
-
-    // let receiver = MergeableStruct::from_derive_input(&original_ast).unwrap();
 
     let attr_args = parse_macro_input!(attr as AttributeArgs);
     let global_options =
@@ -201,11 +169,6 @@ pub fn mergeable(
                 }
             }
         }
-
-
-
-
-
     };
 
     token_stream.into()
