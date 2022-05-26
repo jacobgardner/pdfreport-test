@@ -1,3 +1,7 @@
+//! Handles the text layout within a paragraph. Determines when
+//!  to wrap text and how lines should be positioned relative to each other. This
+//!  is utilized by the block_layout engine because the block height is determined
+//!  by the paragraph height constrained by the block width.
 use std::collections::HashSet;
 
 mod layout_style;

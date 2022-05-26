@@ -1,3 +1,5 @@
+//! User facing error type that should hopefully explain anything
+//! that has gone wrong
 use thiserror::Error;
 
 use crate::fonts::FontAttributes;

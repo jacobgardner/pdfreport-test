@@ -1,3 +1,6 @@
+//! Handles the logic of merging various styles together based on an
+//!  array of classnames
+
 use std::collections::HashMap;
 
 use serde::Deserialize;

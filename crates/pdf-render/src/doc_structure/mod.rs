@@ -1,3 +1,6 @@
+//! This is the raw representation of the DOM that will ultimately
+//!  be used throughout the rest of the engine. This includes the stylesheet
+//!  definition, the dom hierarchy, and the font definitions.
 use serde::Deserialize;
 
 mod dom_node;

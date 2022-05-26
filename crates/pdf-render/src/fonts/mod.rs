@@ -1,3 +1,5 @@
+//! Handles loading and prepping fonts for layout and embedding within the
+//!  PDF
 
 mod attributes;
 mod font_id;

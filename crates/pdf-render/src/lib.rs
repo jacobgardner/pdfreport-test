@@ -3,6 +3,9 @@
 #![allow(unused_mut)]
 #![allow(dead_code)]
 
+#![doc = include_str!("../README.md")]
+
+
 use block_layout::{layout_engine::LayoutEngine, yoga::YogaLayout};
 use bytes::Bytes;
 use doc_structure::{DomNode, FontFamilyInfo, NodeId};
@@ -14,18 +17,18 @@ use rich_text::dom_node_conversion::dom_node_to_rich_text;
 use std::{collections::HashMap, io::Write, rc::Rc};
 use values::{Point, Pt};
 
-mod block_layout;
+pub mod block_layout;
 pub mod doc_structure;
-mod document_builder;
+pub mod document_builder;
 pub mod error;
-mod fonts;
-mod page_sizes;
-mod paragraph_layout;
-mod print_pdf_writer;
-mod rich_text;
-mod stylesheet;
-mod utils;
-mod values;
+pub mod fonts;
+pub mod page_sizes;
+pub mod paragraph_layout;
+pub mod print_pdf_writer;
+pub mod rich_text;
+pub mod stylesheet;
+pub mod utils;
+pub mod values;
 
 use error::DocumentGenerationError;
 

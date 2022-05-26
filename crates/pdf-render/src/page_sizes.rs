@@ -1,4 +1,4 @@
-
+//! Some standard page sizes for the PDFs
 use crate::values::{Size, Mm};
 
 // Apparently this is different from letter

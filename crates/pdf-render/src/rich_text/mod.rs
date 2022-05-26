@@ -1,3 +1,6 @@
+//! A representation of the style (size, color, etc.) of text
+//!  throughout a paragraph. 
+
 use crate::{
     error::DocumentGenerationError,
     fonts::FontAttributes,

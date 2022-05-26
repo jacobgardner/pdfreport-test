@@ -1,3 +1,5 @@
+//! This is ultimately what takes nodes that have been styled
+//!  and laid out and writes them to a PDF.
 use std::{
     collections::HashMap,
     io::{BufWriter, Write},
