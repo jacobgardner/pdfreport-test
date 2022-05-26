@@ -11,6 +11,16 @@ use std::str::FromStr;
 use syn::{self, parse_macro_input, Attribute, AttributeArgs, Data, DeriveInput, Fields, Type};
 
 fn build_skip_optional_attr() -> Attribute {
+    
+    // let attr = Attribute {
+    //     pound_token: todo!(),
+    //     style: todo!(),
+    //     bracket_token: todo!(),
+    //     path: todo!(),
+    //     tokens: todo!(),
+    // };
+
+    
     // FIXME: There's a better way to build up an Attribute than this,
     //  but I'll find it later
     let struct_with_attr: syn::ItemStruct = syn::parse2(quote! {

@@ -1,4 +1,4 @@
-use std::ops::Sub;
+use std::ops::{Sub, Add};
 
 #[derive(Debug, Clone)]
 pub struct Size<T> {
@@ -47,5 +47,13 @@ impl Sub for Pt {
 
     fn sub(self, rhs: Self) -> Self::Output {
         Pt(self.0 - rhs.0)
+    }
+}
+
+impl Add for Pt {
+    type Output = Pt;
+
+    fn add(self, rhs: Self) -> Self::Output {
+        Pt(self.0 + rhs.0)
     }
 }

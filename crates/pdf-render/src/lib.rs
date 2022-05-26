@@ -3,13 +3,14 @@
 #![allow(unused_mut)]
 #![allow(dead_code)]
 
-use block_layout::{layout_engine::LayoutEngine, yoga_layout::YogaLayout};
+use block_layout::{layout_engine::LayoutEngine, yoga::YogaLayout};
 use bytes::Bytes;
-use doc_structure::{FontFamilyInfo, NodeId};
+use doc_structure::{DomNode, FontFamilyInfo, NodeId};
 use document_builder::DocumentBuilder;
 use fonts::{FontCollection, FontFamilyCollection};
-use paragraph_layout::ParagraphLayout;
+use paragraph_layout::{ParagraphLayout, ParagraphStyle};
 use print_pdf_writer::PrintPdfWriter;
+use rich_text::dom_node_conversion::dom_node_to_rich_text;
 use std::{collections::HashMap, io::Write, rc::Rc};
 use values::{Point, Pt};
 
@@ -27,8 +28,6 @@ mod utils;
 mod values;
 
 use error::DocumentGenerationError;
-
-use crate::block_layout::yoga_layout::NodeContext;
 
 static TEMP_FONT_BYTES: &[u8] =
     include_bytes!("../../../assets/fonts/inter-static/Inter-Regular.ttf");
@@ -72,8 +71,12 @@ pub fn build_pdf_from_dom<W: Write>(
     let paragraph_layout = Rc::new(paragraph_layout);
 
     let mut layout_engine = YogaLayout::new();
-    let layout_nodes =
-        layout_engine.build_node_layout(&doc_structure.root, stylesheet, paragraph_layout)?;
+    layout_engine.build_node_layout(
+        page_sizes::LETTER.width.into(),
+        &doc_structure.root,
+        stylesheet,
+        paragraph_layout.clone(),
+    )?;
 
     pdf_writer.load_fonts(&font_collection)?;
 
@@ -81,66 +84,28 @@ pub fn build_pdf_from_dom<W: Write>(
 
     let mut node_parents: HashMap<NodeId, NodeId> = HashMap::new();
 
+    println!("============================");
+
     for (node, parent) in doc_structure.root.block_iter() {
-        if let Some(parent) = parent {
-            node_parents.insert(node.node_id(), parent.node_id());
-        }
-    }
+        if let DomNode::Text(text_node) = node {
+            let layout = layout_engine.get_node_layout(text_node.node_id);
 
-    let calc_abs_layout = |mut node_id: NodeId| {
-        let mut current_layout = layout_nodes.get(&node_id).unwrap().get_layout();
+            let rich_text = dom_node_to_rich_text(text_node, &parent, stylesheet)?;
 
-        let mut left = current_layout.left();
-        let mut top = current_layout.top();
-
-        loop {
-            let parent = node_parents.get(&node_id);
-
-            if let Some(parent) = parent {
-                node_id = *parent;
-                let yoga_node = layout_nodes.get(parent).unwrap();
-                let parent_layout = yoga_node.get_layout();
-
-                left += parent_layout.left();
-                top += parent_layout.top();
-            } else {
-                break;
-            }
-        }
-
-        (left, top)
-    };
-
-    for (_, node) in layout_nodes.iter() {
-        let context = node.get_own_context();
-
-        if let Some(context) = context {
-            let context = context.downcast_ref::<NodeContext>().unwrap();
-
-            let text_block = context.paragraph_metrics.as_ref().unwrap().clone();
-
-            let (x, y) = calc_abs_layout(context.node_id);
-
-            println!("Final layout: {x}, {y}");
+            let text_block = paragraph_layout
+                .calculate_layout(ParagraphStyle::default(), &rich_text, layout.width)
+                .unwrap();
 
             // TODO: Can we change this to take a ref instead?
             pdf_builder.write_text_block(
                 text_block,
                 Point {
-                    x: Pt(x as f64),
-                    y: Pt::from(page_sizes::LETTER.height) - Pt(y as f64),
+                    x: layout.left,
+                    y: Pt::from(page_sizes::LETTER.height) - layout.top,
                 },
             )?;
         }
     }
-
-    //     pdf_builder.write_text_block(
-    //     text_block,
-    //     Point {
-    //         x: Pt(10.),
-    //         y: Pt(600.),
-    //     },
-    // )?;
 
     pdf_builder.into_inner().save(pdf_doc_writer)
 }
