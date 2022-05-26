@@ -3,10 +3,7 @@ use optional_merge_derive::mergeable;
 use serde::Deserialize;
 use ts_rs::TS;
 
-use crate::{
-    fonts::{FontSlant, FontWeight},
-    values::Color,
-};
+use crate::values::Color;
 
 use super::FontStyles;
 
@@ -126,7 +123,6 @@ impl Default for EdgeStyle::Unmergeable {
         }
     }
 }
-
 
 #[mergeable]
 #[derive(TS, Clone, Debug, PartialEq)]

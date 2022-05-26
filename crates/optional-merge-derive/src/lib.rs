@@ -49,7 +49,7 @@ fn convert_fields_to_optional(
 fn convert_nested_fields(
     ast: &mut DeriveInput,
     fields_options: &FieldsOptions,
-    global_options: &FieldOptions,
+    _global_options: &FieldOptions,
 ) {
     if let Data::Struct(mergeable_struct) = &mut ast.data {
         if let Fields::Named(named_fields) = &mut mergeable_struct.fields {
@@ -63,9 +63,6 @@ fn convert_nested_fields(
                     field.ty.clone()
                 };
 
-                // if !global_options.use_null_in_serde {
-                //     field.attrs.push(build_skip_optional_attr());
-                // }
                 field.vis = parse_quote! { pub };
                 field.ty = parse_quote! { #mergeable_type };
             });
@@ -177,6 +174,7 @@ pub fn mergeable(
 
     let token_stream = quote! {
 
+        #[allow(non_snake_case)]
         pub mod #original_name {
             use super::*;
             use merges::Merges;
@@ -215,31 +213,3 @@ pub fn mergeable(
 
     token_stream.into()
 }
-
-// pub mod TestStruct {
-//     use crate::MergeableT;
-
-//     pub struct Required {
-
-//     }
-
-//     pub struct Mergeable {
-
-//     }
-
-//     impl MergeableT for Required {
-//         type MergeableType = Mergeable;
-//     }
-
-// }
-
-// trait MergeableT {
-//     type MergeableType;
-// }
-
-// fn m() {
-//     let a = TestStruct::Mergeable {};
-//     use TestStruct::Required;
-//     let a = Required::MergeableType {};
-
-// }

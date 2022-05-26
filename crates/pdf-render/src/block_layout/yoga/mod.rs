@@ -19,8 +19,6 @@ use super::layout_engine::{LayoutEngine, NodeLayout};
 
 use polyhorn_yoga as yoga;
 
-use crate::stylesheet::Style;
-
 use yoga::{MeasureMode, NodeRef, Size};
 
 #[derive(Default)]
@@ -82,7 +80,7 @@ impl LayoutEngine for YogaLayout {
                 height: Pt(layout.height() as f64),
             },
             |acc, node_id| {
-                let parent = self.yoga_nodes_by_id.get(&node_id).unwrap().get_layout();
+                let parent = self.yoga_nodes_by_id.get(node_id).unwrap().get_layout();
 
                 NodeLayout {
                     left: acc.left + Pt(parent.left() as f64),

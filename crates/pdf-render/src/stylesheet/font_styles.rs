@@ -1,5 +1,4 @@
 use optional_merge_derive::mergeable;
-use serde::Deserialize;
 use ts_rs::TS;
 
 use crate::fonts::{FontSlant, FontWeight};
