@@ -11,7 +11,7 @@ fn pdf_response_from_dom(pdf_dom: DocStructure) -> HttpResponse {
             .content_type("application/pdf")
             .append_header((
                 "Content-Disposition",
-                format!("attachment; filename=\"{filename}\""),
+                format!("inline; filename=\"{filename}\""),
             ))
             // Don't cache
             .append_header(("Cache-Control", "private"))
