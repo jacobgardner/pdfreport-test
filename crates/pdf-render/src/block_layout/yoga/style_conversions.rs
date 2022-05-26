@@ -1,11 +1,9 @@
 use polyhorn_yoga as yoga;
 
-use yoga::{FlexDirection, Wrap, Edge, StyleUnit};
+use yoga::{FlexDirection, Wrap, Edge, StyleUnit, Align, FlexStyle::Flex};
 
-use crate::stylesheet::{Direction, FlexWrap, Style};
+use crate::stylesheet::{Direction, FlexWrap, Style, FlexAlign};
 
-
-// TODO: Find a crate to do some of this for us
 impl From<Direction> for FlexDirection {
     fn from(dir: Direction) -> Self {
         match dir {
@@ -25,11 +23,23 @@ impl From<FlexWrap> for Wrap {
     }
 }
 
+impl From<FlexAlign> for Align {
+    fn from(align: FlexAlign) -> Self {
+        match align {
+            FlexAlign::Auto => Align::Auto,
+            FlexAlign::Baseline => Align::Baseline,
+            FlexAlign::Center => Align::Center,
+            FlexAlign::FlexEnd => Align::FlexEnd,
+            FlexAlign::FlexStart => Align::FlexStart,
+            FlexAlign::Stretch => Align::Stretch,
+        }
+    }
+}
+
 impl From<Style::Unmergeable> for yoga::Node {
     fn from(style: Style::Unmergeable) -> Self {
         let mut layout_node = yoga::Node::new();
 
-        // TODO: Look into flex_styles! macro to clean this up
         layout_node.set_border(Edge::All, style.border.width);
 
         layout_node.set_margin(Edge::Top, StyleUnit::Point(style.margin.top.into()));
@@ -44,8 +54,8 @@ impl From<Style::Unmergeable> for yoga::Node {
 
         layout_node.set_flex_direction(style.flex.direction.into());
         layout_node.set_flex_wrap(style.flex.wrap.into());
-        // layout_node.set_align_items(style.flex.align_items.into());
-        // layout_node.set_align_self(style.flex.align_self.into());
+        layout_node.set_align_items(style.flex.align_items.into());
+        layout_node.set_align_self(style.flex.align_self.into());
         layout_node.set_flex_grow(style.flex.grow);
         layout_node.set_flex_shrink(style.flex.shrink);
         // layout_node.set_flex_basis(style.flex.basis);

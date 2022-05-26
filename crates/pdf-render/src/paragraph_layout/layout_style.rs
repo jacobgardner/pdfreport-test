@@ -18,7 +18,18 @@ pub struct ParagraphStyle {
 }
 
 impl ParagraphStyle {
-    // TODO: Add left & right as well
+    pub fn left() -> Self {
+        Self {
+            align: TextAlign::Left,
+        }
+    }
+
+    pub fn right() -> Self {
+        Self {
+            align: TextAlign::Right,
+        }
+    }
+
     pub fn center() -> Self {
         Self {
             align: TextAlign::Center,

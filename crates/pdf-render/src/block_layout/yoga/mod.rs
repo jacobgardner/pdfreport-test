@@ -47,21 +47,29 @@ extern "C" fn measure_func(
         .downcast_mut::<NodeContext>()
         .unwrap();
 
-    // FIXME: See if we can bubble up the error somehow?????
-    let paragraph_metrics = context
-        .paragraph_layout
-        .calculate_layout(
-            ParagraphStyle::default(),
-            &context.rich_text,
-            Pt(width as f64),
-        )
-        .unwrap();
+    let text_block = context.paragraph_layout.calculate_layout(
+        ParagraphStyle::default(),
+        &context.rich_text,
+        Pt(width as f64),
+    );
 
-    let height = paragraph_metrics.height().0 as f32;
+    match text_block {
+        Ok(text_block) => {
+            let height = text_block.height().0 as f32;
 
-    context.paragraph_metrics = Some(paragraph_metrics);
+            context.text_block = Some(text_block);
 
-    Size { width, height }
+            Size { width, height }
+        }
+        Err(err) => {
+            context.calculate_error = Some(err);
+
+            Size {
+                width: 0.,
+                height: 0.,
+            }
+        }
+    }
 }
 
 impl LayoutEngine for YogaLayout {
@@ -114,7 +122,7 @@ impl LayoutEngine for YogaLayout {
                     node_id: node.node_id(),
                     rich_text,
                     paragraph_layout: paragraph_layout.clone(),
-                    paragraph_metrics: None,
+                    text_block: None,
                     calculate_error: None,
                 });
 
@@ -141,6 +149,26 @@ impl LayoutEngine for YogaLayout {
 
         root_yoga_node.calculate_layout(page_width.0 as f32, yoga::Undefined, yoga::Direction::LTR);
 
+        // We stored any errors during calculation in the context so now we have
+        // to check them now that we're back in our own code.
+        for (_, node) in self.yoga_nodes_by_id.iter() {
+            check_node_for_error(node)?;
+        }
+
         Ok(())
     }
+}
+
+fn check_node_for_error(node: &yoga::Node) -> Result<(), DocumentGenerationError> {
+    if let Some(context) = node.get_own_context_mut() {
+        let context = context.downcast_mut::<NodeContext>().unwrap();
+
+        let err = context.calculate_error.take();
+
+        if let Some(err) = err {
+            return Err(err);
+        }
+    }
+    
+    Ok(())
 }

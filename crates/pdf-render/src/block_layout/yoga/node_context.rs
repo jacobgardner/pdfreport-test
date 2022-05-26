@@ -10,7 +10,7 @@ use crate::{
 pub(super) struct NodeContext {
     pub rich_text: RichText,
     pub paragraph_layout: Rc<ParagraphLayout>,
-    pub paragraph_metrics: Option<RenderedTextBlock>,
+    pub text_block: Option<RenderedTextBlock>,
     pub node_id: NodeId,
     pub calculate_error: Option<DocumentGenerationError>,
 }

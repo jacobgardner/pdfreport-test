@@ -15,7 +15,7 @@ pub struct FlexStyle {
     pub align_self: FlexAlign,
     pub grow: f32,
     pub shrink: f32,
-    pub basis: String,
+    // pub basis: String,
 }
 
 impl Default for FlexStyle::Unmergeable {
@@ -27,7 +27,7 @@ impl Default for FlexStyle::Unmergeable {
             align_self: FlexAlign::Auto,
             grow: 0.,
             shrink: 1.,
-            basis: String::from("undefined"),
+            // basis: String::from("undefined"),
         }
     }
 }

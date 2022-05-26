@@ -7,19 +7,19 @@ use serde::Deserialize;
 
 mod border_radius;
 mod border_style;
+mod edge_style;
 mod flex_style;
 mod flex_values;
 mod font_styles;
 mod style;
-mod edge_style;
 
 pub use border_radius::BorderRadiusStyle;
 pub use border_style::BorderStyle;
+pub use edge_style::EdgeStyle;
 pub use flex_style::FlexStyle;
 pub use flex_values::*;
 pub use font_styles::FontStyles;
 pub use style::Style;
-pub use edge_style::EdgeStyle;
 
 use crate::error::{DocumentGenerationError, UserInputError};
 
@@ -122,53 +122,75 @@ mod tests {
             }
         );
 
-        // FIXME:
+        assert_eq!(
+            stylesheet
+                .get_style(
+                    Default::default(),
+                    &["a".to_owned(), "b".to_owned(), "c".to_owned()]
+                )
+                .unwrap(),
+            Style::Unmergeable {
+                color: Color::white(),
+                height: String::from("b"),
+                width: String::from("c"),
+                ..Default::default()
+            }
+        );
 
-        // assert_eq!(
-        //     stylesheet.get_style(Style::default(), &["a", "b", "c"]).unwrap(),
-        //     Style {
-        //         color: Color::white(),
-        //         height: String::from("b"),
-        //         width: String::from("c"),
-        //         ..Style::default()
-        //     }
-        // );
+        assert_eq!(
+            stylesheet
+                .get_style(
+                    Default::default(),
+                    &[
+                        "a".to_owned(),
+                        "b".to_owned(),
+                        "c".to_owned(),
+                        "d".to_owned()
+                    ]
+                )
+                .unwrap(),
+            Style::Unmergeable {
+                color: Color::white(),
+                height: String::from("d"),
+                width: String::from("d"),
+                ..Default::default()
+            }
+        );
 
-        // assert_eq!(
-        //     stylesheet.get_style(Style::default(), &["a", "b", "c", "d"]).unwrap(),
-        //     Style {
-        //         color: Color::white(),
-        //         height: String::from("d"),
-        //         width: String::from("d"),
-        //         ..Style::default()
-        //     }
-        // );
+        assert_eq!(
+            stylesheet
+                .get_style(Default::default(), &["b".to_owned()])
+                .unwrap(),
+            Style::Unmergeable {
+                height: String::from("b"),
+                ..Default::default()
+            }
+        );
 
-        // assert_eq!(
-        //     stylesheet.get_style(Style::default(), &["b"]).unwrap(),
-        //     Style {
-        //         height: String::from("b"),
-        //         ..Style::default()
-        //     }
-        // );
+        assert_eq!(
+            stylesheet
+                .get_style(Default::default(), &["b".to_owned(), "c".to_owned()])
+                .unwrap(),
+            Style::Unmergeable {
+                height: String::from("b"),
+                width: String::from("c"),
+                ..Default::default()
+            }
+        );
 
-        // assert_eq!(
-        //     stylesheet.get_style(Style::default(), &["b", "c"]).unwrap(),
-        //     Style {
-        //         height: String::from("b"),
-        //         width: String::from("c"),
-        //         ..Style::default()
-        //     }
-        // );
-
-        // assert_eq!(
-        //     stylesheet.get_style(Style::default(), &["b", "c", "d"]).unwrap(),
-        //     Style {
-        //         color: Color::white(),
-        //         height: String::from("d"),
-        //         width: String::from("d"),
-        //         ..Style::default()
-        //     }
-        // );
+        assert_eq!(
+            stylesheet
+                .get_style(
+                    Default::default(),
+                    &["b".to_owned(), "c".to_owned(), "d".to_owned()]
+                )
+                .unwrap(),
+            Style::Unmergeable {
+                color: Color::white(),
+                height: String::from("d"),
+                width: String::from("d"),
+                ..Default::default()
+            }
+        );
     }
 }
