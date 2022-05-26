@@ -123,8 +123,11 @@
       }
     },
     "c2": {
+      "font": {
+        "weight": "ExtraBold"
+      },
       "flex": {
-        "shrink": 1,
+        "shrink": 2,
         "grow": 2
       }
     },
@@ -149,6 +152,7 @@
     "italic": {
       "color": "pink",
       "font": {
+        "weight": "ExtraLight",
         "size": 12,
         "style": "Italic"
       }

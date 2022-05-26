@@ -1,25 +1,25 @@
 use polyhorn_yoga as yoga;
 
-use yoga::{FlexDirection, Wrap, Edge, StyleUnit, Align, FlexStyle::Flex};
+use yoga::{Align, Edge, FlexDirection, StyleUnit, Wrap};
 
-use crate::stylesheet::{Direction, FlexWrap, Style, FlexAlign};
+use crate::stylesheet::{Direction, FlexAlign, FlexWrap, Style};
 
 impl From<Direction> for FlexDirection {
     fn from(dir: Direction) -> Self {
         match dir {
             Direction::Column => FlexDirection::Column,
-            Direction::Row => FlexDirection::Row 
+            Direction::Row => FlexDirection::Row,
         }
     }
 }
 
 impl From<FlexWrap> for Wrap {
     fn from(wrap: FlexWrap) -> Self {
-      match wrap {
-        FlexWrap::NoWrap => Wrap::NoWrap,
-        FlexWrap::Wrap => Wrap::Wrap,
-        FlexWrap::WrapReverse => Wrap::WrapReverse,
-      }
+        match wrap {
+            FlexWrap::NoWrap => Wrap::NoWrap,
+            FlexWrap::Wrap => Wrap::Wrap,
+            FlexWrap::WrapReverse => Wrap::WrapReverse,
+        }
     }
 }
 
@@ -58,7 +58,7 @@ impl From<Style::Unmergeable> for yoga::Node {
         layout_node.set_align_self(style.flex.align_self.into());
         layout_node.set_flex_grow(style.flex.grow);
         layout_node.set_flex_shrink(style.flex.shrink);
-        // layout_node.set_flex_basis(style.flex.basis);
+        layout_node.set_flex_basis(StyleUnit::Auto);
 
         layout_node
     }
