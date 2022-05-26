@@ -5,11 +5,21 @@ use std::collections::HashMap;
 
 use serde::Deserialize;
 
-mod style;
+mod border_radius;
+mod border_style;
+mod flex_style;
+mod flex_values;
 mod font_styles;
+mod style;
+mod edge_style;
 
-pub use style::{Direction, FlexWrap, Style};
+pub use border_radius::BorderRadiusStyle;
+pub use border_style::BorderStyle;
+pub use flex_style::FlexStyle;
+pub use flex_values::*;
 pub use font_styles::FontStyles;
+pub use style::Style;
+pub use edge_style::EdgeStyle;
 
 use crate::error::{DocumentGenerationError, UserInputError};
 
@@ -92,7 +102,9 @@ mod tests {
             Default::default()
         );
         assert_eq!(
-            stylesheet.get_style(Default::default(), &["a".to_owned()]).unwrap(),
+            stylesheet
+                .get_style(Default::default(), &["a".to_owned()])
+                .unwrap(),
             Style::Unmergeable {
                 color: Color::white(),
                 width: String::from("a"),
@@ -101,7 +113,9 @@ mod tests {
         );
 
         assert_eq!(
-            stylesheet.get_style(Default::default(), &["a".to_owned(), "b".to_owned()]).unwrap(),
+            stylesheet
+                .get_style(Default::default(), &["a".to_owned(), "b".to_owned()])
+                .unwrap(),
             Style::Unmergeable {
                 color: Color::white(),
                 height: String::from("b"),
@@ -109,7 +123,7 @@ mod tests {
                 ..Default::default()
             }
         );
-        
+
         // FIXME:
 
         // assert_eq!(
