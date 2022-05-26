@@ -10,7 +10,8 @@ use crate::{
 };
 
 #[mergeable]
-#[derive(Clone, Debug, PartialEq)]
+#[derive(TS, Clone, Debug, PartialEq)]
+#[ts(export)]
 pub struct BorderRadiusStyle {
     pub top_right: f32,
     pub bottom_right: f32,
@@ -30,9 +31,11 @@ impl Default for BorderRadiusStyle {
 }
 
 #[mergeable]
-#[derive(Clone, Debug, PartialEq)]
+#[derive(TS, Clone, Debug, PartialEq)]
+#[ts(export)]
 pub struct BorderStyle {
     pub width: f32,
+    #[ts(type = "string")]
     pub color: Color,
     #[mergeable(nested)]
     pub radius: BorderRadiusStyle,
@@ -75,7 +78,8 @@ pub enum FlexAlign {
 }
 
 #[mergeable]
-#[derive(Clone, Debug, PartialEq)]
+#[derive(TS, Clone, Debug, PartialEq)]
+#[ts(export)]
 pub struct FlexStyle {
     // Add other attributes as needed...
     pub direction: Direction,
@@ -102,7 +106,8 @@ impl Default for FlexStyle {
 }
 
 #[mergeable]
-#[derive(Clone, Debug, PartialEq)]
+#[derive(TS, Clone, Debug, PartialEq)]
+#[ts(export)]
 pub struct EdgeStyle {
     pub top: f32,
     pub right: f32,
@@ -122,7 +127,8 @@ impl Default for EdgeStyle {
 }
 
 #[mergeable]
-#[derive(Clone, Debug, PartialEq)]
+#[derive(TS, Clone, Debug, PartialEq)]
+#[ts(export)]
 pub struct FontStyles {
     pub family: String,
     pub size: f32,
@@ -143,17 +149,20 @@ impl Default for FontStyles {
 }
 
 #[mergeable]
-#[derive(Clone, Debug, PartialEq)]
+#[derive(TS, Clone, Debug, PartialEq)]
+#[ts(export)]
 pub struct Style {
     #[mergeable(nested)]
     pub border: BorderStyle,
     #[mergeable(nested)]
     pub font: FontStyles,
+    #[ts(type = "string")]
     pub color: Color,
     #[mergeable(nested)]
     pub margin: EdgeStyle,
     #[mergeable(nested)]
     pub padding: EdgeStyle,
+    #[ts(type = "string")]
     pub background_color: Color,
     #[mergeable(nested)]
     pub flex: FlexStyle,

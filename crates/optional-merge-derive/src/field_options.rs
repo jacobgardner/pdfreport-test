@@ -73,61 +73,6 @@ impl FieldsOptions {
     }
 }
 
-// impl Parse for FieldOptions {
-//     fn parse(mut input: syn::parse::ParseStream) -> syn::Result<Self> {
-//         let mut options = FieldOptions::default();
-
-//         println!("Input: {:?}", input);
-//         if input.peek(Paren) {
-//             let p = input.parse::<syn::Type>().unwrap();
-//             println!("P: {:?}", p);
-//         }
-
-//         let expression_iter = Punctuated::<Expr, Token![,]>::parse_terminated(input).unwrap();
-//         println!("expr_iter: {:?}", expression_iter);
-
-//         println!("----------------------------");
-//         for thing in expression_iter {
-//           println!("Thing: {:?}", thing);
-//             match thing {
-//                 Expr::Assign(assignment) => {
-//                     let option_name = if let Expr::Path(path) = assignment.left.as_ref() {
-//                         path.path
-//                             .get_ident()
-//                             .expect("Expected left side to have named path")
-//                             .to_string()
-//                     } else {
-//                         unreachable!()
-//                     };
-
-//                     println!("Option: {option_name}");
-//                 }
-//                 Expr::Path(standalone) => {
-//                     let ident = standalone
-//                         .path
-//                         .get_ident()
-//                         .expect("Expected standalone to have named path")
-//                         .to_string();
-//                     println!("Option: {ident}");
-
-//                     match ident.as_str() {
-//                         "nested" => {
-//                             options.is_nested = true;
-//                         }
-//                         "use_null_in_serde" => {
-//                             options.use_null_in_serde = true;
-//                         }
-//                         _ => {}
-//                     }
-//                 }
-//                 _ => unreachable!(),
-//             }
-//         }
-
-//         Ok(options)
-//     }
-// }
-
 pub fn extract_field_attrs(ast: &mut DeriveInput) -> FieldsOptions {
     let mut field_options = FieldsOptions::new();
 
