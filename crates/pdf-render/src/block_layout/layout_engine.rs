@@ -7,8 +7,10 @@ use crate::{
     stylesheet::Stylesheet, values::Pt,
 };
 
+/// The absolute position of the node relative to 
+/// the top of the PDF document. (This does NOT include pagination)
 #[derive(Default)]
-pub struct LayoutNode {
+pub struct NodeLayout {
     pub left: Pt,
     pub right: Pt,
     pub top: Pt,
@@ -27,6 +29,5 @@ pub trait LayoutEngine {
     ) -> Result<(), DocumentGenerationError>;
 
 
-    /// Returns the absolute positioning of the node
-    fn get_node_layout(&self, node_id: NodeId) -> LayoutNode;
+    fn get_node_layout(&self, node_id: NodeId) -> NodeLayout;
 }

@@ -15,7 +15,7 @@ use crate::{
 
 use self::node_context::NodeContext;
 
-use super::layout_engine::{LayoutEngine, LayoutNode};
+use super::layout_engine::{LayoutEngine, NodeLayout};
 
 use polyhorn_yoga as yoga;
 
@@ -66,7 +66,7 @@ extern "C" fn measure_func(
 }
 
 impl LayoutEngine for YogaLayout {
-    fn get_node_layout(&self, node_id: NodeId) -> LayoutNode {
+    fn get_node_layout(&self, node_id: NodeId) -> NodeLayout {
         let ancestors = self.parent_node_ids.get_ancestors(node_id);
 
         let layout = self.yoga_nodes_by_id.get(&node_id).unwrap().get_layout();
@@ -74,7 +74,7 @@ impl LayoutEngine for YogaLayout {
         // Yoga doesn't give us absolute positions. All the positions are
         //  relative to the parent node so we have to build it up from ancestors
         ancestors.iter().fold(
-            LayoutNode {
+            NodeLayout {
                 left: Pt(layout.left() as f64),
                 top: Pt(layout.top() as f64),
                 right: Pt(layout.right() as f64),
@@ -84,7 +84,7 @@ impl LayoutEngine for YogaLayout {
             |acc, node_id| {
                 let parent = self.yoga_nodes_by_id.get(&node_id).unwrap().get_layout();
 
-                LayoutNode {
+                NodeLayout {
                     left: acc.left + Pt(parent.left() as f64),
                     right: acc.right + Pt(parent.right() as f64),
                     top: acc.top + Pt(parent.top() as f64),
