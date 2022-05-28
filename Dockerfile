@@ -10,7 +10,7 @@ RUN apt install -y git build-essential llvm-dev libclang-dev clang libfreetype-d
 ADD . /workspace
 WORKDIR /workspace
 
-RUN cargo build --bin server --release
+RUN cargo build --bin server --release --no-default-features
 
 FROM dependencies
 
