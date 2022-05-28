@@ -14,7 +14,6 @@ use crate::{
     error::{DocumentGenerationError, InternalServerError},
     fonts::{FontCollection, FontId},
     paragraph_layout::RenderedTextBlock,
-    rich_text::RichText,
     values::{Mm, Point, Pt, Size},
 };
 

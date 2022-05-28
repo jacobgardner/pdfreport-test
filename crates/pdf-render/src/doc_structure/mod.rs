@@ -4,19 +4,18 @@
 use serde::Deserialize;
 
 mod dom_node;
-mod text_node;
-mod styled_node;
-mod image_node;
 mod fonts;
+mod image_node;
+mod styled_node;
+mod text_node;
 
 pub use dom_node::DomNode;
-pub use styled_node::StyledNode;
-pub use image_node::ImageNode;
-pub use text_node::{TextChild, TextNode};
 pub use fonts::FontFamilyInfo;
+pub use image_node::ImageNode;
+pub use styled_node::StyledNode;
+pub use text_node::{TextChild, TextNode};
 
 use crate::{stylesheet::Stylesheet, utils::unique_id::create_id};
-
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]

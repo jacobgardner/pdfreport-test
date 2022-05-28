@@ -29,7 +29,7 @@ impl FontCollection {
             .find(|&(_, font)| font.font_id() == font_id)
             .map(|(_, data)| data)
     }
-    
+
     pub fn add_family(
         &mut self,
         family_collection: FontFamilyCollection,
@@ -88,7 +88,7 @@ mod tests {
                 Bytes::from("2"),
             )
             .unwrap();
-            
+
         font_collection.add_family(family1).unwrap();
 
         assert_eq!(

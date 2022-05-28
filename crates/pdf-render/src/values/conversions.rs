@@ -1,5 +1,5 @@
-use printpdf::Pt as PrintPdfPt;
 use printpdf::Mm as PrintPdfMm;
+use printpdf::Pt as PrintPdfPt;
 
 use super::{Mm, Pt};
 

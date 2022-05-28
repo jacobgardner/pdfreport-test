@@ -20,11 +20,11 @@ macro_rules! create_id {
                 Self(CURRENT_ID.fetch_add(1, Ordering::SeqCst))
             }
         }
-        
+
         impl Default for $id_type {
-          fn default() -> Self {
-            Self::new()
-          }
+            fn default() -> Self {
+                Self::new()
+            }
         }
     };
 }

@@ -30,7 +30,8 @@ impl ParagraphLayout {
             return Err(
                 InternalServerError::FontFamilyNotRegisteredForLayoutEngine {
                     family_name: span.font_family.clone(),
-                }.into(),
+                }
+                .into(),
             );
         }
 

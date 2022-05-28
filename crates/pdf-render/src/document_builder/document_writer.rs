@@ -1,5 +1,7 @@
 use crate::{
-    error::DocumentGenerationError, paragraph_layout::RenderedTextBlock, rich_text::RichText, values::{Point, Pt},
+    error::DocumentGenerationError,
+    paragraph_layout::RenderedTextBlock,
+    values::{Point, Pt},
 };
 
 pub trait DocumentWriter {

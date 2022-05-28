@@ -42,7 +42,6 @@ extern "C" fn measure_func(
     _height: f32,
     _height_measure_mode: MeasureMode,
 ) -> Size {
-
     let context = yoga::Node::get_context_mut(&node_ref)
         .unwrap()
         .downcast_mut::<NodeContext>()

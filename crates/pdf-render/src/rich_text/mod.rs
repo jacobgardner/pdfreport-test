@@ -1,5 +1,5 @@
 //! A representation of the style (size, color, etc.) of text
-//!  throughout a paragraph. 
+//!  throughout a paragraph.
 
 use crate::{
     error::DocumentGenerationError,
@@ -99,7 +99,29 @@ impl RichText {
 mod tests {
     use super::*;
 
-    // TODO: Add tests for substr out side of range
+    #[test]
+    #[should_panic]
+    fn bad_substr() {
+        let line = RichText(vec![
+            RichTextSpan {
+                // 15 characters
+                size: Pt(32.),
+                .."The quick brown".into()
+            },
+            RichTextSpan {
+                // 19 characters
+                size: Pt(15.),
+                .." fox jumps over the".into()
+            },
+            RichTextSpan {
+                // 9 characters
+                size: Pt(8.),
+                .." lazy dog".into()
+            },
+        ]);
+
+        line.substr(0, 44).unwrap();
+    }
 
     #[test]
     fn substr_works() {

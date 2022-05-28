@@ -1,8 +1,7 @@
 use optional_merge_derive::mergeable;
 use ts_rs::TS;
 
-use super::{Direction, FlexWrap, FlexAlign};
-
+use super::{Direction, FlexAlign, FlexWrap};
 
 #[mergeable]
 #[derive(TS, Clone, Debug, PartialEq)]

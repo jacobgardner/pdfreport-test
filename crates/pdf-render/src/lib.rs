@@ -51,7 +51,7 @@ pub fn build_pdf_from_dom<W: Write>(
     pdf_doc_writer: W,
 ) -> Result<W, DocumentGenerationError> {
     let font_collection = load_fonts_from_doc_structure(&doc_structure.fonts)?;
-    let mut pdf_writer = PrintPdfWriter::new(
+    let pdf_writer = PrintPdfWriter::new(
         &doc_structure.document_title,
         page_sizes::LETTER,
         &font_collection,

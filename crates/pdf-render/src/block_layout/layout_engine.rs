@@ -4,10 +4,11 @@ use crate::{
     doc_structure::{DomNode, NodeId},
     error::DocumentGenerationError,
     paragraph_layout::ParagraphLayout,
-    stylesheet::Stylesheet, values::Pt,
+    stylesheet::Stylesheet,
+    values::Pt,
 };
 
-/// The absolute position of the node relative to 
+/// The absolute position of the node relative to
 /// the top of the PDF document. (This does NOT include pagination)
 #[derive(Debug, Default)]
 pub struct NodeLayout {
@@ -16,7 +17,6 @@ pub struct NodeLayout {
     pub top: Pt,
     pub width: Pt,
     pub height: Pt,
-
 }
 
 pub trait LayoutEngine {
@@ -27,7 +27,6 @@ pub trait LayoutEngine {
         stylesheet: &Stylesheet,
         paragraph_layout: Rc<ParagraphLayout>,
     ) -> Result<(), DocumentGenerationError>;
-
 
     fn get_node_layout(&self, node_id: NodeId) -> NodeLayout;
 }

@@ -1,5 +1,5 @@
 //! Some standard page sizes for the PDFs
-use crate::values::{Size, Mm};
+use crate::values::{Mm, Size};
 
 // Apparently this is different from letter
 pub const A4: Size<Mm> = Size {

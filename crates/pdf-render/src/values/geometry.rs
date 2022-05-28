@@ -1,4 +1,4 @@
-use std::ops::{Sub, Add};
+use std::ops::{Add, Sub};
 
 #[derive(Debug, Clone)]
 pub struct Size<T> {
@@ -32,7 +32,6 @@ impl From<f64> for Pt {
         Self(pt)
     }
 }
-
 
 const MM_TO_PT: f64 = 2.8346456692913;
 

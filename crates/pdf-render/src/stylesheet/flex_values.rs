@@ -1,7 +1,6 @@
 use serde::Deserialize;
 use ts_rs::TS;
 
-
 #[derive(TS, Deserialize, Clone, Copy, PartialEq, Debug)]
 #[ts(export)]
 pub enum Direction {

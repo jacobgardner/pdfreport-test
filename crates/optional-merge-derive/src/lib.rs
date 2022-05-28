@@ -3,7 +3,7 @@ extern crate proc_macro;
 mod config;
 mod field_options;
 
-use config::{UNMERGEABLE_NAME, MERGEABLE_NAME};
+use config::{MERGEABLE_NAME, UNMERGEABLE_NAME};
 use darling::FromMeta;
 use field_options::{extract_field_attrs, FieldOptions, FieldsOptions};
 use proc_macro2::Span;
@@ -87,7 +87,7 @@ pub fn mergeable(
 
     let mut mergeable_ast = original_ast.clone();
     let original_name = original_ast.ident.clone();
-    
+
     let mergeable_name = syn::Ident::new(MERGEABLE_NAME, Span::call_site());
     let unmergeable_name = syn::Ident::new(UNMERGEABLE_NAME, Span::call_site());
 
@@ -168,7 +168,7 @@ pub fn mergeable(
     } else {
         unimplemented!()
     };
-    
+
     original_ast.vis = parse_quote! { pub };
     mergeable_ast.vis = parse_quote! { pub };
 

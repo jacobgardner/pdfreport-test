@@ -23,11 +23,11 @@ impl FontData {
             attributes,
         }
     }
-    
+
     pub fn family_name(&self) -> &str {
         &self.family_name
     }
-    
+
     pub fn attributes(&self) -> &FontAttributes {
         &self.attributes
     }

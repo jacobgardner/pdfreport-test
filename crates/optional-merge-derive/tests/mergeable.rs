@@ -1,5 +1,5 @@
-use optional_merge_derive::mergeable;
 use merges::Merges;
+use optional_merge_derive::mergeable;
 
 #[mergeable]
 #[derive(Debug, Clone)]
@@ -12,7 +12,6 @@ struct TestStruct {
     #[mergeable(nested)]
     nested_struct: NestedStruct,
 }
-
 
 #[test]
 fn test_unmerged() {

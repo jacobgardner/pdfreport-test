@@ -1,11 +1,9 @@
 //! This is a generic interface to build up an unstructured
 //!  document (like a PDF)
 
-
 use crate::{
     error::DocumentGenerationError,
     paragraph_layout::RenderedTextBlock,
-    rich_text::RichText,
     values::{Point, Pt},
 };
 
