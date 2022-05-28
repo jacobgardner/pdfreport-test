@@ -3,7 +3,6 @@ use crate::{
 };
 
 pub trait DocumentWriter {
-    fn write_line(&mut self, line: RichText) -> Result<&mut Self, DocumentGenerationError>;
     fn write_text_block(
         &mut self,
         text_block: RenderedTextBlock,

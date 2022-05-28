@@ -48,28 +48,38 @@ impl<'a> PrintPdfWriter<'a> {
         }
     }
 
-    pub fn load_fonts(
+    pub fn get_font(
         &mut self,
-        font_collection: &FontCollection,
-    ) -> Result<&mut Self, DocumentGenerationError> {
-        // TODO: Lazily add fonts as they are used so we don't end up embedding
-        // fonts we don't actually need
-        for (family_name, font_family) in font_collection.as_ref().iter() {
-            for (attributes, data) in font_family.as_ref().iter() {
-                let indirect_font_ref = self
-                    .raw_pdf_doc
-                    .add_external_font(data.as_bytes())
-                    .map_err(|e| InternalServerError::LoadFontError {
-                        source: Box::new(e),
-                        family_name: family_name.clone(),
-                        attributes: *attributes,
-                    })?;
+        font_id: FontId,
+    ) -> Result<&IndirectFontRef, DocumentGenerationError> {
+        // We have to do this since NLL are not yet implemented in Rust yet
+        if self.fonts.contains_key(&font_id) {
+            Ok(self
+                .fonts
+                .get(&font_id)
+                .expect("We just checked for its existence"))
+        } else {
+            let font_data = self
+                .font_collection
+                .get_font(font_id)
+                .ok_or(InternalServerError::FontIdNotLoaded)?;
 
-                self.fonts.insert(data.font_id(), indirect_font_ref);
-            }
+            let font_ref = self
+                .raw_pdf_doc
+                .add_external_font(font_data.as_bytes())
+                .map_err(|e| InternalServerError::LoadFontError {
+                    source: Box::new(e),
+                    family_name: font_data.family_name().to_owned(),
+                    attributes: *font_data.attributes(),
+                })?;
+
+            self.fonts.insert(font_data.font_id(), font_ref);
+
+            Ok(self
+                .fonts
+                .get(&font_data.font_id())
+                .expect("We just inserted it so it has to exist"))
         }
-
-        Ok(self)
     }
 
     pub fn save<W: Write>(
@@ -89,38 +99,6 @@ impl<'a> PrintPdfWriter<'a> {
 }
 
 impl<'a> DocumentWriter for PrintPdfWriter<'a> {
-    fn write_line(&mut self, pdf_line: RichText) -> Result<&mut Self, DocumentGenerationError> {
-        let (page_index, layers) = &self.page_layer_indices[0];
-        let first_layer = layers[0];
-
-        let page = self.raw_pdf_doc.get_page(*page_index);
-        let layer = page.get_layer(first_layer);
-
-        layer.begin_text_section();
-        layer.set_text_cursor(printpdf::Mm(0.), printpdf::Mm(100.));
-
-        for span in pdf_line.0.iter() {
-            let font = self
-                .font_collection
-                .lookup_font(&span.font_family, &span.attributes)?;
-
-            let font = self
-                .fonts
-                .get(&font.font_id())
-                .ok_or(InternalServerError::FontIdNotLoaded)?;
-
-            // TODO: I believe every time we set this, it adds more data to
-            // the PDF, so we should probably optimize to only update the
-            // styles when something has changed (keep track of last state)
-            layer.set_font(font, span.size.0);
-            layer.write_text(span.text.clone(), font);
-        }
-
-        layer.end_text_section();
-
-        Ok(self)
-    }
-
     fn write_text_block(
         &mut self,
         text_block: RenderedTextBlock,
@@ -149,10 +127,7 @@ impl<'a> DocumentWriter for PrintPdfWriter<'a> {
                     .font_collection
                     .lookup_font(&span.font_family, &span.attributes)?;
 
-                let font = self
-                    .fonts
-                    .get(&font.font_id())
-                    .ok_or(InternalServerError::FontIdNotLoaded)?;
+                let font = self.get_font(font.font_id())?;
 
                 // TODO: I believe every time we set this, it adds more data to
                 // the PDF, so we should probably optimize to only update the

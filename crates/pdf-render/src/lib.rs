@@ -72,8 +72,6 @@ pub fn build_pdf_from_dom<W: Write>(
         paragraph_layout.clone(),
     )?;
 
-    pdf_writer.load_fonts(&font_collection)?;
-
     let mut pdf_builder = DocumentBuilder::new(pdf_writer);
 
     for (node, parent) in doc_structure.root.block_iter() {

@@ -43,12 +43,6 @@ impl<Writer: DocumentWriter> DocumentBuilder<Writer> {
         Ok(self)
     }
 
-    pub fn write_line(&mut self, line: RichText) -> Result<&mut Self, DocumentGenerationError> {
-        self.raw_document_writer.write_line(line)?;
-
-        Ok(self)
-    }
-
     pub fn into_inner(self) -> Writer {
         self.raw_document_writer
     }
@@ -73,21 +67,6 @@ mod tests {
     }
 
     impl DocumentWriter for MockDocWriter {
-        fn write_line(
-            &mut self,
-            line: RichText,
-        ) -> Result<&mut MockDocWriter, DocumentGenerationError> {
-            self.lines.push(
-                line.0
-                    .iter()
-                    .map(|span| span.text.clone())
-                    .collect::<Vec<String>>()
-                    .join(" "),
-            );
-
-            Ok(self)
-        }
-
         fn write_text_block(
             &mut self,
             text_block: crate::paragraph_layout::RenderedTextBlock,

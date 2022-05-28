@@ -1,5 +1,5 @@
 /target
-output.pdf
+*.pdf
 trace-*.json
 .vscode
 cache

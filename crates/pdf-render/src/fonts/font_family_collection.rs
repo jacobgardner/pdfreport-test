@@ -57,7 +57,10 @@ impl FontFamilyCollection {
 
         if self
             .fonts_by_attribute
-            .insert(attributes, FontData::new(new_font_id, bytes))
+            .insert(
+                attributes,
+                FontData::new(new_font_id, self.family_name.clone(), attributes, bytes),
+            )
             .is_some()
         {
             Err(UserInputError::NonUniqueFontAttribute {

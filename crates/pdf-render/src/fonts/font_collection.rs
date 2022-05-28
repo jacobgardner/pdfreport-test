@@ -29,7 +29,7 @@ impl FontCollection {
             .find(|&(_, font)| font.font_id() == font_id)
             .map(|(_, data)| data)
     }
-
+    
     pub fn add_family(
         &mut self,
         family_collection: FontFamilyCollection,
