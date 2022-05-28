@@ -55,7 +55,7 @@ async fn main() -> Result<(), std::io::Error> {
 
         app
     })
-    .bind(("127.0.0.1", 1234))?
+    .bind(("0.0.0.0", 1234))?
     .run()
     .await
 }

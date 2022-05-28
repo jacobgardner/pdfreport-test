@@ -1,0 +1,8 @@
+rust-toolchain
+.git
+target
+.vscode
+.github
+output.pdf
+Dockerfile
+.dockerignore
