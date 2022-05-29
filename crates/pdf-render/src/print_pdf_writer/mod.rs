@@ -1,12 +1,15 @@
 //! This is ultimately what takes nodes that have been styled
 //!  and laid out and writes them to a PDF.
 use std::{
+    cell::RefCell,
     collections::HashMap,
     io::{BufWriter, Write},
+    rc::Rc,
 };
 
 use printpdf::{
-    IndirectFontRef, PdfDocument, PdfDocumentReference, PdfLayerIndex, PdfPageIndex, TextMatrix,
+    IndirectFontRef, PdfDocument, PdfDocumentReference, PdfLayerIndex, PdfLayerReference,
+    PdfPageIndex, TextMatrix,
 };
 
 use crate::{
@@ -14,14 +17,48 @@ use crate::{
     error::{DocumentGenerationError, InternalServerError},
     fonts::{FontCollection, FontId},
     paragraph_layout::RenderedTextBlock,
-    values::{Mm, Point, Pt, Size},
+    rich_text::RichTextSpan,
+    values::{Color, Mm, Point, Pt, Size},
 };
+
+#[derive(Clone, Default)]
+struct CurrentStyles {
+    font_id: Option<FontId>,
+    font_size: Option<Pt>,
+
+    color: Option<Color>,
+}
+
+struct FontLookup(RefCell<HashMap<FontId, Rc<IndirectFontRef>>>);
+
+impl FontLookup {
+    fn new() -> Self {
+        Self(RefCell::new(HashMap::new()))
+    }
+
+    fn get(&self, font_id: FontId) -> Option<Rc<IndirectFontRef>> {
+        self.0.borrow().get(&font_id).cloned()
+    }
+
+    fn insert(&self, font_id: FontId, font_ref: IndirectFontRef) {
+        self.0.borrow_mut().insert(font_id, Rc::new(font_ref));
+    }
+
+    fn insert_and_get(&self, font_id: FontId, font_ref: IndirectFontRef) -> Rc<IndirectFontRef> {
+        self.insert(font_id, font_ref);
+
+        self.get(font_id)
+            .expect("We just inserted it. It has to exist")
+    }
+}
 
 pub struct PrintPdfWriter<'a> {
     raw_pdf_doc: PdfDocumentReference,
-    fonts: HashMap<FontId, IndirectFontRef>,
+    fonts: FontLookup,
     page_layer_indices: Vec<(PdfPageIndex, Vec<PdfLayerIndex>)>,
     font_collection: &'a FontCollection,
+
+    current_style_by_page: Vec<CurrentStyles>,
 }
 
 impl<'a> PrintPdfWriter<'a> {
@@ -41,22 +78,19 @@ impl<'a> PrintPdfWriter<'a> {
 
         Self {
             raw_pdf_doc: doc,
-            fonts: HashMap::new(),
+            fonts: FontLookup::new(),
             page_layer_indices: vec![(page_index, vec![layer_index])],
             font_collection,
+            current_style_by_page: vec![CurrentStyles::default()],
         }
     }
 
     pub fn get_font(
-        &mut self,
+        &self,
         font_id: FontId,
-    ) -> Result<&IndirectFontRef, DocumentGenerationError> {
-        // We have to do this since NLL are not yet implemented in Rust yet
-        if self.fonts.contains_key(&font_id) {
-            Ok(self
-                .fonts
-                .get(&font_id)
-                .expect("We just checked for its existence"))
+    ) -> Result<Rc<IndirectFontRef>, DocumentGenerationError> {
+        if let Some(font) = self.fonts.get(font_id) {
+            Ok(font)
         } else {
             let font_data = self
                 .font_collection
@@ -72,12 +106,7 @@ impl<'a> PrintPdfWriter<'a> {
                     attributes: *font_data.attributes(),
                 })?;
 
-            self.fonts.insert(font_data.font_id(), font_ref);
-
-            Ok(self
-                .fonts
-                .get(&font_data.font_id())
-                .expect("We just inserted it so it has to exist"))
+            Ok(self.fonts.insert_and_get(font_data.font_id(), font_ref))
         }
     }
 
@@ -103,11 +132,9 @@ impl<'a> DocumentWriter for PrintPdfWriter<'a> {
         text_block: RenderedTextBlock,
         position: Point<Pt>,
     ) -> Result<&mut Self, DocumentGenerationError> {
-        let (page_index, layers) = &self.page_layer_indices[0];
-        let first_layer = layers[0];
+        let page_number = 0;
 
-        let page = self.raw_pdf_doc.get_page(*page_index);
-        let layer = page.get_layer(first_layer);
+        let layer = self.get_base_layer(page_number);
 
         layer.begin_text_section();
 
@@ -122,18 +149,9 @@ impl<'a> DocumentWriter for PrintPdfWriter<'a> {
             ));
 
             for span in line.rich_text.0.iter() {
-                let font = self
-                    .font_collection
-                    .lookup_font(&span.font_family, &span.attributes)?;
+                let font = self.set_base_layer_style(page_number, &layer, &span)?;
 
-                let font = self.get_font(font.font_id())?;
-
-                // TODO: I believe every time we set this, it adds more data to
-                // the PDF, so we should probably optimize to only update the
-                // styles when something has changed (keep track of last state)
-                layer.set_font(font, span.size.0);
-                layer.set_fill_color(span.color.clone().into());
-                layer.write_text(span.text.clone(), font);
+                layer.write_text(span.text.clone(), font.as_ref());
             }
 
             current_y -= line.line_metrics.height.into();
@@ -142,5 +160,50 @@ impl<'a> DocumentWriter for PrintPdfWriter<'a> {
         layer.end_text_section();
 
         Ok(self)
+    }
+}
+
+impl<'a> PrintPdfWriter<'a> {
+    fn get_base_layer(&self, page_number: usize) -> PdfLayerReference {
+        let (page_index, layers) = &self.page_layer_indices[page_number];
+        let first_layer = layers[0];
+
+        let page = self.raw_pdf_doc.get_page(*page_index);
+        let layer = page.get_layer(first_layer);
+
+        layer
+    }
+
+    fn set_base_layer_style(
+        &mut self,
+        page_number: usize,
+        layer: &PdfLayerReference,
+        span: &RichTextSpan,
+    ) -> Result<Rc<IndirectFontRef>, DocumentGenerationError> {
+        let font = self
+            .font_collection
+            .lookup_font(&span.font_family, &span.attributes)?;
+
+        let style = &self.current_style_by_page[page_number];
+
+        let font_ref = self.get_font(font.font_id())?;
+
+        let mut new_style = style.clone();
+        if style.font_id != Some(font.font_id()) || style.font_size != Some(span.size) {
+            layer.set_font(font_ref.as_ref(), span.size.0);
+
+            new_style.font_id = Some(font.font_id());
+            new_style.font_size = Some(span.size);
+        }
+
+        if style.color.as_ref() != Some(&span.color) {
+            layer.set_fill_color(span.color.clone().into());
+
+            new_style.color = Some(span.color.clone());
+        }
+
+        self.current_style_by_page[page_number] = new_style;
+
+        Ok(font_ref)
     }
 }
