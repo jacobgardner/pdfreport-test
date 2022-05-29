@@ -2,7 +2,7 @@
 
 use block_layout::{layout_engine::LayoutEngine, yoga::YogaLayout};
 use bytes::Bytes;
-use doc_structure::{DomNode, FontFamilyInfo};
+use doc_structure::{DomNode, FontFamilyInfo, HasNodeId};
 use document_builder::DocumentBuilder;
 use fonts::{FontCollection, FontFamilyCollection};
 use paragraph_layout::{ParagraphLayout, ParagraphStyle};
@@ -11,6 +11,8 @@ use rich_text::dom_node_conversion::dom_node_to_rich_text;
 use std::{io::Write, rc::Rc};
 use utils::dom_lookup::NodeLookup;
 use values::{Point, Pt};
+
+
 
 pub mod block_layout;
 pub mod doc_structure;
@@ -77,9 +79,9 @@ pub fn build_pdf_from_dom<W: Write>(
     let mut pdf_builder = DocumentBuilder::new(pdf_writer);
 
     for (node, parent) in doc_structure.root.block_iter() {
+        let layout = layout_engine.get_node_layout(node.node_id());
+        pdf_builder.draw_dom_node(node, &dom_lookup, &layout)?;
         if let DomNode::Text(text_node) = node {
-            let layout = layout_engine.get_node_layout(text_node.node_id);
-
             let style = dom_lookup.get_style(text_node);
             let rich_text = dom_node_to_rich_text(text_node, &dom_lookup, stylesheet)?;
 
@@ -92,8 +94,6 @@ pub fn build_pdf_from_dom<W: Write>(
                     layout.width - Pt(style.padding.left + style.padding.right),
                 )
                 .unwrap();
-
-            pdf_builder.draw_dom_node(node, &dom_lookup, &layout)?;
 
             // TODO: Can we change this to take a ref instead?
             pdf_builder.write_text_block(

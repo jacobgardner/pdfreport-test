@@ -101,6 +101,7 @@
   ],
   "stylesheet": {
     "root": {
+      "debug": true,
       "color": "#A98765",
       "font": {
         "family": "Inter"
@@ -113,12 +114,24 @@
       }
     },
     "container": {
+      "debug": true,
+      "margin": {
+        "top": 5,
+        "left": 5,
+        "right": 5,
+        "bottom": 5
+      },
+      "padding": {
+        "top": 5,
+        "left": 5,
+        "right": 5,
+        "bottom": 5
+      },
       "flex": {
         "direction": "Row"
       }
     },
     "c1": {
-      "debug": true,
       "flex": {
         "shrink": 1,
         "grow": 1
