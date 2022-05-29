@@ -26,6 +26,7 @@ pub struct Style {
     pub flex: FlexStyle,
     pub width: String,
     pub height: String,
+    pub debug: bool,
 }
 
 impl Default for Style::Unmergeable {
@@ -40,6 +41,7 @@ impl Default for Style::Unmergeable {
             margin: Default::default(),
             padding: Default::default(),
             flex: Default::default(),
+            debug: false,
         }
     }
 }
@@ -48,7 +50,7 @@ impl Style::Mergeable {
     /// This is meant to emulate how if you set a color on a parent, the child
     /// gets that color by default unless overridden
     ///
-    /// With the exception of inherited styles, the target node, self, should win in all cases, 
+    /// With the exception of inherited styles, the target node, self, should win in all cases,
     /// even if the parent has a style where the target node does not.
     /// For inherited styles, inherited styles should only "win" where the
     /// target node does not have any style set.
