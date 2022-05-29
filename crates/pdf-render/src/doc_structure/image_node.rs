@@ -1,6 +1,6 @@
 use serde::Deserialize;
 
-use super::NodeId;
+use super::{has_node_id::HasNodeId, NodeId};
 
 #[derive(Clone, Deserialize, Debug)]
 pub struct ImageNode {
@@ -9,4 +9,10 @@ pub struct ImageNode {
     #[serde(default)]
     pub styles: Vec<String>,
     pub content: String,
+}
+
+impl HasNodeId for ImageNode {
+    fn node_id(&self) -> NodeId {
+        self.node_id
+    }
 }

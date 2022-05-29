@@ -1,6 +1,6 @@
 use serde::Deserialize;
 
-use super::{DomNode, NodeId};
+use super::{DomNode, NodeId, has_node_id::HasNodeId};
 
 #[derive(Clone, Default, Deserialize, Debug)]
 pub struct StyledNode {
@@ -18,5 +18,11 @@ impl StyledNode {
             styles: styles.iter().map(|&s| s.to_owned()).collect(),
             ..Default::default()
         }
+    }
+}
+
+impl HasNodeId for StyledNode {
+    fn node_id(&self) -> NodeId {
+        self.node_id
     }
 }

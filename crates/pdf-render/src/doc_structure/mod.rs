@@ -8,12 +8,14 @@ mod fonts;
 mod image_node;
 mod styled_node;
 mod text_node;
+mod has_node_id;
 
 pub use dom_node::DomNode;
 pub use fonts::FontFamilyInfo;
 pub use image_node::ImageNode;
 pub use styled_node::StyledNode;
 pub use text_node::{TextChild, TextNode};
+pub use has_node_id::HasNodeId;
 
 use crate::{stylesheet::Stylesheet, utils::unique_id::create_id};
 

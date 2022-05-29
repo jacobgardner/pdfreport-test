@@ -21,6 +21,7 @@ impl ParentLookup {
         self.0.get(&node).cloned()
     }
 
+    /// Ancestor ids are returned from deepest node to root node.
     pub fn get_ancestors(&self, mut node: NodeId) -> Vec<NodeId> {
         let mut ancestors = vec![];
 

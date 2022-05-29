@@ -9,6 +9,7 @@ use paragraph_layout::{ParagraphLayout, ParagraphStyle};
 use print_pdf_writer::PrintPdfWriter;
 use rich_text::dom_node_conversion::dom_node_to_rich_text;
 use std::{io::Write, rc::Rc};
+use utils::dom_lookup::NodeLookup;
 use values::{Point, Pt};
 
 pub mod block_layout;
@@ -57,14 +58,16 @@ pub fn build_pdf_from_dom<W: Write>(
         &font_collection,
     );
 
+
     let stylesheet = &doc_structure.stylesheet;
+    let dom_lookup = NodeLookup::from_root_node(&doc_structure.root, &stylesheet)?;
 
     let mut paragraph_layout = ParagraphLayout::new();
     paragraph_layout.load_fonts(&font_collection)?;
 
     let paragraph_layout = Rc::new(paragraph_layout);
 
-    let mut layout_engine = YogaLayout::new();
+    let mut layout_engine = YogaLayout::new(&dom_lookup);
     layout_engine.build_node_layout(
         page_sizes::LETTER.width.into(),
         &doc_structure.root,
@@ -78,7 +81,7 @@ pub fn build_pdf_from_dom<W: Write>(
         if let DomNode::Text(text_node) = node {
             let layout = layout_engine.get_node_layout(text_node.node_id);
 
-            let rich_text = dom_node_to_rich_text(text_node, &parent, stylesheet)?;
+            let rich_text = dom_node_to_rich_text(text_node, &dom_lookup, stylesheet)?;
 
             // FIXME: We already calculated the text block in the yoga layout
             // engine. Either re-use that or pass it into the layout engine?

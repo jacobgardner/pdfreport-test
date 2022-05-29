@@ -2,6 +2,7 @@ mod node_context;
 mod style_conversions;
 
 use std::{collections::HashMap, rc::Rc};
+use crate::doc_structure::HasNodeId;
 
 use crate::{
     doc_structure::{DomNode, NodeId},
@@ -9,7 +10,7 @@ use crate::{
     paragraph_layout::{ParagraphLayout, ParagraphStyle},
     rich_text::dom_node_conversion::dom_node_to_rich_text,
     stylesheet::Stylesheet,
-    utils::parent_lookup::ParentLookup,
+    utils::dom_lookup::NodeLookup,
     values::Pt,
 };
 
@@ -21,15 +22,17 @@ use polyhorn_yoga as yoga;
 
 use yoga::{MeasureMode, NodeRef, Size};
 
-#[derive(Default)]
-pub struct YogaLayout {
-    parent_node_ids: ParentLookup,
+pub struct YogaLayout<'a> {
+    dom_lookup: &'a NodeLookup<'a>,
     yoga_nodes_by_id: HashMap<NodeId, yoga::Node>,
 }
 
-impl YogaLayout {
-    pub fn new() -> Self {
-        Self::default()
+impl<'a> YogaLayout<'a> {
+    pub fn new(dom_lookup: &'a NodeLookup) -> Self {
+        Self {
+            dom_lookup,
+            yoga_nodes_by_id: HashMap::new(),
+        }
     }
 }
 
@@ -73,9 +76,9 @@ extern "C" fn measure_func(
     }
 }
 
-impl LayoutEngine for YogaLayout {
+impl<'a> LayoutEngine for YogaLayout<'a> {
     fn get_node_layout(&self, node_id: NodeId) -> NodeLayout {
-        let ancestors = self.parent_node_ids.get_ancestors(node_id);
+        let ancestors = self.dom_lookup.get_ancestor_ids(node_id);
 
         let layout = self.yoga_nodes_by_id.get(&node_id).unwrap().get_layout();
 
@@ -117,7 +120,7 @@ impl LayoutEngine for YogaLayout {
             let mut layout_node = yoga::Node::from(node_style);
 
             if let DomNode::Text(text_node) = node {
-                let rich_text = dom_node_to_rich_text(text_node, &parent, stylesheet)?;
+                let rich_text = dom_node_to_rich_text(text_node, &self.dom_lookup, stylesheet)?;
 
                 let context = yoga::Context::new(NodeContext {
                     node_id: node.node_id(),
@@ -132,9 +135,6 @@ impl LayoutEngine for YogaLayout {
             }
 
             if let Some(parent) = parent {
-                self.parent_node_ids
-                    .add_parent(node.node_id(), parent.node_id());
-
                 let parent_yoga_node = self
                     .yoga_nodes_by_id
                     .get_mut(&parent.node_id())

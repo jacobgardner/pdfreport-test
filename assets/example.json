@@ -102,6 +102,7 @@
   "stylesheet": {
     "root": {
       "font": {
+        "color": "#A98765",
         "family": "Inter"
       },
       "padding": {
@@ -132,7 +133,6 @@
       }
     },
     "h1": {
-      "color": "#A98765",
       "font": {
         "size": 20
       },

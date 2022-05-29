@@ -4,3 +4,4 @@
 pub mod parent_lookup;
 pub mod tree_iter;
 pub mod unique_id;
+pub mod dom_lookup;

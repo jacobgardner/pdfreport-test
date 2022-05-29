@@ -3,6 +3,7 @@
 
 use std::collections::HashMap;
 
+use merges::Merges;
 use serde::Deserialize;
 
 mod border_radius;
@@ -30,21 +31,43 @@ pub struct Stylesheet {
 }
 
 impl Stylesheet {
+    pub fn get_mergeable_style(
+        &self,
+        class_names: &[String],
+    ) -> Result<Style::Mergeable, DocumentGenerationError> {
+        class_names
+            .iter()
+            .map(|class_name| (class_name, self.style_lookup.get(class_name)))
+            .try_fold(Style::Mergeable::default(), |acc, (class_name, style)| {
+                Ok(
+                    acc.merge(style.ok_or_else(|| UserInputError::StyleDoesNotExist {
+                        style_name: class_name.to_owned(),
+                    })?),
+                )
+            })
+    }
+
     pub fn get_style(
         &self,
         base_style: Style::Unmergeable,
         class_names: &[String],
     ) -> Result<Style::Unmergeable, DocumentGenerationError> {
-        class_names
-            .iter()
-            .map(|class_name| (class_name, self.style_lookup.get(class_name)))
-            .try_fold(base_style, |acc, (class_name, style)| {
-                Ok(
-                    acc.merge_style(style.ok_or_else(|| UserInputError::StyleDoesNotExist {
-                        style_name: class_name.to_owned(),
-                    })?),
-                )
-            })
+        let mergeable = self.get_mergeable_style(class_names)?;
+
+        Ok(base_style.merge_style(&mergeable))
+    }
+
+    pub fn compute_mergeable_style(
+        &self,
+        parent_style: &Style::Mergeable,
+        class_names: &[String],
+    ) -> Result<Style::Mergeable, DocumentGenerationError> {
+        let mergeable = self.get_mergeable_style(class_names)?;
+        
+        let inherited_style = mergeable.merge_inherited_styles(parent_style);
+        
+        Ok(inherited_style)
+        
     }
 }
 

@@ -1,9 +1,10 @@
 use crate::{
-    doc_structure::{DomNode, TextChild, TextNode},
+    doc_structure::{TextChild, TextNode},
     error::DocumentGenerationError,
     fonts::FontAttributes,
     rich_text::RichTextSpan,
-    stylesheet::Stylesheet,
+    stylesheet::{Style, Stylesheet},
+    utils::dom_lookup::NodeLookup,
     values::Pt,
 };
 
@@ -11,18 +12,33 @@ use super::RichText;
 
 pub fn dom_node_to_rich_text(
     text_node: &TextNode,
-    parent_node: &Option<&DomNode>,
+    dom_lookup: &NodeLookup,
     stylesheet: &Stylesheet,
 ) -> Result<RichText, DocumentGenerationError> {
-    let parent_style = if let Some(parent_node) = parent_node {
-        // FIXME: This does not take into account the parent relying on ancestors'
-        // default styles
-        stylesheet.get_style(Default::default(), parent_node.styles())?
-    } else {
-        Default::default()
-    };
+    // let ancestor_style = dom_lookup
+    //     .get_ancestors(text_node.node_id)
+    //     .into_iter()
+    //     .rev()
+    //     .fold(Default::default(), |acc, node| {
+    //         dom_lookup.get_style(node).merge_inherited_styles(&acc)
+    //     });
 
-    let text_node_style = stylesheet.get_style(parent_style, text_node.styles())?;
+    // let parent_style = if let Some(parent_id) = dom_lookup.get_parent_id(text_node) {
+    //     dom_lookup.get_style(parent_id).clone()
+    // } else {
+    //     Default::default()
+    // };
+
+    // let text_node_style =
+    //     stylesheet.compute_style(Default::default(), &parent_style, text_node.styles())?;
+
+    // let ancestor_style = Style::Unmergeable::default().merge_style(
+    //     &dom_lookup
+    //         .get_style(text_node)
+    //         .merge_inherited_styles(&ancestor_style),
+    // );
+
+    let text_node_style = dom_lookup.get_style(text_node);
 
     let mut rich_text_spans: Vec<RichTextSpan> = vec![];
 

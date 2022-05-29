@@ -2,7 +2,7 @@ use serde::Deserialize;
 
 use crate::utils::tree_iter::{TreeIterator, TreeNode};
 
-use super::NodeId;
+use super::{NodeId, has_node_id::HasNodeId};
 
 #[derive(Default, Deserialize, Debug, Clone)]
 pub struct TextNode {
@@ -46,5 +46,11 @@ impl TreeNode for TextChild {
             TextChild::Content(_) => &[],
             TextChild::TextNode(node) => &node.children,
         }
+    }
+}
+
+impl HasNodeId for TextNode {
+    fn node_id(&self) -> NodeId {
+        self.node_id
     }
 }

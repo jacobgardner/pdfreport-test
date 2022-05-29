@@ -16,9 +16,7 @@ pub struct FontStyles {
 impl Default for FontStyles::Unmergeable {
     fn default() -> Self {
         Self {
-            // FIXME:
-            // TODO: Don't use Inter
-            family: String::from("Inter"),
+            family: String::from("sans-serif"),
             size: 12.,
             style: FontSlant::Normal,
             weight: FontWeight::Regular,

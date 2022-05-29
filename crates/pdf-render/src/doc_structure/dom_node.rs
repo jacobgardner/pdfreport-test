@@ -4,12 +4,24 @@ use crate::utils::tree_iter::{TreeIterator, TreeNode};
 
 use super::{ImageNode, NodeId, StyledNode, TextNode};
 
+pub use super::HasNodeId;
+
 #[derive(Clone, Deserialize, Debug)]
 #[serde(tag = "type")]
 pub enum DomNode {
     Styled(StyledNode),
     Text(TextNode),
     Image(ImageNode),
+}
+
+impl HasNodeId for DomNode {
+    fn node_id(&self) -> NodeId {
+        match self {
+            DomNode::Styled(node) => node.node_id(),
+            DomNode::Text(node) => node.node_id(),
+            DomNode::Image(node) => node.node_id(),
+        }
+    }
 }
 
 impl DomNode {
@@ -21,16 +33,14 @@ impl DomNode {
         }
     }
 
-    pub fn node_id(&self) -> NodeId {
-        match self {
-            DomNode::Styled(node) => node.node_id,
-            DomNode::Text(node) => node.node_id,
-            DomNode::Image(node) => node.node_id,
-        }
-    }
-
     pub fn block_iter(&self) -> TreeIterator<Self> {
         TreeIterator::new(self)
+    }
+}
+
+impl<T: HasNodeId> From<&T> for NodeId {
+    fn from(node: &T) -> Self {
+        node.node_id()
     }
 }
 

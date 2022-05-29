@@ -44,6 +44,31 @@ impl Default for Style::Unmergeable {
     }
 }
 
+impl Style::Mergeable {
+    /// This is meant to emulate how if you set a color on a parent, the child
+    /// gets that color by default unless overridden
+    ///
+    /// With the exception of inherited styles, the target node, self, should win in all cases, 
+    /// even if the parent has a style where the target node does not.
+    /// For inherited styles, inherited styles should only "win" where the
+    /// target node does not have any style set.
+    pub fn merge_inherited_styles(&self, parent_style: &Style::Mergeable) -> Style::Mergeable {
+        let mut style = self.clone();
+
+        style.font = if let Some(font) = style.font {
+            font.merge_optional(&parent_style.font)
+        } else {
+            parent_style.font.clone()
+        };
+
+        if style.color.is_none() {
+            style.color = parent_style.color.clone();
+        }
+
+        style
+    }
+}
+
 impl Style::Unmergeable {
     pub fn merge_style(&self, rhs: &Style::Mergeable) -> Style::Unmergeable {
         let base = Style::Mergeable::from(self.clone());
