@@ -58,7 +58,6 @@ pub fn build_pdf_from_dom<W: Write>(
         &font_collection,
     );
 
-
     let stylesheet = &doc_structure.stylesheet;
     let dom_lookup = NodeLookup::from_root_node(&doc_structure.root, &stylesheet)?;
 
@@ -81,20 +80,27 @@ pub fn build_pdf_from_dom<W: Write>(
         if let DomNode::Text(text_node) = node {
             let layout = layout_engine.get_node_layout(text_node.node_id);
 
+            let style = dom_lookup.get_style(text_node);
             let rich_text = dom_node_to_rich_text(text_node, &dom_lookup, stylesheet)?;
 
             // FIXME: We already calculated the text block in the yoga layout
             // engine. Either re-use that or pass it into the layout engine?
             let text_block = paragraph_layout
-                .calculate_layout(ParagraphStyle::default(), &rich_text, layout.width)
+                .calculate_layout(
+                    ParagraphStyle::default(),
+                    &rich_text,
+                    layout.width - Pt(style.padding.left + style.padding.right),
+                )
                 .unwrap();
+
+            pdf_builder.draw_dom_node(node, &dom_lookup, &layout)?;
 
             // TODO: Can we change this to take a ref instead?
             pdf_builder.write_text_block(
                 text_block,
                 Point {
-                    x: layout.left,
-                    y: Pt::from(page_sizes::LETTER.height) - layout.top,
+                    x: layout.left + Pt(style.padding.left),
+                    y: Pt::from(page_sizes::LETTER.height) - (layout.top + Pt(style.padding.top)),
                 },
             )?;
         }

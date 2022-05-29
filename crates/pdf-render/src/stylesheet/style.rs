@@ -67,6 +67,10 @@ impl Style::Mergeable {
             style.color = parent_style.color.clone();
         }
 
+        if style.debug.is_none() {
+            style.debug = parent_style.debug.clone();
+        }
+
         style
     }
 }

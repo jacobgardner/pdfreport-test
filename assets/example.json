@@ -102,7 +102,6 @@
   "stylesheet": {
     "root": {
       "color": "#A98765",
-      "debug": true,
       "font": {
         "family": "Inter"
       },
@@ -119,6 +118,7 @@
       }
     },
     "c1": {
+      "debug": true,
       "flex": {
         "shrink": 1,
         "grow": 1
@@ -135,14 +135,24 @@
       }
     },
     "h1": {
-
       "font": {
         "size": 20
       },
       "flex": {
         "direction": "Column"
       },
-      "padding": {},
+      "margin": {
+        "top": 5,
+        "left": 5,
+        "right": 5,
+        "bottom": 5
+      },
+      "padding": {
+        "top": 5,
+        "left": 5,
+        "right": 5,
+        "bottom": 5
+      },
       "border": {
         "width": 1,
         "color": "#ABCDEF",

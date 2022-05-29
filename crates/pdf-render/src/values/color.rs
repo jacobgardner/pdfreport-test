@@ -6,9 +6,10 @@ use crate::error::UserInputError;
 #[derive(TS, Deserialize, Debug, Clone, PartialEq)]
 #[serde(try_from = "&str")]
 pub struct Color {
-    r: f64,
-    g: f64,
-    b: f64,
+    pub r: f64,
+    pub g: f64,
+    pub b: f64,
+    pub a: f64,
 }
 
 impl Color {
@@ -17,6 +18,7 @@ impl Color {
             r: 1.,
             g: 1.,
             b: 1.,
+            a: 1.,
         }
     }
 
@@ -25,6 +27,7 @@ impl Color {
             r: 0.,
             g: 0.,
             b: 0.,
+            a: 1.,
         }
     }
 }
@@ -50,8 +53,8 @@ impl TryFrom<&str> for Color {
     type Error = UserInputError;
 
     fn try_from(value: &str) -> Result<Self, Self::Error> {
-        let (r, g, b, _) = color_processing::Color::new_string(value)?.get_rgba();
+        let (r, g, b, a) = color_processing::Color::new_string(value)?.get_rgba();
 
-        Ok(Color { r, g, b })
+        Ok(Color { r, g, b, a })
     }
 }

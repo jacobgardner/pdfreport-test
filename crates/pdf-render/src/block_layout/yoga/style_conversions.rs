@@ -42,15 +42,15 @@ impl From<Style::Unmergeable> for yoga::Node {
 
         layout_node.set_border(Edge::All, style.border.width);
 
-        layout_node.set_margin(Edge::Top, StyleUnit::Point(style.margin.top.into()));
-        layout_node.set_margin(Edge::Right, StyleUnit::Point(style.margin.right.into()));
-        layout_node.set_margin(Edge::Bottom, StyleUnit::Point(style.margin.bottom.into()));
-        layout_node.set_margin(Edge::Left, StyleUnit::Point(style.margin.left.into()));
+        layout_node.set_margin(Edge::Top, StyleUnit::Point((style.margin.top as f32).into()));
+        layout_node.set_margin(Edge::Right, StyleUnit::Point((style.margin.right as f32).into()));
+        layout_node.set_margin(Edge::Bottom, StyleUnit::Point((style.margin.bottom as f32).into()));
+        layout_node.set_margin(Edge::Left, StyleUnit::Point((style.margin.left as f32).into()));
 
-        layout_node.set_padding(Edge::Top, StyleUnit::Point(style.padding.top.into()));
-        layout_node.set_padding(Edge::Right, StyleUnit::Point(style.padding.right.into()));
-        layout_node.set_padding(Edge::Bottom, StyleUnit::Point(style.padding.bottom.into()));
-        layout_node.set_padding(Edge::Left, StyleUnit::Point(style.padding.left.into()));
+        layout_node.set_padding(Edge::Top, StyleUnit::Point((style.padding.top as f32).into()));
+        layout_node.set_padding(Edge::Right, StyleUnit::Point((style.padding.right as f32).into()));
+        layout_node.set_padding(Edge::Bottom, StyleUnit::Point((style.padding.bottom as f32).into()));
+        layout_node.set_padding(Edge::Left, StyleUnit::Point((style.padding.left as f32).into()));
 
         layout_node.set_flex_direction(style.flex.direction.into());
         layout_node.set_flex_wrap(style.flex.wrap.into());

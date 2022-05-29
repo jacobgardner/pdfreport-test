@@ -56,3 +56,11 @@ impl Add for Pt {
         Pt(self.0 + rhs.0)
     }
 }
+
+#[derive(Debug, Clone)]
+pub struct Rect<T> {
+    pub left: T,
+    pub top: T,
+    pub width: T,
+    pub height: T,
+}

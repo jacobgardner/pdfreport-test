@@ -5,10 +5,10 @@ use ts_rs::TS;
 #[derive(TS, Clone, Debug, PartialEq)]
 #[ts(export)]
 pub struct BorderRadiusStyle {
-    pub top_right: f32,
-    pub bottom_right: f32,
-    pub bottom_left: f32,
-    pub top_left: f32,
+    pub top_right: f64,
+    pub bottom_right: f64,
+    pub bottom_left: f64,
+    pub top_left: f64,
 }
 
 impl Default for BorderRadiusStyle::Unmergeable {

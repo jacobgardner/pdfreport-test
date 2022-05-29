@@ -5,10 +5,10 @@ use ts_rs::TS;
 #[derive(TS, Clone, Debug, PartialEq)]
 #[ts(export)]
 pub struct EdgeStyle {
-    pub top: f32,
-    pub right: f32,
-    pub bottom: f32,
-    pub left: f32,
+    pub top: f64,
+    pub right: f64,
+    pub bottom: f64,
+    pub left: f64,
 }
 
 impl Default for EdgeStyle::Unmergeable {

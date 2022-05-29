@@ -1,8 +1,8 @@
 mod node_context;
 mod style_conversions;
 
-use std::{collections::HashMap, rc::Rc};
 use crate::doc_structure::HasNodeId;
+use std::{collections::HashMap, rc::Rc};
 
 use crate::{
     doc_structure::{DomNode, NodeId},
@@ -53,7 +53,7 @@ extern "C" fn measure_func(
     let text_block = context.paragraph_layout.calculate_layout(
         ParagraphStyle::default(),
         &context.rich_text,
-        Pt(width as f64),
+        Pt(width as f64 - context.style.padding.left - context.style.padding.right),
     );
 
     match text_block {
@@ -117,7 +117,7 @@ impl<'a> LayoutEngine for YogaLayout<'a> {
         for (node, parent) in root_node.block_iter() {
             let node_style = stylesheet.get_style(Default::default(), node.styles())?;
 
-            let mut layout_node = yoga::Node::from(node_style);
+            let mut layout_node = yoga::Node::from(node_style.clone());
 
             if let DomNode::Text(text_node) = node {
                 let rich_text = dom_node_to_rich_text(text_node, &self.dom_lookup, stylesheet)?;
@@ -126,6 +126,7 @@ impl<'a> LayoutEngine for YogaLayout<'a> {
                     node_id: node.node_id(),
                     rich_text,
                     paragraph_layout: paragraph_layout.clone(),
+                    style: node_style,
                     text_block: None,
                     calculate_error: None,
                 });
