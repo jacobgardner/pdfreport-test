@@ -106,26 +106,31 @@
       "font": {
         "family": "Inter"
       },
+      "margin": {
+        "left": 10,
+        "right": 10,
+        "top": 10,
+        "bottom": 10
+      },
       "padding": {
-        "left": 20,
-        "right": 20,
-        "top": 20,
-        "bottom": 20
+        "left": 10,
+        "right": 10,
+        "top": 10,
+        "bottom": 10
       }
     },
     "container": {
-      "debug": true,
       "margin": {
-        "top": 5,
-        "left": 5,
-        "right": 5,
-        "bottom": 5
+        "top": 4,
+        "left": 4,
+        "right": 4,
+        "bottom": 4
       },
       "padding": {
-        "top": 5,
-        "left": 5,
-        "right": 5,
-        "bottom": 5
+        "top": 4,
+        "left": 4,
+        "right": 4,
+        "bottom": 4
       },
       "flex": {
         "direction": "Row"

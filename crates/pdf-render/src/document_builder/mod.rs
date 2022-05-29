@@ -43,33 +43,33 @@ impl<Writer: UnstructuredDocumentWriter> DocumentBuilder<Writer> {
         let style = node_lookup.get_style(dom_node.node_id());
 
         if style.debug {
-            let mut outside_rect = Rect {
+            let mut margin_rect = Rect {
                 left: layout.left - Pt(style.margin.left),
                 top: layout.top - Pt(style.margin.top),
                 width: layout.width + Pt(style.margin.right + style.margin.left),
                 height: layout.height + Pt(style.margin.top + style.margin.bottom),
             };
 
-            let mut prepadding_rect = Rect {
+            let mut border_rect = Rect {
                 left: layout.left,
                 top: layout.top,
                 width: layout.width,
                 height: layout.height,
             };
 
-            let mut padding_rect = Rect {
-                left: prepadding_rect.left + Pt(style.padding.left),
-                top: prepadding_rect.top + Pt(style.padding.top),
-                width: prepadding_rect.width - Pt(style.padding.right + style.padding.left),
-                height: prepadding_rect.height - Pt(style.padding.top + style.padding.bottom),
+            let mut content_rect = Rect {
+                left: border_rect.left + Pt(style.padding.left),
+                top: border_rect.top + Pt(style.padding.top),
+                width: border_rect.width - Pt(style.padding.right + style.padding.left),
+                height: border_rect.height - Pt(style.padding.top + style.padding.bottom),
             };
 
-            outside_rect.top = Pt::from(page_sizes::LETTER.height) - outside_rect.top;
-            prepadding_rect.top = Pt::from(page_sizes::LETTER.height) - prepadding_rect.top;
-            padding_rect.top = Pt::from(page_sizes::LETTER.height) - padding_rect.top;
+            margin_rect.top = Pt::from(page_sizes::LETTER.height) - margin_rect.top;
+            border_rect.top = Pt::from(page_sizes::LETTER.height) - border_rect.top;
+            content_rect.top = Pt::from(page_sizes::LETTER.height) - content_rect.top;
 
             self.unstructured_doc_writer.draw_rect(
-                outside_rect,
+                margin_rect,
                 Pt(1.),
                 Some(Color::try_from("green").unwrap()),
                 None,
@@ -77,7 +77,7 @@ impl<Writer: UnstructuredDocumentWriter> DocumentBuilder<Writer> {
             );
 
             self.unstructured_doc_writer.draw_rect(
-                prepadding_rect,
+                border_rect,
                 Pt(1.),
                 Some(Color::try_from("red").unwrap()),
                 None,
@@ -85,7 +85,7 @@ impl<Writer: UnstructuredDocumentWriter> DocumentBuilder<Writer> {
             );
 
             self.unstructured_doc_writer.draw_rect(
-                padding_rect,
+                content_rect,
                 Pt(1.),
                 Some(Color::try_from("blue").unwrap()),
                 None,
