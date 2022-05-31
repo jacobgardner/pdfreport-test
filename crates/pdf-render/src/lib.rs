@@ -89,7 +89,7 @@ pub fn build_pdf_from_dom<W: Write>(
             // engine. Either re-use that or pass it into the layout engine?
             let text_block = paragraph_layout
                 .calculate_layout(
-                    ParagraphStyle::default(),
+                    ParagraphStyle::left(),
                     &rich_text,
                     layout.width - Pt(style.padding.left + style.padding.right),
                 )

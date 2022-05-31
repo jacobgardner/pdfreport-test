@@ -197,7 +197,8 @@ impl<'a> UnstructuredDocumentWriter for PrintPdfWriter<'a> {
                 // 4 points per corner & 2 points per edge
                 let mut points: Vec<(printpdf::Point, bool)> = Vec::with_capacity(4 * 4 + 4 * 2);
 
-
+                // TODO: Skip any corners where the radius is 0
+                // TODO: Optimization: Don't recalculate corners that have matching radius
                 let circle_points = calculate_points_for_circle(printpdf::Pt(border_radius.top_left), printpdf::Pt(0.), printpdf::Pt(0.));
                 points.extend(circle_points[TOP_LEFT_CORNER].iter().map(|&(pt, b)| (Point { x: pt.x + printpdf::Pt(border_radius.top_left) + start.x, y: pt.y - printpdf::Pt(border_radius.top_left) + start.y}, b)));
                 points.push((Point { x: start.x + printpdf::Pt(border_radius.top_left), y: start.y, }, false));
