@@ -1,4 +1,4 @@
-use std::rc::Rc;
+use std::{rc::Rc, fmt::Display};
 
 use crate::{
     doc_structure::{DomNode, NodeId},
@@ -17,6 +17,12 @@ pub struct NodeLayout {
     pub top: Pt,
     pub width: Pt,
     pub height: Pt,
+}
+
+impl Display for NodeLayout {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "({}, {}) -> {}x{}", self.left, self.top, self.width, self.height)
+    }
 }
 
 pub trait LayoutEngine {

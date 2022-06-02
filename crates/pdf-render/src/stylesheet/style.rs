@@ -1,10 +1,24 @@
 use merges::Merges;
 use optional_merge_derive::mergeable;
+use serde::Deserialize;
 use ts_rs::TS;
 
 use crate::values::Color;
 
 use super::{BorderStyle, EdgeStyle, FlexStyle, FontStyles};
+
+#[derive(TS, Clone, Debug, PartialEq, Deserialize)]
+#[ts(export)]
+pub enum BreakInside {
+    Auto,
+    Avoid 
+}
+
+impl Default for BreakInside {
+    fn default() -> Self {
+        Self::Auto
+    }
+}
 
 #[mergeable]
 #[derive(TS, Clone, Debug, PartialEq)]
@@ -27,6 +41,7 @@ pub struct Style {
     pub width: String,
     pub height: String,
     pub debug: bool,
+    pub break_inside: BreakInside,
 }
 
 impl Default for Style::Unmergeable {
@@ -41,6 +56,7 @@ impl Default for Style::Unmergeable {
             margin: Default::default(),
             padding: Default::default(),
             flex: Default::default(),
+            break_inside: Default::default(),
             debug: false,
         }
     }

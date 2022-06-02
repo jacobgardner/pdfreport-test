@@ -2,36 +2,30 @@
 //!  document (like a PDF)
 
 use crate::{
-    block_layout::layout_engine::NodeLayout,
+    block_layout::{layout_engine::NodeLayout, paginated_layout::PaginatedLayout},
     doc_structure::{DomNode, HasNodeId},
     error::DocumentGenerationError,
     page_sizes,
     paragraph_layout::RenderedTextBlock,
     utils::dom_lookup::NodeLookup,
-    values::{Color, Point, Pt, Rect},
+    values::{Color, Pt, Rect, Size},
 };
 
 pub use self::document_writer::UnstructuredDocumentWriter;
 
 pub struct DocumentBuilder<Writer: UnstructuredDocumentWriter> {
     unstructured_doc_writer: Writer,
-    draw_debug_lines: bool,
+    page_size: Size<Pt>,
 }
 
 mod document_writer;
 
 impl<Writer: UnstructuredDocumentWriter> DocumentBuilder<Writer> {
-    pub fn new(raw_document_writer: Writer) -> Self {
+    pub fn new(raw_document_writer: Writer, page_size: impl Into<Size<Pt>>) -> Self {
         Self {
             unstructured_doc_writer: raw_document_writer,
-            draw_debug_lines: false,
+            page_size: page_size.into(),
         }
-    }
-
-    pub fn enable_debug_lines(&mut self, value: bool) -> &mut Self {
-        self.draw_debug_lines = value;
-
-        self
     }
 
     pub fn draw_dom_node(
@@ -99,10 +93,10 @@ impl<Writer: UnstructuredDocumentWriter> DocumentBuilder<Writer> {
     pub fn write_text_block(
         &mut self,
         text_block: RenderedTextBlock,
-        position: Point<Pt>,
+        layout: &PaginatedLayout,
     ) -> Result<&mut Self, DocumentGenerationError> {
         self.unstructured_doc_writer
-            .write_text_block(text_block, position)?;
+            .write_text_block(text_block, layout)?;
 
         Ok(self)
     }
@@ -134,7 +128,7 @@ mod tests {
         fn write_text_block(
             &mut self,
             text_block: crate::paragraph_layout::RenderedTextBlock,
-            position: crate::values::Point<crate::values::Pt>,
+            layout: &PaginatedLayout,
         ) -> Result<&mut Self, DocumentGenerationError> {
             todo!()
         }
@@ -156,7 +150,8 @@ mod tests {
     fn can_write_line() {
         let writer = MockDocWriter::new("Test Title");
 
-        let mut builder: DocumentBuilder<MockDocWriter> = DocumentBuilder::new(writer);
+        let mut builder: DocumentBuilder<MockDocWriter> =
+            DocumentBuilder::new(writer, page_sizes::LETTER);
 
         // let f1 = FontId::new();
 

@@ -20,7 +20,7 @@ pub use edge_style::EdgeStyle;
 pub use flex_style::FlexStyle;
 pub use flex_values::*;
 pub use font_styles::FontStyles;
-pub use style::Style;
+pub use style::{Style, BreakInside};
 
 use crate::error::{DocumentGenerationError, UserInputError};
 

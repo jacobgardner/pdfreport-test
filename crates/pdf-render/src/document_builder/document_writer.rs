@@ -1,8 +1,9 @@
 use crate::{
+    block_layout::paginated_layout::PaginatedLayout,
     error::DocumentGenerationError,
     paragraph_layout::RenderedTextBlock,
     stylesheet::BorderRadiusStyle,
-    values::{Point, Pt, Rect, Color},
+    values::{Color, Point, Pt, Rect},
 };
 
 pub trait UnstructuredDocumentWriter {
@@ -18,6 +19,6 @@ pub trait UnstructuredDocumentWriter {
     fn write_text_block(
         &mut self,
         text_block: RenderedTextBlock,
-        position: Point<Pt>,
+        layout: &PaginatedLayout,
     ) -> Result<&mut Self, DocumentGenerationError>;
 }

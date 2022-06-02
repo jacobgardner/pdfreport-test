@@ -20,7 +20,7 @@ use crate::{
     paragraph_layout::RenderedTextBlock,
     rich_text::RichTextSpan,
     stylesheet::BorderRadiusStyle,
-    values::{Color, Mm, Pt, Rect, Size},
+    values::{Color, Mm, Pt, Rect, Size}, block_layout::paginated_layout::PaginatedLayout,
 };
 
 #[derive(Clone, Default)]
@@ -137,7 +137,7 @@ impl<'a> UnstructuredDocumentWriter for PrintPdfWriter<'a> {
     fn write_text_block(
         &mut self,
         text_block: RenderedTextBlock,
-        position: crate::values::Point<Pt>,
+        layout: &PaginatedLayout,
     ) -> Result<&mut Self, DocumentGenerationError> {
         let page_number = 0;
 
@@ -145,8 +145,8 @@ impl<'a> UnstructuredDocumentWriter for PrintPdfWriter<'a> {
 
         layer.begin_text_section();
 
-        let x = printpdf::Pt::from(position.x);
-        let y = printpdf::Pt::from(position.y);
+        let x = printpdf::Pt::from(layout.left());
+        let y = printpdf::Pt::from(layout.top());
 
         let mut current_y = y;
         for line in text_block.lines.iter() {
