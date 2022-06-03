@@ -47,6 +47,7 @@ impl Display for DrawCursor {
 }
 
 pub struct DebugCursor {
+    pub page_index: usize,
     pub position: Point<Pt>,
     pub label: String,
 }
@@ -60,7 +61,7 @@ pub struct PaginatedLayoutEngine<'a> {
     layout_engine: &'a dyn LayoutEngine,
     stylesheet: &'a Stylesheet,
     page_height: Pt,
-    debug_cursors: Vec<DebugCursor>,
+    pub debug_cursors: Vec<DebugCursor>,
 }
 
 // Json Processed -> Flexbox layout (yoga) -> Text layout -> Pagination Layout
@@ -123,23 +124,30 @@ impl<'a> PaginatedLayoutEngine<'a> {
 
         let layout_engine = self.layout_engine;
 
+        let debug_cursors = RefCell::new(vec![]);
+
         root_node.visit_nodes(
             &mut |node, parent| {
                 let mut draw_cursor = draw_cursor.borrow_mut();
                 let mut prior_sibling_layout = prior_sibling_layout.borrow_mut();
+                let node_layout = layout_engine.get_node_layout(node.node_id());
+
+                let mut debug_cursors = debug_cursors.borrow_mut();
                 // let style = paginated_layout_engine.node_lookup.get_style(node);
 
-                let node_layout = layout_engine.get_node_layout(node.node_id());
                 if let Some(parent) = parent {
                     let parent_layout = layout_engine.get_node_layout(parent.node_id());
 
+                    let cursor_label: String;
                     let offset = if parent.first_child() == node {
                         depth += 1;
                         println!("Parent to child {depth}");
+                        cursor_label = String::from("Enter: Parent -> Child");
 
                         // Parent to child movement
                         node_layout.top - parent_layout.top
                     } else {
+                        cursor_label = String::from("Enter: Sibling -> Sibling");
                         println!(
                             "Sibling to sibling {} - {}",
                             node_layout.top,
@@ -148,12 +156,20 @@ impl<'a> PaginatedLayoutEngine<'a> {
                         node_layout.top - prior_sibling_layout.bottom()
                     };
 
-                    println!("Moving cursor down {offset}");
+                    // println!("Moving cursor down {offset}");
 
                     draw_cursor.y_offset += offset;
+                    debug_cursors.push(DebugCursor {
+                        page_index: draw_cursor.page_index,
+                        position: Point {
+                            x: Pt(5.),
+                            y: draw_cursor.y_offset,
+                        },
+                        label: cursor_label,
+                    });
                 }
 
-                self.draw_paginated_node(&mut draw_cursor, &node_layout, node)?;
+                self.draw_paginated_node(&mut draw_cursor, &node_layout, node, &mut debug_cursors)?;
 
                 *prior_sibling_layout = node_layout;
 
@@ -163,6 +179,7 @@ impl<'a> PaginatedLayoutEngine<'a> {
                 // let style = paginated_layout_engine.node_lookup.get_style(node);
                 let mut draw_cursor = draw_cursor.borrow_mut();
                 let node_layout = layout_engine.get_node_layout(node.node_id());
+                let mut debug_cursors = debug_cursors.borrow_mut();
 
                 if let Some(parent) = parent {
                     // Do pagination stuff
@@ -171,6 +188,15 @@ impl<'a> PaginatedLayoutEngine<'a> {
                     let parent_layout = layout_engine.get_node_layout(parent.node_id());
                     if parent.last_child() == node {
                         draw_cursor.y_offset += parent_layout.bottom() - node_layout.bottom();
+
+                        debug_cursors.push(DebugCursor {
+                            page_index: draw_cursor.page_index,
+                            position: Point {
+                                x: Pt(5.),
+                                y: draw_cursor.y_offset,
+                            },
+                            label: String::from("Draw Finish: Text Node"),
+                        });
                     }
                 }
 
@@ -178,6 +204,8 @@ impl<'a> PaginatedLayoutEngine<'a> {
             },
             None,
         )?;
+
+        self.debug_cursors = debug_cursors.into_inner();
 
         Ok(self)
     }
@@ -187,6 +215,7 @@ impl<'a> PaginatedLayoutEngine<'a> {
         draw_cursor: &mut DrawCursor,
         node_layout: &NodeLayout,
         node: &DomNode,
+        debug_cursors: &mut Vec<DebugCursor>,
     ) -> Result<(), DocumentGenerationError> {
         let style = self.node_lookup.get_style(node);
         let mut adjusted_layout = NodeLayout {
@@ -208,6 +237,15 @@ impl<'a> PaginatedLayoutEngine<'a> {
             }
         }
 
+        debug_cursors.push(DebugCursor {
+            page_index: draw_cursor.page_index,
+            position: Point {
+                x: Pt(200.),
+                y: draw_cursor.y_offset,
+            },
+            label: String::from("Draw: Adjusted Cursor"),
+        });
+
         // By this point, the draw cursor is in the correct place to start
         // the current node.
 
@@ -225,6 +263,15 @@ impl<'a> PaginatedLayoutEngine<'a> {
 
         if let DrawableNode::Text(_) = paginated_node.drawable_node {
             draw_cursor.y_offset += node_layout.height; //  - Pt(style.margin.bottom);
+                                                        //
+            debug_cursors.push(DebugCursor {
+                page_index: draw_cursor.page_index,
+                position: Point {
+                    x: Pt(400.),
+                    y: draw_cursor.y_offset,
+                },
+                label: String::from("Draw Finish: Text Node"),
+            });
         }
 
         self.paginated_nodes.push(paginated_node);

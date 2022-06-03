@@ -14,10 +14,10 @@ use printpdf::{
 };
 
 use crate::{
-    block_layout::paginated_layout::{DrawableNode, PaginatedLayout, PaginatedNode},
+    block_layout::paginated_layout::{DebugCursor, DrawableNode, PaginatedLayout, PaginatedNode},
     document_builder::UnstructuredDocumentWriter,
     error::{DocumentGenerationError, InternalServerError},
-    fonts::{FontCollection, FontId},
+    fonts::{FontAttributes, FontCollection, FontId},
     paragraph_layout::RenderedTextBlock,
     rich_text::RichTextSpan,
     stylesheet::{BorderRadiusStyle, Style},
@@ -94,6 +94,59 @@ impl<'a> PrintPdfWriter<'a> {
             font_collection,
             page_size: dimensions.into(),
             current_style_by_page: vec![CurrentStyles::default()],
+        }
+    }
+
+    pub fn draw_debug_cursors(&mut self, debug_cursors: &[DebugCursor]) {
+        let font = self
+            .font_collection
+            .lookup_font(&"Inter", &FontAttributes::default())
+            .unwrap();
+
+        let font = self.get_font(font.font_id()).unwrap();
+
+        for cursor in debug_cursors.iter() {
+            let layer = self.get_base_layer(cursor.page_index);
+            layer.set_outline_color(Color::black().into());
+            layer.set_fill_color(Color::black().into());
+
+            let cursor_points = vec![
+                (
+                    Point::new(
+                        Mm::from(cursor.position.x).into(),
+                        Mm::from(self.page_size.height - cursor.position.y).into(),
+                    ),
+                    false,
+                ),
+                (
+                    Point::new(
+                        Mm::from(cursor.position.x + Pt(20.)).into(),
+                        Mm::from(self.page_size.height - cursor.position.y).into(),
+                    ),
+                    false,
+                ),
+            ];
+
+            let line = Line {
+                points: cursor_points,
+                is_closed: false,
+                has_fill: false,
+                has_stroke: true,
+                is_clipping_path: false,
+            };
+
+            layer.add_shape(line);
+
+            layer.begin_text_section();
+            layer.set_text_cursor(
+                Mm::from(cursor.position.x + Pt(20.)).into(),
+                Mm::from(self.page_size.height - cursor.position.y).into(),
+            );
+
+            layer.set_font(&font, 12.);
+            layer.write_text(&cursor.label, &font);
+
+            layer.end_text_section();
         }
     }
 

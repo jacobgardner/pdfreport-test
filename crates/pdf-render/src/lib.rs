@@ -111,6 +111,11 @@ pub fn build_pdf_from_dom<W: Write>(
     for drawable_node in paginated_layout.paginated_nodes().iter() {
         pdf_builder.draw_node(&drawable_node)?;
     }
+    
+    let mut pdf_writer = pdf_builder.into_inner();
+    pdf_writer.draw_debug_cursors(&paginated_layout.debug_cursors);
+    
+    // pdf_builder.draw_debug_cursors(&paginated_layout.debug_cursors);
 
     // for (node, parent) in doc_structure.root.block_iter() {
     //     let layout = layout_engine.get_node_layout(node.node_id());
@@ -136,5 +141,5 @@ pub fn build_pdf_from_dom<W: Write>(
     //     }
     // }
 
-    pdf_builder.into_inner().save(pdf_doc_writer)
+    pdf_writer.save(pdf_doc_writer)
 }
