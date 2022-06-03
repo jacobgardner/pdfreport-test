@@ -1,17 +1,22 @@
 #![doc = include_str!("../README.md")]
 
 use block_layout::{
-    layout_engine::LayoutEngine, paginated_layout::PaginatedLayoutEngine, yoga::YogaLayout,
+    layout_engine::{LayoutEngine, NodeLayout},
+    paginated_layout::{
+        DrawableNode, DrawableTextNode, PaginatedLayout, PaginatedLayoutEngine, PaginatedNode,
+    },
+    yoga::YogaLayout,
 };
 use bytes::Bytes;
 use doc_structure::{DomNode, FontFamilyInfo, HasNodeId};
 use document_builder::DocumentBuilder;
 use fonts::{FontCollection, FontFamilyCollection};
-use paragraph_layout::{ParagraphLayout, ParagraphStyle};
+use paragraph_layout::{ParagraphLayout, ParagraphStyle, RenderedTextBlock};
 use print_pdf_writer::PrintPdfWriter;
 use rich_text::dom_node_conversion::dom_node_to_rich_text;
 use std::{io::Write, rc::Rc};
-use utils::dom_lookup::NodeLookup;
+use stylesheet::Style;
+use utils::node_lookup::NodeLookup;
 use values::{Point, Pt};
 
 pub mod block_layout;
@@ -61,14 +66,14 @@ pub fn build_pdf_from_dom<W: Write>(
     );
 
     let stylesheet = &doc_structure.stylesheet;
-    let dom_lookup = NodeLookup::from_root_node(&doc_structure.root, &stylesheet)?;
+    let node_lookup = NodeLookup::from_root_node(&doc_structure.root, &stylesheet)?;
 
     let mut paragraph_layout = ParagraphLayout::new();
     paragraph_layout.load_fonts(&font_collection)?;
 
     let paragraph_layout = Rc::new(paragraph_layout);
 
-    let mut layout_engine = YogaLayout::new(&dom_lookup);
+    let mut layout_engine = YogaLayout::new(&node_lookup);
     layout_engine.build_node_layout(
         page_sizes::LETTER.width.into(),
         &doc_structure.root,
@@ -76,38 +81,64 @@ pub fn build_pdf_from_dom<W: Write>(
         paragraph_layout.clone(),
     )?;
 
-    let paginated = PaginatedLayoutEngine::new(
+    let paginated_layout = PaginatedLayoutEngine::new(
         &doc_structure.root,
         &layout_engine,
-        &dom_lookup,
+        &node_lookup,
+        &paragraph_layout,
+        stylesheet,
         Pt::from(page_sizes::LETTER.height),
-    );
+    )?;
 
     let mut pdf_builder = DocumentBuilder::new(pdf_writer, page_sizes::LETTER);
 
-    for (node, parent) in doc_structure.root.block_iter() {
-        let layout = layout_engine.get_node_layout(node.node_id());
-        pdf_builder.draw_dom_node(node, &dom_lookup, &layout)?;
-        if let DomNode::Text(text_node) = node {
-            let style = dom_lookup.get_style(text_node);
-            let rich_text = dom_node_to_rich_text(text_node, &dom_lookup, stylesheet)?;
+    // pdf_builder.draw_node(&PaginatedNode {
+    //     layout: PaginatedLayout {
+    //         layout: NodeLayout {
+    //             left: Pt(0.),
+    //             top: Pt(10.),
+    //             width: Pt(100.),
+    //             height: Pt(100.),
+    //             right: Pt(0.),
+    //         },
+    //         page_number: 10,
+    //     },
+    //     drawable_node: DrawableNode::Text(DrawableTextNode {
+    //         text_block: RenderedTextBlock::default(),
+    //         style: Style::Unmergeable {
+    //             debug: true,
+    //             ..Default::default()
+    //         }
+    //     })
+    // })?;
 
-            // FIXME: We already calculated the text block in the yoga layout
-            // engine. Either re-use that or pass it into the layout engine?
-            let text_block = paragraph_layout
-                .calculate_layout(
-                    ParagraphStyle::left(),
-                    &rich_text,
-                    layout.width - Pt(style.padding.left + style.padding.right),
-                )
-                .unwrap();
-
-            let node_layout = paginated.get_node_layout(node.node_id());
-
-            // TODO: Can we change this to take a ref instead?
-            pdf_builder.write_text_block(text_block, &node_layout)?;
-        }
+    for drawable_node in paginated_layout.paginated_nodes().iter() {
+        pdf_builder.draw_node(&drawable_node)?;
     }
+
+    // for (node, parent) in doc_structure.root.block_iter() {
+    //     let layout = layout_engine.get_node_layout(node.node_id());
+    //     pdf_builder.draw_dom_node(node, &node_lookup, &layout)?;
+    //     if let DomNode::Text(text_node) = node {
+    //         let style = node_lookup.get_style(text_node);
+    //         let rich_text = dom_node_to_rich_text(text_node, &node_lookup, stylesheet)?;
+
+    //         // FIXME: We already calculated the text block in the yoga layout
+    //         // engine. Either re-use that or pass it into the layout engine?
+    //         let text_block = paragraph_layout
+    //             .calculate_layout(
+    //                 ParagraphStyle::left(),
+    //                 &rich_text,
+    //                 layout.width - Pt(style.padding.left + style.padding.right),
+    //             )
+    //             .unwrap();
+
+    //         let node_layout = paginated_layout.get_node_layout(node.node_id());
+
+    //         // TODO: Can we change this to take a ref instead?
+    //         pdf_builder.write_text_block(text_block, &node_layout, &style)?;
+    //     }
+    // }
 
     pdf_builder.into_inner().save(pdf_doc_writer)
 }

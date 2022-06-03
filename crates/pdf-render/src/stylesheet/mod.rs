@@ -20,7 +20,7 @@ pub use edge_style::EdgeStyle;
 pub use flex_style::FlexStyle;
 pub use flex_values::*;
 pub use font_styles::FontStyles;
-pub use style::{Style, BreakInside};
+pub use style::{BreakInside, Style};
 
 use crate::error::{DocumentGenerationError, UserInputError};
 
@@ -63,11 +63,10 @@ impl Stylesheet {
         class_names: &[String],
     ) -> Result<Style::Mergeable, DocumentGenerationError> {
         let mergeable = self.get_mergeable_style(class_names)?;
-        
+
         let inherited_style = mergeable.merge_inherited_styles(parent_style);
-        
+
         Ok(inherited_style)
-        
     }
 }
 

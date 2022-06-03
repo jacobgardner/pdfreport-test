@@ -1,4 +1,4 @@
-use std::{rc::Rc, fmt::Display};
+use std::{fmt::Display, rc::Rc};
 
 use crate::{
     doc_structure::{DomNode, NodeId},
@@ -10,7 +10,7 @@ use crate::{
 
 /// The absolute position of the node relative to
 /// the top of the PDF document. (This does NOT include pagination)
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Clone)]
 pub struct NodeLayout {
     pub left: Pt,
     pub right: Pt,
@@ -19,9 +19,19 @@ pub struct NodeLayout {
     pub height: Pt,
 }
 
+impl NodeLayout {
+    pub fn bottom(&self) -> Pt {
+        self.top + self.height 
+    }
+}
+
 impl Display for NodeLayout {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "({}, {}) -> {}x{}", self.left, self.top, self.width, self.height)
+        write!(
+            f,
+            "({}, {}) -> {}x{}",
+            self.left, self.top, self.width, self.height
+        )
     }
 }
 

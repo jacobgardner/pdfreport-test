@@ -4,7 +4,7 @@ use crate::{
     fonts::FontAttributes,
     rich_text::RichTextSpan,
     stylesheet::{Style, Stylesheet},
-    utils::dom_lookup::NodeLookup,
+    utils::node_lookup::NodeLookup,
     values::Pt,
 };
 
@@ -12,7 +12,7 @@ use super::RichText;
 
 pub fn dom_node_to_rich_text(
     text_node: &TextNode,
-    dom_lookup: &NodeLookup,
+    node_lookup: &NodeLookup,
     stylesheet: &Stylesheet,
 ) -> Result<RichText, DocumentGenerationError> {
     // let ancestor_style = dom_lookup
@@ -38,7 +38,7 @@ pub fn dom_node_to_rich_text(
     //         .merge_inherited_styles(&ancestor_style),
     // );
 
-    let text_node_style = dom_lookup.get_style(text_node);
+    let text_node_style = node_lookup.get_style(text_node);
 
     let mut rich_text_spans: Vec<RichTextSpan> = vec![];
 

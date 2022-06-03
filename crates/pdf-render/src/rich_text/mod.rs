@@ -1,6 +1,8 @@
 //! A representation of the style (size, color, etc.) of text
 //!  throughout a paragraph.
 
+use std::fmt::Display;
+
 use crate::{
     error::DocumentGenerationError,
     fonts::FontAttributes,
@@ -32,6 +34,17 @@ impl From<&str> for RichTextSpan {
 pub struct RichText(pub Vec<RichTextSpan>);
 
 impl RichText {
+    
+    pub fn to_string(&self) -> String {
+        let mut outstr = String::new();
+        
+        for span in self.0.iter() {
+            outstr += &span.text;
+        }
+        
+        outstr
+    }
+    
     pub fn substr(
         &self,
         line_start_index: usize,

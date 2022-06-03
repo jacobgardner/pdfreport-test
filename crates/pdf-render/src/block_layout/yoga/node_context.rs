@@ -4,7 +4,8 @@ use crate::{
     doc_structure::NodeId,
     error::DocumentGenerationError,
     paragraph_layout::{ParagraphLayout, RenderedTextBlock},
-    rich_text::RichText, stylesheet::Style,
+    rich_text::RichText,
+    stylesheet::Style,
 };
 
 pub(super) struct NodeContext {

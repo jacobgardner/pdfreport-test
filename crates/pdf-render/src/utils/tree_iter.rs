@@ -1,8 +1,21 @@
+use std::marker::PhantomData;
+
+use crate::error::DocumentGenerationError;
+
 pub trait TreeNode: Sized {
     fn children(&self) -> &[Self];
     fn has_children(&self) -> bool {
         !self.children().is_empty()
     }
+
+    fn first_child(&self) -> &Self {
+        &self.children()[0]
+    }
+
+    fn last_child(&self) -> &Self {
+        &self.children()[self.children().len() - 1]
+    }
+
     fn sibling(&self, target_node: &Self) -> Option<&Self> {
         // This should be safe from panic as well because the
         // current_node MUST have come from the parent
@@ -14,6 +27,41 @@ pub trait TreeNode: Sized {
 
         self.children().get(current_index + 1)
     }
+
+    fn visit_nodes(
+        &self,
+        // TODO: Make these optional later?
+        node_enter: &mut impl FnMut(&Self, Option<&Self>) -> Result<(), DocumentGenerationError>,
+        // node_visit: impl Fn(&Self, Option<&Self>) -> Result<(), DocumentGenerationError>,
+        node_leave: &mut impl FnMut(&Self, Option<&Self>) -> Result<(), DocumentGenerationError>,
+        parent: Option<&Self>,
+    ) -> Result<(), DocumentGenerationError> {
+        
+        node_enter(self, parent);  
+
+        for child in self.children() {
+            child.visit_nodes(node_enter, node_leave, Some(self))?;
+        }
+        
+        node_leave(self, parent);
+
+
+        Ok(())
+    }
+}
+
+//type VisitorFn<T> = Fn(&T, Option<&T>) -> Result<(), DocumentGenerationError>;
+
+pub struct NodeVisitor<T, Enter, Visit, Leave>
+where
+    Enter: Fn(&T, Option<&T>) -> Result<(), DocumentGenerationError>,
+    Visit: Fn(&T, Option<&T>) -> Result<(), DocumentGenerationError>,
+    Leave: Fn(&T, Option<&T>) -> Result<(), DocumentGenerationError>,
+{
+    pub node_enter: Option<Enter>,
+    pub node_visit: Option<Visit>,
+    pub node_leave: Option<Leave>,
+    pub _node_type: PhantomData<T>,
 }
 
 pub struct TreeIterator<'a, T: TreeNode> {

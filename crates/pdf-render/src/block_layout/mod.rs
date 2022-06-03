@@ -3,5 +3,5 @@
 //!  relative to each other
 
 pub mod layout_engine;
-pub mod yoga;
 pub mod paginated_layout;
+pub mod yoga;

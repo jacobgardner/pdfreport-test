@@ -1,6 +1,6 @@
 use serde::Deserialize;
 
-use crate::utils::tree_iter::{TreeIterator, TreeNode};
+use crate::{utils::tree_iter::{TreeIterator, TreeNode}, error::DocumentGenerationError};
 
 use super::{ImageNode, NodeId, StyledNode, TextNode};
 
@@ -13,6 +13,13 @@ pub enum DomNode {
     Text(TextNode),
     Image(ImageNode),
 }
+
+impl PartialEq for DomNode {
+    fn eq(&self, other: &Self) -> bool {
+        self.node_id() == other.node_id() 
+    }
+}
+
 
 impl HasNodeId for DomNode {
     fn node_id(&self) -> NodeId {
@@ -36,6 +43,8 @@ impl DomNode {
     pub fn block_iter(&self) -> TreeIterator<Self> {
         TreeIterator::new(self)
     }
+    
+
 }
 
 impl<T: HasNodeId> From<&T> for NodeId {

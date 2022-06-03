@@ -1,24 +1,27 @@
 use crate::{
-    block_layout::paginated_layout::PaginatedLayout,
+    block_layout::paginated_layout::{DrawableNode, PaginatedLayout, PaginatedNode},
     error::DocumentGenerationError,
     paragraph_layout::RenderedTextBlock,
-    stylesheet::BorderRadiusStyle,
-    values::{Color, Point, Pt, Rect},
+    stylesheet::{BorderRadiusStyle, Style},
+    values::{Color, Pt, Rect},
 };
 
 pub trait UnstructuredDocumentWriter {
-    fn draw_rect(
-        &mut self,
-        rect: Rect<Pt>,
-        border_width: Pt,
-        border_color: Option<Color>,
-        background_color: Option<Color>,
-        border_radius: Option<BorderRadiusStyle::Unmergeable>,
-    );
+    fn draw_node(&mut self, node: &PaginatedNode) -> Result<&mut Self, DocumentGenerationError>;
 
-    fn write_text_block(
+    // fn draw_rect(
+    //     &mut self,
+    //     rect: Rect<Pt>,
+    //     border_width: Pt,
+    //     border_color: Option<Color>,
+    //     background_color: Option<Color>,
+    //     border_radius: Option<BorderRadiusStyle::Unmergeable>,
+    // );
+
+    fn draw_text_block(
         &mut self,
-        text_block: RenderedTextBlock,
         layout: &PaginatedLayout,
+        style: &Style::Unmergeable,
+        text_block: &RenderedTextBlock,
     ) -> Result<&mut Self, DocumentGenerationError>;
 }

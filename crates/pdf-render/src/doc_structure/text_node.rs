@@ -2,7 +2,7 @@ use serde::Deserialize;
 
 use crate::utils::tree_iter::{TreeIterator, TreeNode};
 
-use super::{NodeId, has_node_id::HasNodeId};
+use super::{has_node_id::HasNodeId, NodeId};
 
 #[derive(Default, Deserialize, Debug, Clone)]
 pub struct TextNode {

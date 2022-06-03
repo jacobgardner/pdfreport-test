@@ -10,7 +10,7 @@ use crate::{
     paragraph_layout::{ParagraphLayout, ParagraphStyle},
     rich_text::dom_node_conversion::dom_node_to_rich_text,
     stylesheet::Stylesheet,
-    utils::dom_lookup::NodeLookup,
+    utils::node_lookup::NodeLookup,
     values::Pt,
 };
 
@@ -23,14 +23,14 @@ use polyhorn_yoga as yoga;
 use yoga::{MeasureMode, NodeRef, Size};
 
 pub struct YogaLayout<'a> {
-    dom_lookup: &'a NodeLookup<'a>,
+    node_lookup: &'a NodeLookup<'a>,
     yoga_nodes_by_id: HashMap<NodeId, yoga::Node>,
 }
 
 impl<'a> YogaLayout<'a> {
-    pub fn new(dom_lookup: &'a NodeLookup) -> Self {
+    pub fn new(node_lookup: &'a NodeLookup) -> Self {
         Self {
-            dom_lookup,
+            node_lookup,
             yoga_nodes_by_id: HashMap::new(),
         }
     }
@@ -78,7 +78,7 @@ extern "C" fn measure_func(
 
 impl<'a> LayoutEngine for YogaLayout<'a> {
     fn get_node_layout(&self, node_id: NodeId) -> NodeLayout {
-        let ancestors = self.dom_lookup.get_ancestor_ids(node_id);
+        let ancestors = self.node_lookup.get_ancestor_ids(node_id);
 
         let layout = self.yoga_nodes_by_id.get(&node_id).unwrap().get_layout();
 
@@ -120,7 +120,7 @@ impl<'a> LayoutEngine for YogaLayout<'a> {
             let mut layout_node = yoga::Node::from(node_style.clone());
 
             if let DomNode::Text(text_node) = node {
-                let rich_text = dom_node_to_rich_text(text_node, &self.dom_lookup, stylesheet)?;
+                let rich_text = dom_node_to_rich_text(text_node, &self.node_lookup, stylesheet)?;
 
                 let context = yoga::Context::new(NodeContext {
                     node_id: node.node_id(),

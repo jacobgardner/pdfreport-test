@@ -11,7 +11,7 @@ use super::{BorderStyle, EdgeStyle, FlexStyle, FontStyles};
 #[ts(export)]
 pub enum BreakInside {
     Auto,
-    Avoid 
+    Avoid,
 }
 
 impl Default for BreakInside {

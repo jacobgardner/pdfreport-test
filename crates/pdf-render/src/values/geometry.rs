@@ -1,6 +1,6 @@
 use std::{
     fmt::Display,
-    ops::{Add, Sub},
+    ops::{Add, Sub, AddAssign},
 };
 
 #[derive(Debug, Clone)]
@@ -14,6 +14,15 @@ impl From<Size<Mm>> for Size<Pt> {
         Self {
             width: mm.width.into(),
             height: mm.height.into(),
+        }
+    }
+}
+
+impl From<Size<Pt>> for Size<Mm> {
+    fn from(pt: Size<Pt>) -> Self {
+        Self {
+            width: pt.width.into(),
+            height: pt.height.into(),
         }
     }
 }
@@ -33,7 +42,7 @@ impl<T> From<(T, T)> for Size<T> {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Default, Debug, PartialEq, Copy, Clone, PartialOrd)]
 pub struct Mm(pub f64);
 
 #[derive(Default, Copy, Clone, Debug, PartialEq, PartialOrd)]
@@ -55,7 +64,13 @@ const MM_TO_PT: f64 = 2.8346456692913;
 
 impl From<Mm> for Pt {
     fn from(mm: Mm) -> Self {
-        Pt(mm.0 * MM_TO_PT)
+        Self(mm.0 * MM_TO_PT)
+    }
+}
+
+impl From<Pt> for Mm {
+    fn from(pt: Pt) -> Self {
+        Self(pt.0 * 1. / MM_TO_PT)
     }
 }
 
@@ -72,6 +87,12 @@ impl Add for Pt {
 
     fn add(self, rhs: Self) -> Self::Output {
         Pt(self.0 + rhs.0)
+    }
+}
+
+impl AddAssign for Pt {
+    fn add_assign(&mut self, rhs: Self) {
+        *self = *self + rhs;
     }
 }
 

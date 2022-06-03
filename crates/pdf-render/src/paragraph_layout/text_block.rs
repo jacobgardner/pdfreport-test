@@ -2,13 +2,13 @@ use crate::{rich_text::RichText, values::Pt};
 
 use super::LineMetrics;
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct RenderedTextLine {
     pub rich_text: RichText,
     pub line_metrics: LineMetrics,
 }
 
-#[derive(Clone, Default)]
+#[derive(Debug, Clone, Default)]
 pub struct RenderedTextBlock {
     // block_metrics: BlockMetrics
     pub lines: Vec<RenderedTextLine>,

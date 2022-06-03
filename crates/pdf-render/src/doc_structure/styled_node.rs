@@ -1,6 +1,6 @@
 use serde::Deserialize;
 
-use super::{DomNode, NodeId, has_node_id::HasNodeId};
+use super::{has_node_id::HasNodeId, DomNode, NodeId};
 
 #[derive(Clone, Default, Deserialize, Debug)]
 pub struct StyledNode {
