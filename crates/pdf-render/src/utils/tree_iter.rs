@@ -36,15 +36,13 @@ pub trait TreeNode: Sized {
         node_leave: &mut impl FnMut(&Self, Option<&Self>) -> Result<(), DocumentGenerationError>,
         parent: Option<&Self>,
     ) -> Result<(), DocumentGenerationError> {
-        
-        node_enter(self, parent);  
+        node_enter(self, parent)?;
 
         for child in self.children() {
             child.visit_nodes(node_enter, node_leave, Some(self))?;
         }
-        
-        node_leave(self, parent);
 
+        node_leave(self, parent)?;
 
         Ok(())
     }

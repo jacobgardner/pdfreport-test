@@ -1,4 +1,4 @@
-use std::{cell::RefCell, collections::HashMap, fmt::Display, rc::Rc};
+use std::{cell::RefCell, collections::HashMap, fmt::Display};
 
 use crate::{
     doc_structure::{DomNode, HasNodeId, NodeId},
@@ -87,19 +87,20 @@ impl<'a> PaginatedLayoutEngine<'a> {
             layout_engine,
             debug_cursors: vec![],
         };
-        
+
         paginated_layout_engine.compute_paginated_layout(root_node)?;
 
         Ok(paginated_layout_engine)
     }
 
-    fn compute_paginated_layout(&mut self, root_node: &DomNode) -> Result<&mut Self, DocumentGenerationError> {
+    fn compute_paginated_layout(
+        &mut self,
+        root_node: &DomNode,
+    ) -> Result<&mut Self, DocumentGenerationError> {
         // Probably not the most efficient way to do this
         for (node, _) in root_node.block_iter() {
             if self.does_node_avoid_page_break(&node) {
-                self
-                    .node_avoids_page_break
-                    .insert(node.node_id(), true);
+                self.node_avoids_page_break.insert(node.node_id(), true);
                 self.apply_page_break_avoid_rules(&node);
             }
 
@@ -119,7 +120,7 @@ impl<'a> PaginatedLayoutEngine<'a> {
 
         let prior_sibling_layout = RefCell::new(NodeLayout::default());
         let mut depth = 0;
-        
+
         let layout_engine = self.layout_engine;
 
         root_node.visit_nodes(
@@ -152,11 +153,7 @@ impl<'a> PaginatedLayoutEngine<'a> {
                     draw_cursor.y_offset += offset;
                 }
 
-                self.draw_paginated_node(
-                    &mut draw_cursor,
-                    &node_layout,
-                    node,
-                )?;
+                self.draw_paginated_node(&mut draw_cursor, &node_layout, node)?;
 
                 *prior_sibling_layout = node_layout;
 
@@ -181,7 +178,7 @@ impl<'a> PaginatedLayoutEngine<'a> {
             },
             None,
         )?;
-        
+
         Ok(self)
     }
 
@@ -275,7 +272,7 @@ impl<'a> PaginatedLayoutEngine<'a> {
         self.layouts.get(&node_id).unwrap()
     }
 
-    pub fn apply_page_break_avoid_rules(&mut self, mut node: &DomNode) {
+    pub fn apply_page_break_avoid_rules(&mut self, node: &DomNode) {
         while let Some(parent) = self.node_lookup.get_parent(node) {
             if parent.children()[0].node_id() == node.node_id() {
                 if self.node_avoids_page_break.insert(parent.node_id(), true) == Some(true) {

@@ -181,7 +181,7 @@ impl<'a> UnstructuredDocumentWriter for PrintPdfWriter<'a> {
         match &node.drawable_node {
             DrawableNode::Text(text_node) => {
                 self.draw_text_block(&node.layout, node_style, &text_node.text_block)?;
-            },
+            }
             _ => {}
         }
 
@@ -236,7 +236,7 @@ impl<'a> PrintPdfWriter<'a> {
         content_rect.top = Pt::from(self.page_size.height) - content_rect.top;
 
         self.draw_rect(
-            *page_number, 
+            *page_number,
             margin_rect,
             Pt(1.),
             Some(Color::try_from("green").unwrap()),
@@ -273,8 +273,8 @@ impl<'a> PrintPdfWriter<'a> {
 
             self.page_layer_indices
                 .push((page_index, vec![layer_index]));
-        
-            self.current_style_by_page.push(CurrentStyles::default()); 
+
+            self.current_style_by_page.push(CurrentStyles::default());
         }
 
         let (page_index, layers) = &self.page_layer_indices[page_number];

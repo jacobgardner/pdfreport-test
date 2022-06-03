@@ -21,7 +21,7 @@ pub struct NodeLayout {
 
 impl NodeLayout {
     pub fn bottom(&self) -> Pt {
-        self.top + self.height 
+        self.top + self.height
     }
 }
 

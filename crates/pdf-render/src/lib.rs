@@ -1,23 +1,19 @@
 #![doc = include_str!("../README.md")]
 
 use block_layout::{
-    layout_engine::{LayoutEngine, NodeLayout},
-    paginated_layout::{
-        DrawableNode, DrawableTextNode, PaginatedLayout, PaginatedLayoutEngine, PaginatedNode,
-    },
-    yoga::YogaLayout,
+    layout_engine::LayoutEngine, paginated_layout::PaginatedLayoutEngine, yoga::YogaLayout,
 };
 use bytes::Bytes;
-use doc_structure::{DomNode, FontFamilyInfo, HasNodeId};
+use doc_structure::FontFamilyInfo;
 use document_builder::DocumentBuilder;
 use fonts::{FontCollection, FontFamilyCollection};
-use paragraph_layout::{ParagraphLayout, ParagraphStyle, RenderedTextBlock};
+use paragraph_layout::ParagraphLayout;
 use print_pdf_writer::PrintPdfWriter;
-use rich_text::dom_node_conversion::dom_node_to_rich_text;
+
 use std::{io::Write, rc::Rc};
-use stylesheet::Style;
+
 use utils::node_lookup::NodeLookup;
-use values::{Point, Pt};
+use values::Pt;
 
 pub mod block_layout;
 pub mod doc_structure;

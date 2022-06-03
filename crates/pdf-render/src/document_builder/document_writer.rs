@@ -1,9 +1,8 @@
 use crate::{
-    block_layout::paginated_layout::{DrawableNode, PaginatedLayout, PaginatedNode},
+    block_layout::paginated_layout::{PaginatedLayout, PaginatedNode},
     error::DocumentGenerationError,
     paragraph_layout::RenderedTextBlock,
-    stylesheet::{BorderRadiusStyle, Style},
-    values::{Color, Pt, Rect},
+    stylesheet::Style,
 };
 
 pub trait UnstructuredDocumentWriter {

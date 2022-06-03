@@ -212,7 +212,7 @@
           "h1"
         ],
         "children": [
-          "This is some osadijfoasdifjosaidfjo text ",
+          "This is some long text ",
           {
             "styles": [
               "italic"

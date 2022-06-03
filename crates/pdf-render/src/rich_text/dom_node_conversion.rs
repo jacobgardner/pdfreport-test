@@ -3,7 +3,7 @@ use crate::{
     error::DocumentGenerationError,
     fonts::FontAttributes,
     rich_text::RichTextSpan,
-    stylesheet::{Style, Stylesheet},
+    stylesheet::Stylesheet,
     utils::node_lookup::NodeLookup,
     values::Pt,
 };

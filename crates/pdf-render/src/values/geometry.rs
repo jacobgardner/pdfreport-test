@@ -1,6 +1,6 @@
 use std::{
     fmt::Display,
-    ops::{Add, Sub, AddAssign},
+    ops::{Add, AddAssign, Sub},
 };
 
 #[derive(Debug, Clone)]
