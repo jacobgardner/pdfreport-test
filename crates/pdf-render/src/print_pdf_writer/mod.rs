@@ -10,7 +10,7 @@ use std::{
 
 use printpdf::{
     calculate_points_for_circle, IndirectFontRef, Line, PdfDocument, PdfDocumentReference,
-    PdfLayerIndex, PdfLayerReference, PdfPageIndex, Point, TextMatrix,
+    PdfLayerIndex, PdfLayerReference, PdfPageIndex, Point, Rgb, TextMatrix,
 };
 
 use crate::{
@@ -100,27 +100,34 @@ impl<'a> PrintPdfWriter<'a> {
     pub fn draw_debug_cursors(&mut self, debug_cursors: &[DebugCursor]) {
         let font = self
             .font_collection
-            .lookup_font(&"Inter", &FontAttributes::default())
+            .lookup_font(&"Inter", &FontAttributes::bold())
             .unwrap();
 
         let font = self.get_font(font.font_id()).unwrap();
 
-        for cursor in debug_cursors.iter() {
+        for (idx, cursor) in debug_cursors.iter().enumerate() {
             let layer = self.get_base_layer(cursor.page_index);
             layer.set_outline_color(Color::black().into());
-            layer.set_fill_color(Color::black().into());
+            layer.set_fill_color(printpdf::Color::Rgb(Rgb {
+                r: 0.2,
+                g: 0.,
+                b: 0.,
+                icc_profile: None,
+            }));
+
+            let x_position = Pt((idx % 6) as f64 * 90. + 10.);
 
             let cursor_points = vec![
                 (
                     Point::new(
-                        Mm::from(cursor.position.x).into(),
+                        Mm::from(x_position).into(),
                         Mm::from(self.page_size.height - cursor.position.y).into(),
                     ),
                     false,
                 ),
                 (
                     Point::new(
-                        Mm::from(cursor.position.x + Pt(20.)).into(),
+                        Mm::from(x_position + Pt(20.)).into(),
                         Mm::from(self.page_size.height - cursor.position.y).into(),
                     ),
                     false,
@@ -135,16 +142,17 @@ impl<'a> PrintPdfWriter<'a> {
                 is_clipping_path: false,
             };
 
+            layer.set_outline_thickness(5.);
             layer.add_shape(line);
 
             layer.begin_text_section();
             layer.set_text_cursor(
-                Mm::from(cursor.position.x + Pt(20.)).into(),
-                Mm::from(self.page_size.height - cursor.position.y).into(),
+                Mm::from(x_position + Pt(20.)).into(),
+                Mm::from(self.page_size.height - cursor.position.y - Pt(15.)).into(),
             );
 
             layer.set_font(&font, 12.);
-            layer.write_text(&cursor.label, &font);
+            layer.write_text(&format!("{} - {}", idx, cursor.label), &font);
 
             layer.end_text_section();
         }
@@ -202,8 +210,8 @@ impl<'a> UnstructuredDocumentWriter for PrintPdfWriter<'a> {
 
         layer.begin_text_section();
 
-        let x = printpdf::Pt::from(Pt(style.padding.left) + layout.left());
-        let y = printpdf::Pt::from(self.page_size.height - (layout.top() + Pt(style.padding.top)));
+        let x = printpdf::Pt::from(style.padding.left + layout.left());
+        let y = printpdf::Pt::from(self.page_size.height - (layout.top() + style.padding.top));
 
         let mut current_y = y;
         for line in text_block.lines.iter() {
@@ -264,10 +272,10 @@ impl<'a> PrintPdfWriter<'a> {
         } = layout;
 
         let mut margin_rect = Rect {
-            left: layout.left - Pt(style.margin.left),
-            top: layout.top - Pt(style.margin.top),
-            width: layout.width + Pt(style.margin.right + style.margin.left),
-            height: layout.height + Pt(style.margin.top + style.margin.bottom),
+            left: layout.left - style.margin.left,
+            top: layout.top - style.margin.top,
+            width: layout.width + (style.margin.right + style.margin.left),
+            height: layout.height + (style.margin.top + style.margin.bottom),
         };
 
         let mut border_rect = Rect {
@@ -278,10 +286,10 @@ impl<'a> PrintPdfWriter<'a> {
         };
 
         let mut content_rect = Rect {
-            left: border_rect.left + Pt(style.padding.left),
-            top: border_rect.top + Pt(style.padding.top),
-            width: border_rect.width - Pt(style.padding.right + style.padding.left),
-            height: border_rect.height - Pt(style.padding.top + style.padding.bottom),
+            left: border_rect.left + style.padding.left,
+            top: border_rect.top + style.padding.top,
+            width: border_rect.width - (style.padding.right + style.padding.left),
+            height: border_rect.height - (style.padding.top + style.padding.bottom),
         };
 
         margin_rect.top = Pt::from(self.page_size.height) - margin_rect.top;

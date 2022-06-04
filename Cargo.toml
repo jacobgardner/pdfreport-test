@@ -30,6 +30,7 @@ exclude = ["crates/prototype-implementation"]
 actix-web = "*"
 serde = { version = "*", features = ["derive"] }
 serde_json = "*"
+clap = { version = "3.1.18", features = ["derive"] }
 
 pdf-render = { path = "crates/pdf-render" }
 

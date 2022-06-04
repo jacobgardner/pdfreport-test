@@ -53,7 +53,7 @@ extern "C" fn measure_func(
     let text_block = context.paragraph_layout.calculate_layout(
         ParagraphStyle::default(),
         &context.rich_text,
-        Pt(width as f64 - context.style.padding.left - context.style.padding.right),
+        Pt(width as f64) - context.style.padding.left - context.style.padding.right,
     );
 
     match text_block {

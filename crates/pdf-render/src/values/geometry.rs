@@ -3,6 +3,8 @@ use std::{
     ops::{Add, AddAssign, Sub},
 };
 
+use serde::Deserialize;
+
 #[derive(Debug, Clone)]
 pub struct Size<T> {
     pub width: T,
@@ -45,7 +47,7 @@ impl<T> From<(T, T)> for Size<T> {
 #[derive(Default, Debug, PartialEq, Copy, Clone, PartialOrd)]
 pub struct Mm(pub f64);
 
-#[derive(Default, Copy, Clone, Debug, PartialEq, PartialOrd)]
+#[derive(Default, Copy, Clone, Debug, PartialEq, PartialOrd, Deserialize)]
 pub struct Pt(pub f64);
 
 impl Display for Pt {

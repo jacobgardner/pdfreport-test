@@ -2,7 +2,10 @@ use polyhorn_yoga as yoga;
 
 use yoga::{Align, Edge, FlexDirection, StyleUnit, Wrap};
 
-use crate::stylesheet::{Direction, FlexAlign, FlexWrap, Style};
+use crate::{
+    stylesheet::{Direction, FlexAlign, FlexWrap, Style},
+    values::Pt,
+};
 
 impl From<Direction> for FlexDirection {
     fn from(dir: Direction) -> Self {
@@ -42,39 +45,15 @@ impl From<Style::Unmergeable> for yoga::Node {
 
         layout_node.set_border(Edge::All, style.border.width);
 
-        layout_node.set_margin(
-            Edge::Top,
-            StyleUnit::Point((style.margin.top as f32).into()),
-        );
-        layout_node.set_margin(
-            Edge::Right,
-            StyleUnit::Point((style.margin.right as f32).into()),
-        );
-        layout_node.set_margin(
-            Edge::Bottom,
-            StyleUnit::Point((style.margin.bottom as f32).into()),
-        );
-        layout_node.set_margin(
-            Edge::Left,
-            StyleUnit::Point((style.margin.left as f32).into()),
-        );
+        layout_node.set_margin(Edge::Top, style.margin.top.into());
+        layout_node.set_margin(Edge::Right, style.margin.right.into());
+        layout_node.set_margin(Edge::Bottom, style.margin.bottom.into());
+        layout_node.set_margin(Edge::Left, style.margin.left.into());
 
-        layout_node.set_padding(
-            Edge::Top,
-            StyleUnit::Point((style.padding.top as f32).into()),
-        );
-        layout_node.set_padding(
-            Edge::Right,
-            StyleUnit::Point((style.padding.right as f32).into()),
-        );
-        layout_node.set_padding(
-            Edge::Bottom,
-            StyleUnit::Point((style.padding.bottom as f32).into()),
-        );
-        layout_node.set_padding(
-            Edge::Left,
-            StyleUnit::Point((style.padding.left as f32).into()),
-        );
+        layout_node.set_padding(Edge::Top, style.padding.top.into());
+        layout_node.set_padding(Edge::Right, style.padding.right.into());
+        layout_node.set_padding(Edge::Bottom, style.padding.bottom.into());
+        layout_node.set_padding(Edge::Left, style.padding.left.into());
 
         layout_node.set_flex_direction(style.flex.direction.into());
         layout_node.set_flex_wrap(style.flex.wrap.into());
@@ -85,5 +64,11 @@ impl From<Style::Unmergeable> for yoga::Node {
         layout_node.set_flex_basis(StyleUnit::Auto);
 
         layout_node
+    }
+}
+
+impl From<Pt> for StyleUnit {
+    fn from(pt: Pt) -> Self {
+        StyleUnit::Point((pt.0 as f32).into())
     }
 }

@@ -1,4 +1,5 @@
 use std::{cell::RefCell, collections::HashMap, fmt::Display};
+mod node_visitor;
 
 use crate::{
     doc_structure::{DomNode, HasNodeId, NodeId},
@@ -6,9 +7,14 @@ use crate::{
     paragraph_layout::{ParagraphLayout, ParagraphStyle, RenderedTextBlock},
     rich_text::dom_node_conversion::dom_node_to_rich_text,
     stylesheet::{BreakInside, Direction, FlexWrap, Style, Stylesheet},
-    utils::{node_lookup::NodeLookup, tree_iter::TreeNode},
+    utils::{
+        node_lookup::NodeLookup,
+        tree_iter::{NodeVisitor, TreeNode},
+    },
     values::{Point, Pt},
 };
+
+use self::node_visitor::PaginationVisitor;
 
 use super::layout_engine::{LayoutEngine, NodeLayout};
 
@@ -112,100 +118,9 @@ impl<'a> PaginatedLayoutEngine<'a> {
         // We want the relative offset between the previous node and the current
         // to calculate the adjusted position. ()
 
-        // let root_layout = layout_engine.get_node_layout(root_node.node_id());
+        let mut visitor = PaginationVisitor::new(self);
 
-        let draw_cursor = RefCell::new(DrawCursor {
-            y_offset: Pt(0.),
-            page_index: 0,
-        });
-
-        let prior_sibling_layout = RefCell::new(NodeLayout::default());
-        let mut depth = 0;
-
-        let layout_engine = self.layout_engine;
-
-        let debug_cursors = RefCell::new(vec![]);
-
-        root_node.visit_nodes(
-            &mut |node, parent| {
-                let mut draw_cursor = draw_cursor.borrow_mut();
-                let mut prior_sibling_layout = prior_sibling_layout.borrow_mut();
-                let node_layout = layout_engine.get_node_layout(node.node_id());
-
-                let mut debug_cursors = debug_cursors.borrow_mut();
-                // let style = paginated_layout_engine.node_lookup.get_style(node);
-
-                if let Some(parent) = parent {
-                    let parent_layout = layout_engine.get_node_layout(parent.node_id());
-
-                    let cursor_label: String;
-                    let offset = if parent.first_child() == node {
-                        depth += 1;
-                        println!("Parent to child {depth}");
-                        cursor_label = String::from("Enter: Parent -> Child");
-
-                        // Parent to child movement
-                        node_layout.top - parent_layout.top
-                    } else {
-                        cursor_label = String::from("Enter: Sibling -> Sibling");
-                        println!(
-                            "Sibling to sibling {} - {}",
-                            node_layout.top,
-                            prior_sibling_layout.bottom()
-                        );
-                        node_layout.top - prior_sibling_layout.bottom()
-                    };
-
-                    // println!("Moving cursor down {offset}");
-
-                    draw_cursor.y_offset += offset;
-                    debug_cursors.push(DebugCursor {
-                        page_index: draw_cursor.page_index,
-                        position: Point {
-                            x: Pt(5.),
-                            y: draw_cursor.y_offset,
-                        },
-                        label: cursor_label,
-                    });
-                }
-
-                self.draw_paginated_node(&mut draw_cursor, &node_layout, node, &mut debug_cursors)?;
-
-                *prior_sibling_layout = node_layout;
-
-                Ok(())
-            },
-            &mut |node, parent| {
-                // let style = paginated_layout_engine.node_lookup.get_style(node);
-                let mut draw_cursor = draw_cursor.borrow_mut();
-                let node_layout = layout_engine.get_node_layout(node.node_id());
-                let mut debug_cursors = debug_cursors.borrow_mut();
-
-                if let Some(parent) = parent {
-                    // Do pagination stuff
-                    //
-
-                    let parent_layout = layout_engine.get_node_layout(parent.node_id());
-                    if parent.last_child() == node {
-                        draw_cursor.y_offset += parent_layout.bottom() - node_layout.bottom();
-
-                        debug_cursors.push(DebugCursor {
-                            page_index: draw_cursor.page_index,
-                            position: Point {
-                                x: Pt(5.),
-                                y: draw_cursor.y_offset,
-                            },
-                            label: String::from("Draw Finish: Text Node"),
-                        });
-                    }
-                }
-
-                Ok(())
-            },
-            None,
-        )?;
-
-        self.debug_cursors = debug_cursors.into_inner();
+        root_node.visit_nodes(&mut visitor, None)?;
 
         Ok(self)
     }
@@ -215,17 +130,15 @@ impl<'a> PaginatedLayoutEngine<'a> {
         draw_cursor: &mut DrawCursor,
         node_layout: &NodeLayout,
         node: &DomNode,
-        debug_cursors: &mut Vec<DebugCursor>,
     ) -> Result<(), DocumentGenerationError> {
         let style = self.node_lookup.get_style(node);
+
         let mut adjusted_layout = NodeLayout {
             top: draw_cursor.y_offset,
             ..node_layout.clone()
         };
 
-        if adjusted_layout.bottom() <= self.page_height {
-            // Not breaking
-        } else {
+        if adjusted_layout.bottom() > self.page_height {
             if *self
                 .node_avoids_page_break
                 .get(&node.node_id())
@@ -237,13 +150,13 @@ impl<'a> PaginatedLayoutEngine<'a> {
             }
         }
 
-        debug_cursors.push(DebugCursor {
+        self.debug_cursors.push(DebugCursor {
             page_index: draw_cursor.page_index,
             position: Point {
                 x: Pt(200.),
                 y: draw_cursor.y_offset,
             },
-            label: String::from("Draw: Adjusted Cursor"),
+            label: String::from("Original"),
         });
 
         // By this point, the draw cursor is in the correct place to start
@@ -261,17 +174,8 @@ impl<'a> PaginatedLayoutEngine<'a> {
             drawable_node,
         };
 
-        if let DrawableNode::Text(_) = paginated_node.drawable_node {
-            draw_cursor.y_offset += node_layout.height; //  - Pt(style.margin.bottom);
-                                                        //
-            debug_cursors.push(DebugCursor {
-                page_index: draw_cursor.page_index,
-                position: Point {
-                    x: Pt(400.),
-                    y: draw_cursor.y_offset,
-                },
-                label: String::from("Draw Finish: Text Node"),
-            });
+        if paginated_node.drawable_node.is_leaf_node() {
+
         }
 
         self.paginated_nodes.push(paginated_node);
@@ -298,7 +202,7 @@ impl<'a> PaginatedLayoutEngine<'a> {
                     .calculate_layout(
                         ParagraphStyle::left(),
                         &rich_text,
-                        layout.width - Pt(style.padding.left + style.padding.right),
+                        layout.width - (style.padding.left + style.padding.right),
                     )
                     .unwrap();
 
@@ -363,6 +267,13 @@ impl DrawableNode {
         match self {
             Self::Text(node) => &node.style,
             Self::Container(node) => &node.style,
+        }
+    }
+
+    pub fn is_leaf_node(&self) -> bool {
+        match self {
+            Self::Container(_) => false,
+            _ => true,
         }
     }
 }
