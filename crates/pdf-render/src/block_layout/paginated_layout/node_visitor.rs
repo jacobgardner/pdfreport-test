@@ -25,6 +25,7 @@ impl<'a, 'b> PaginationVisitor<'a, 'b> {
             draw_cursor: DrawCursor {
                 y_offset: Pt(0.),
                 page_index: 0,
+                debt: Pt(0.)
             },
             prior_sibling_layout: Default::default(),
             prior_sibling_style: Default::default(),
@@ -44,7 +45,7 @@ impl<'a, 'b> NodeVisitor<DomNode> for PaginationVisitor<'a, 'b> {
             .layout_engine
             .get_node_layout(node.node_id());
 
-        let cursor_offset = node_layout.top - self.prior_sibling_layout.top;
+        let cursor_offset = node_layout.top - self.prior_sibling_layout.top - self.draw_cursor.debt;
 
         self.draw_cursor.y_offset += cursor_offset;
 

@@ -1,4 +1,4 @@
-use std::{cell::RefCell, collections::HashMap, fmt::Display};
+use std::{collections::HashMap, fmt::Display};
 mod node_visitor;
 
 use crate::{
@@ -7,10 +7,7 @@ use crate::{
     paragraph_layout::{ParagraphLayout, ParagraphStyle, RenderedTextBlock},
     rich_text::dom_node_conversion::dom_node_to_rich_text,
     stylesheet::{BreakInside, Direction, FlexWrap, Style, Stylesheet},
-    utils::{
-        node_lookup::NodeLookup,
-        tree_iter::{NodeVisitor, TreeNode},
-    },
+    utils::{node_lookup::NodeLookup, tree_iter::TreeNode},
     values::{Point, Pt},
 };
 
@@ -44,11 +41,16 @@ impl Display for PaginatedLayout {
 pub struct DrawCursor {
     y_offset: Pt,
     page_index: usize,
+    debt: Pt,
 }
 
 impl Display for DrawCursor {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "Page {}, {}", self.page_index, self.y_offset)
+        write!(
+            f,
+            "Page {}, {} -{}",
+            self.page_index, self.y_offset, self.debt
+        )
     }
 }
 
@@ -133,16 +135,19 @@ impl<'a> PaginatedLayoutEngine<'a> {
     ) -> Result<(), DocumentGenerationError> {
         let style = self.node_lookup.get_style(node);
 
+        draw_cursor.debt = Pt(0.);
+
         let mut adjusted_layout = NodeLayout {
             top: draw_cursor.y_offset,
             ..node_layout.clone()
         };
 
         if adjusted_layout.bottom() > self.page_height {
-            if *self
-                .node_avoids_page_break
-                .get(&node.node_id())
-                .unwrap_or(&false)
+            if adjusted_layout.top > self.page_height
+                || *self
+                    .node_avoids_page_break
+                    .get(&node.node_id())
+                    .unwrap_or(&false)
             {
                 adjusted_layout.top = Pt(0.);
                 draw_cursor.y_offset = Pt(0.);
@@ -156,7 +161,7 @@ impl<'a> PaginatedLayoutEngine<'a> {
                 x: Pt(200.),
                 y: draw_cursor.y_offset,
             },
-            label: String::from("Original"),
+            label: String::from("Draw Start"),
         });
 
         // By this point, the draw cursor is in the correct place to start
@@ -174,11 +179,71 @@ impl<'a> PaginatedLayoutEngine<'a> {
             drawable_node,
         };
 
-        if paginated_node.drawable_node.is_leaf_node() {
+        println!("Pn: {:?}", paginated_node.layout);
 
+        if let DrawableNode::Text(text_node) = &paginated_node.drawable_node {
+            let mut line_offset = 0;
+
+            while line_offset < text_node.text_block.lines.len() {
+                let cumulative_height: Vec<_> = text_node.text_block.lines[line_offset..]
+                    .iter()
+                    .scan(Pt(0.), |state, line| {
+                        *state += line.line_metrics.height;
+
+                        Some(*state)
+                    })
+                    .collect();
+
+                let page_break_index = cumulative_height.iter().position(|&bottom| {
+                    bottom + style.padding.top + draw_cursor.y_offset > self.page_height
+                });
+
+                let block_height = page_break_index
+                    .map(|idx| cumulative_height[idx])
+                    .unwrap_or(Pt(0.));
+
+                let page_break = page_break_index
+                    .map(|break_offset| break_offset + line_offset)
+                    .unwrap_or_else(|| text_node.text_block.lines.len());
+
+                let partial_text_block = RenderedTextBlock {
+                    lines: text_node.text_block.lines[line_offset..page_break]
+                        .iter()
+                        .cloned()
+                        .collect(),
+                    ..text_node.text_block.clone()
+                };
+
+                let pn = PaginatedNode {
+                    layout: PaginatedLayout {
+                        layout: NodeLayout {
+                            top: draw_cursor.y_offset,
+                            ..node_layout.clone()
+                        },
+                        page_index: draw_cursor.page_index,
+                    },
+                    drawable_node: DrawableNode::Text(DrawableTextNode {
+                        text_block: partial_text_block,
+                        style: text_node.style.clone(),
+                    }),
+                };
+
+                self.paginated_nodes.push(pn);
+
+                line_offset = page_break;
+                if line_offset < text_node.text_block.lines.len() {
+                    draw_cursor.page_index += 1;
+                    draw_cursor.y_offset = Pt(0.);
+                    draw_cursor.debt +=  self.page_height; // block_height;
+                } else {
+                    draw_cursor.y_offset += style.padding.bottom;
+                }
+
+                println!("Draw Cursor: {draw_cursor}");
+            }
+        } else {
+            self.paginated_nodes.push(paginated_node);
         }
-
-        self.paginated_nodes.push(paginated_node);
 
         Ok(())
     }

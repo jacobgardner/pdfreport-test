@@ -106,6 +106,9 @@ impl<'a> PrintPdfWriter<'a> {
         let font = self.get_font(font.font_id()).unwrap();
 
         for (idx, cursor) in debug_cursors.iter().enumerate() {
+            
+            println!("Cursor: {} - {}", cursor.page_index, cursor.position.y);
+            
             let layer = self.get_base_layer(cursor.page_index);
             layer.set_outline_color(Color::black().into());
             layer.set_fill_color(printpdf::Color::Rgb(Rgb {
