@@ -1,8 +1,6 @@
 //! This is ultimately what takes nodes that have been styled
 //!  and laid out and writes them to a PDF.
 use std::{
-    cell::RefCell,
-    collections::HashMap,
     io::{BufWriter, Write},
     rc::Rc,
 };
@@ -13,6 +11,7 @@ use printpdf::{
 };
 
 mod debug;
+mod font_lookup;
 mod rect;
 
 use crate::{
@@ -26,6 +25,8 @@ use crate::{
     values::{Color, Mm, Pt, Size},
 };
 
+use self::font_lookup::FontLookup;
+
 #[derive(Clone, Default)]
 struct CurrentStyles {
     font_id: Option<FontId>,
@@ -35,29 +36,6 @@ struct CurrentStyles {
 }
 
 static BASE_LAYER_NAME: &str = "Layer 1";
-
-struct FontLookup(RefCell<HashMap<FontId, Rc<IndirectFontRef>>>);
-
-impl FontLookup {
-    fn new() -> Self {
-        Self(RefCell::new(HashMap::new()))
-    }
-
-    fn get(&self, font_id: FontId) -> Option<Rc<IndirectFontRef>> {
-        self.0.borrow().get(&font_id).cloned()
-    }
-
-    fn insert(&self, font_id: FontId, font_ref: IndirectFontRef) {
-        self.0.borrow_mut().insert(font_id, Rc::new(font_ref));
-    }
-
-    fn insert_and_get(&self, font_id: FontId, font_ref: IndirectFontRef) -> Rc<IndirectFontRef> {
-        self.insert(font_id, font_ref);
-
-        self.get(font_id)
-            .expect("We just inserted it. It has to exist")
-    }
-}
 
 pub struct PrintPdfWriter<'a> {
     raw_pdf_doc: PdfDocumentReference,
