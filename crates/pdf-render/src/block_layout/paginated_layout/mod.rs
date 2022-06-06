@@ -1,4 +1,4 @@
-use std::{collections::HashMap};
+use std::collections::HashMap;
 mod draw_cursor;
 mod paginated_node;
 
@@ -133,76 +133,87 @@ impl<'a> PaginatedLayoutEngine<'a> {
         };
 
         if let DrawableNode::Text(text_node) = &paginated_node.drawable_node {
-            let mut line_offset = 0;
-
-            while line_offset < text_node.text_block.lines.len() {
-                let cumulative_height: Vec<_> = text_node.text_block.lines[line_offset..]
-                    .iter()
-                    .scan(Pt(0.), |state, line| {
-                        *state += line.line_metrics.height; // line.line_metrics.descent - line.line_metrics.ascent;
-
-                        Some(*state)
-                    })
-                    .collect();
-
-                let page_break_index = cumulative_height.iter().position(|&bottom| {
-                    bottom + style.padding.top + draw_cursor.y_offset > self.page_height
-                });
-
-                let block_height = match page_break_index {
-                    Some(idx) if idx > 0 => cumulative_height[idx - 1],
-                    Some(_) => Pt(0.),
-                    None => cumulative_height.last().cloned().unwrap_or(Pt(0.)),
-                };
-
-                let page_break = page_break_index
-                    .map(|break_offset| break_offset + line_offset)
-                    .unwrap_or_else(|| text_node.text_block.lines.len());
-
-                for height in cumulative_height.iter() {
-                    self.debug_cursors.push(DebugCursor {
-                        page_index: draw_cursor.page_index,
-                        position: Point {
-                            x: Pt(0.),
-                            y: draw_cursor.y_offset + *height + style.padding.top,
-                        },
-                        label: format!("{} {block_height}", *height),
-                    });
-                }
-
-                let partial_text_block = RenderedTextBlock {
-                    lines: text_node.text_block.lines[line_offset..page_break].to_vec(),
-                    // ..text_node.text_block.clone()
-                };
-
-                let pn = PaginatedNode {
-                    page_layout: NodeLayout {
-                        top: draw_cursor.y_offset,
-                        ..node_layout.clone()
-                    },
-                    page_index: draw_cursor.page_index,
-                    drawable_node: DrawableNode::Text(DrawableTextNode {
-                        text_block: partial_text_block,
-                        style: style.clone(),
-                    }),
-                };
-                node_layout.height -= block_height + style.padding.top;
-
-                self.paginated_nodes.push(pn);
-
-                line_offset = page_break;
-                if line_offset < text_node.text_block.lines.len() {
-                    draw_cursor.page_index += 1;
-                    draw_cursor.y_offset = Pt(0.);
-                    draw_cursor.page_break_debt += block_height + style.padding.top;
-                    style.margin.top = Pt(0.);
-                    style.padding.top = Pt(0.);
-                }
-            }
+            self.draw_text_node(draw_cursor, &mut style, &mut node_layout, text_node)?;
         } else {
             self.paginated_nodes.push(paginated_node);
         }
 
+        Ok(())
+    }
+
+    fn draw_text_node(
+        &mut self,
+        draw_cursor: &mut DrawCursor,
+        style: &mut Style::Unmergeable,
+        node_layout: &mut NodeLayout,
+        text_node: &DrawableTextNode,
+    ) -> Result<(), DocumentGenerationError> {
+        let mut line_offset = 0;
+
+        while line_offset < text_node.text_block.lines.len() {
+            let cumulative_height: Vec<_> = text_node.text_block.lines[line_offset..]
+                .iter()
+                .scan(Pt(0.), |state, line| {
+                    *state += line.line_metrics.height; // line.line_metrics.descent - line.line_metrics.ascent;
+
+                    Some(*state)
+                })
+                .collect();
+
+            let page_break_index = cumulative_height.iter().position(|&bottom| {
+                bottom + style.padding.top + draw_cursor.y_offset > self.page_height
+            });
+
+            let block_height = match page_break_index {
+                Some(idx) if idx > 0 => cumulative_height[idx - 1],
+                Some(_) => Pt(0.),
+                None => cumulative_height.last().cloned().unwrap_or(Pt(0.)),
+            };
+
+            let page_break = page_break_index
+                .map(|break_offset| break_offset + line_offset)
+                .unwrap_or_else(|| text_node.text_block.lines.len());
+
+            for height in cumulative_height.iter() {
+                self.debug_cursors.push(DebugCursor {
+                    page_index: draw_cursor.page_index,
+                    position: Point {
+                        x: Pt(0.),
+                        y: draw_cursor.y_offset + *height + style.padding.top,
+                    },
+                    label: format!("{} {block_height}", *height),
+                });
+            }
+
+            let partial_text_block = RenderedTextBlock {
+                lines: text_node.text_block.lines[line_offset..page_break].to_vec(),
+                // ..text_node.text_block.clone()
+            };
+
+            let pn = PaginatedNode {
+                page_layout: NodeLayout {
+                    top: draw_cursor.y_offset,
+                    ..node_layout.clone()
+                },
+                page_index: draw_cursor.page_index,
+                drawable_node: DrawableNode::Text(DrawableTextNode {
+                    text_block: partial_text_block,
+                    style: style.clone(),
+                }),
+            };
+            node_layout.height -= block_height + style.padding.top;
+
+            self.paginated_nodes.push(pn);
+
+            line_offset = page_break;
+            if line_offset < text_node.text_block.lines.len() {
+                draw_cursor.page_index += 1;
+                draw_cursor.y_offset = Pt(0.);
+                draw_cursor.page_break_debt += block_height + style.padding.top;
+                style.margin.top = Pt(0.);
+                style.padding.top = Pt(0.);
+            }
+        }
         Ok(())
     }
 
@@ -225,7 +236,7 @@ impl<'a> PaginatedLayoutEngine<'a> {
                     .calculate_layout(
                         ParagraphStyle::left(),
                         &rich_text,
-                        layout.width - (style.padding.left + style.padding.right),
+                        layout.width - style.padding.horizontal(),
                     )
                     .unwrap();
 
