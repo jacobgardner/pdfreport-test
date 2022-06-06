@@ -17,7 +17,7 @@ pub trait UnstructuredDocumentWriter {
 
     fn draw_text_block(
         &mut self,
-        layout: &PaginatedNode,
+        node: &PaginatedNode,
         style: &Style::Unmergeable,
         text_block: &RenderedTextBlock,
     ) -> Result<&mut Self, DocumentGenerationError>;

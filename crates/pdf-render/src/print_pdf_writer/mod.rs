@@ -4,24 +4,26 @@ use std::{
     cell::RefCell,
     collections::HashMap,
     io::{BufWriter, Write},
-    ops::Range,
     rc::Rc,
 };
 
 use printpdf::{
-    calculate_points_for_circle, IndirectFontRef, Line, PdfDocument, PdfDocumentReference,
-    PdfLayerIndex, PdfLayerReference, PdfPageIndex, Point, Rgb, TextMatrix,
+    IndirectFontRef, PdfDocument, PdfDocumentReference, PdfLayerIndex, PdfLayerReference,
+    PdfPageIndex, TextMatrix,
 };
 
+mod debug;
+mod rect;
+
 use crate::{
-    block_layout::paginated_layout::{DebugCursor, DrawableNode, PaginatedNode},
+    block_layout::paginated_layout::{DrawableNode, PaginatedNode},
     document_builder::UnstructuredDocumentWriter,
     error::{DocumentGenerationError, InternalServerError},
-    fonts::{FontAttributes, FontCollection, FontId},
+    fonts::{FontCollection, FontId},
     paragraph_layout::RenderedTextBlock,
     rich_text::RichTextSpan,
-    stylesheet::{BorderRadiusStyle, Style},
-    values::{Color, Mm, Pt, Rect, Size},
+    stylesheet::Style,
+    values::{Color, Mm, Pt, Size},
 };
 
 #[derive(Clone, Default)]
@@ -31,11 +33,6 @@ struct CurrentStyles {
 
     color: Option<Color>,
 }
-
-const TOP_LEFT_CORNER: Range<usize> = 12..16;
-const TOP_RIGHT_CORNER: Range<usize> = 0..4;
-const BOTTOM_RIGHT_CORNER: Range<usize> = 4..8;
-const BOTTOM_LEFT_CORNER: Range<usize> = 8..12;
 
 static BASE_LAYER_NAME: &str = "Layer 1";
 
@@ -94,72 +91,6 @@ impl<'a> PrintPdfWriter<'a> {
             font_collection,
             page_size: dimensions.into(),
             current_style_by_page: vec![CurrentStyles::default()],
-        }
-    }
-
-    pub fn draw_debug_cursors(&mut self, debug_cursors: &[DebugCursor]) {
-        let font = self
-            .font_collection
-            .lookup_font("Inter", &FontAttributes::bold())
-            .unwrap();
-
-        let font = self.get_font(font.font_id()).unwrap();
-
-        for (idx, cursor) in debug_cursors.iter().enumerate() {
-            // println!("Cursor: {} - {}", cursor.page_index, cursor.position.y);
-
-            let layer = self.get_base_layer(cursor.page_index);
-            layer.set_outline_color(Color::black().into());
-            layer.set_fill_color(printpdf::Color::Rgb(Rgb {
-                r: 0.2,
-                g: 0.,
-                b: 0.,
-                icc_profile: None,
-            }));
-
-            let x_position = Pt((idx % 6) as f64 * 90. + 10.);
-
-            let cursor_points = vec![
-                (
-                    Point::new(
-                        Mm::from(x_position).into(),
-                        Mm::from(self.page_size.height - cursor.position.y).into(),
-                    ),
-                    false,
-                ),
-                (
-                    Point::new(
-                        Mm::from(x_position + Pt(20.)).into(),
-                        Mm::from(self.page_size.height - cursor.position.y).into(),
-                    ),
-                    false,
-                ),
-            ];
-
-            let line = Line {
-                points: cursor_points,
-                is_closed: false,
-                has_fill: false,
-                has_stroke: true,
-                is_clipping_path: false,
-            };
-
-            layer.set_outline_thickness(0.5);
-            layer.add_shape(line);
-
-            layer.begin_text_section();
-            layer.set_text_cursor(
-                Mm::from(x_position + Pt(20.)).into(),
-                Mm::from(self.page_size.height - cursor.position.y - Pt(15.)).into(),
-            );
-
-            layer.set_font(&font, 12.);
-            layer.write_text(
-                &format!("{}:{} - {}", idx, cursor.position.y, cursor.label),
-                &font,
-            );
-
-            layer.end_text_section();
         }
     }
 
@@ -271,68 +202,6 @@ impl<'a> PrintPdfWriter<'a> {
         Ok(self)
     }
 
-    fn draw_debug_outlines(&mut self, node: &PaginatedNode, style: &Style::Unmergeable) {
-        let PaginatedNode {
-            page_layout: layout,
-            page_index,
-            ..
-        } = node;
-        
-        let page_index = *page_index;
-
-        let mut margin_rect = Rect {
-            left: layout.left - style.margin.left,
-            top: layout.top - style.margin.top,
-            width: layout.width + (style.margin.right + style.margin.left),
-            height: layout.height + (style.margin.top + style.margin.bottom),
-        };
-
-        let mut border_rect = Rect {
-            left: layout.left,
-            top: layout.top,
-            width: layout.width,
-            height: layout.height,
-        };
-
-        let mut content_rect = Rect {
-            left: border_rect.left + style.padding.left,
-            top: border_rect.top + style.padding.top,
-            width: border_rect.width - (style.padding.right + style.padding.left),
-            height: border_rect.height - (style.padding.top + style.padding.bottom),
-        };
-
-        margin_rect.top = self.page_size.height - margin_rect.top;
-        border_rect.top = self.page_size.height - border_rect.top;
-        content_rect.top = self.page_size.height - content_rect.top;
-
-        self.draw_rect(
-            page_index,
-            margin_rect,
-            Pt(1.),
-            Some(Color::try_from("green").unwrap()),
-            None,
-            None,
-        );
-
-        self.draw_rect(
-            page_index,
-            border_rect,
-            Pt(1.),
-            Some(Color::try_from("red").unwrap()),
-            None,
-            None,
-        );
-
-        self.draw_rect(
-            page_index,
-            content_rect,
-            Pt(1.),
-            Some(Color::try_from("blue").unwrap()),
-            None,
-            None,
-        );
-    }
-
     fn get_base_layer(&mut self, page_index: usize) -> PdfLayerReference {
         while page_index >= self.page_layer_indices.len() {
             let (page_index, layer_index) = self.raw_pdf_doc.add_page(
@@ -387,88 +256,5 @@ impl<'a> PrintPdfWriter<'a> {
         self.current_style_by_page[page_index] = new_style;
 
         Ok(font_ref)
-    }
-
-    fn draw_rect(
-        &mut self,
-        page_index: usize,
-        rect: Rect<Pt>,
-        border_width: Pt,
-        border_color: Option<Color>,
-        background_color: Option<Color>,
-        border_radius: Option<BorderRadiusStyle::Unmergeable>,
-    ) {
-        let layer = self.get_base_layer(page_index);
-
-        let start = Point {
-            x: rect.left.into(),
-            y: rect.top.into(),
-        };
-
-        let end = Point {
-            x: (rect.left + rect.width).into(),
-            y: (rect.top - rect.height).into(),
-        };
-
-        #[rustfmt::skip]
-        let points = match border_radius {
-            Some(border_radius) if border_radius != BorderRadiusStyle::Unmergeable::default() => {
-                // 4 points per corner & 2 points per edge
-                let mut points: Vec<(printpdf::Point, bool)> = Vec::with_capacity(4 * 4 + 4 * 2);
-
-                // TODO: Skip any corners where the radius is 0
-                // TODO: Optimization: Don't recalculate corners that have matching radius
-                let circle_points = calculate_points_for_circle(printpdf::Pt(border_radius.top_left), printpdf::Pt(0.), printpdf::Pt(0.));
-                points.extend(circle_points[TOP_LEFT_CORNER].iter().map(|&(pt, b)| (Point { x: pt.x + printpdf::Pt(border_radius.top_left) + start.x, y: pt.y - printpdf::Pt(border_radius.top_left) + start.y}, b)));
-                points.push((Point { x: start.x + printpdf::Pt(border_radius.top_left), y: start.y, }, false));
-                points.push((Point { x: end.x - printpdf::Pt(border_radius.top_left), y: start.y, }, false));
-
-                let circle_points = calculate_points_for_circle(printpdf::Pt(border_radius.top_right), printpdf::Pt(0.), printpdf::Pt(0.));
-                points.extend(circle_points[TOP_RIGHT_CORNER].iter().map(|&(pt, b)| (Point { x: pt.x - printpdf::Pt(border_radius.top_right) + end.x, y: pt.y - printpdf::Pt(border_radius.top_right) + start.y}, b)));
-                points.push((Point { x: end.x, y: start.y - printpdf::Pt(border_radius.top_right), }, false));
-                points.push((Point { x: end.x, y: end.y + printpdf::Pt(border_radius.top_right), }, false));
-
-                let circle_points = calculate_points_for_circle(printpdf::Pt(border_radius.bottom_right), printpdf::Pt(0.), printpdf::Pt(0.));
-                points.extend(circle_points[BOTTOM_RIGHT_CORNER].iter().map(|&(pt, b)| (Point { x: pt.x - printpdf::Pt(border_radius.bottom_right) + end.x, y: pt.y + printpdf::Pt(border_radius.bottom_right) + end.y}, b)));
-                points.push((Point { x: end.x - printpdf::Pt(border_radius.bottom_right), y: end.y, }, false));
-                points.push((Point { x: start.x + printpdf::Pt(border_radius.bottom_right), y: end.y , }, false));
-
-                let circle_points = calculate_points_for_circle(printpdf::Pt(border_radius.bottom_left), printpdf::Pt(0.), printpdf::Pt(0.));
-                points.extend(circle_points[BOTTOM_LEFT_CORNER].iter().map(|&(pt, b)| (Point { x: pt.x + printpdf::Pt(border_radius.bottom_left) + start.x, y: pt.y + printpdf::Pt(border_radius.bottom_left) + end.y}, b)));
-
-                points
-            },
-            _ => {
-                vec![
-                    (Point { x: start.x, y: start.y, }, false),
-                    (Point { x: end.x,   y: start.y, }, false),
-                    (Point { x: end.x,   y: end.y    }, false),
-                    (Point { x: start.x, y: end.y,   }, false),
-                ]
-            }
-        };
-
-        layer.save_graphics_state();
-        let line = Line {
-            points,
-            is_closed: true,
-            has_fill: background_color.is_some(),
-            has_stroke: border_color.is_some(),
-            is_clipping_path: false,
-        };
-
-        if let Some(color) = border_color {
-            layer.set_outline_color(color.into());
-        }
-
-        if let Some(color) = background_color {
-            layer.set_fill_color(color.into());
-        }
-
-        layer.set_outline_thickness(border_width.0);
-
-        layer.add_shape(line);
-
-        layer.restore_graphics_state();
     }
 }
