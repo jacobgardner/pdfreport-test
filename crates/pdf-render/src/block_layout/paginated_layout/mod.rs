@@ -41,7 +41,13 @@ impl Display for PaginatedLayout {
 pub struct DrawCursor {
     y_offset: Pt,
     page_index: usize,
-    debt: Pt,
+    /// I don't have a better name for this atm. This is meant to represent
+    /// the amount we have to offset the next drawing node to compensate for
+    /// the prior node that is broken across one or more pages. Basically, if
+    /// only 25% of the prior node is visible on the current page, then we only
+    /// need to offset the current node by 25% of the previous node where 100%
+    /// is already built in.
+    page_break_debt: Pt,
 }
 
 impl Display for DrawCursor {
@@ -49,7 +55,7 @@ impl Display for DrawCursor {
         write!(
             f,
             "Page {}, {} -{}",
-            self.page_index, self.y_offset, self.debt
+            self.page_index, self.y_offset, self.page_break_debt
         )
     }
 }
@@ -108,9 +114,9 @@ impl<'a> PaginatedLayoutEngine<'a> {
     ) -> Result<&mut Self, DocumentGenerationError> {
         // Probably not the most efficient way to do this
         for (node, _) in root_node.block_iter() {
-            if self.does_node_avoid_page_break(&node) {
+            if self.does_node_avoid_page_break(node) {
                 self.node_avoids_page_break.insert(node.node_id(), true);
-                self.apply_page_break_avoid_rules(&node);
+                self.apply_page_break_avoid_rules(node);
             }
 
             // if node is no-break and first child of parent, then parent is
@@ -135,24 +141,22 @@ impl<'a> PaginatedLayoutEngine<'a> {
     ) -> Result<(), DocumentGenerationError> {
         let mut style = self.node_lookup.get_style(node).clone();
 
-        draw_cursor.debt = Pt(0.);
+        draw_cursor.page_break_debt = Pt(0.);
 
         let mut adjusted_layout = NodeLayout {
             top: draw_cursor.y_offset,
             ..node_layout.clone()
         };
 
-        if adjusted_layout.bottom() > self.page_height {
-            if adjusted_layout.top > self.page_height
-                || *self
-                    .node_avoids_page_break
-                    .get(&node.node_id())
-                    .unwrap_or(&false)
-            {
-                adjusted_layout.top = Pt(0.);
-                draw_cursor.y_offset = Pt(0.);
-                draw_cursor.page_index += 1;
-            }
+        if adjusted_layout.bottom() > self.page_height && adjusted_layout.top > self.page_height
+            || *self
+                .node_avoids_page_break
+                .get(&node.node_id())
+                .unwrap_or(&false)
+        {
+            adjusted_layout.top = Pt(0.);
+            draw_cursor.y_offset = Pt(0.);
+            draw_cursor.page_index += 1;
         }
 
         self.debug_cursors.push(DebugCursor {
@@ -230,14 +234,9 @@ impl<'a> PaginatedLayoutEngine<'a> {
                 }
 
                 let partial_text_block = RenderedTextBlock {
-                    lines: text_node.text_block.lines[line_offset..page_break]
-                        .iter()
-                        .cloned()
-                        .collect(),
-                    ..text_node.text_block.clone()
+                    lines: text_node.text_block.lines[line_offset..page_break].to_vec(),
+                    // ..text_node.text_block.clone()
                 };
-
-                println!("Height remaining: {}", node_layout.height);
 
                 let pn = PaginatedNode {
                     layout: PaginatedLayout {
@@ -260,7 +259,7 @@ impl<'a> PaginatedLayoutEngine<'a> {
                 if line_offset < text_node.text_block.lines.len() {
                     draw_cursor.page_index += 1;
                     draw_cursor.y_offset = Pt(0.);
-                    draw_cursor.debt += block_height + style.padding.top;
+                    draw_cursor.page_break_debt += block_height + style.padding.top;
                     style.margin.top = Pt(0.);
                     style.padding.top = Pt(0.);
                 }
@@ -282,7 +281,7 @@ impl<'a> PaginatedLayoutEngine<'a> {
             DomNode::Text(text_node) => {
                 // FIXME: This should also have already been computed by now
                 let rich_text =
-                    dom_node_to_rich_text(text_node, &self.node_lookup, &self.stylesheet)?;
+                    dom_node_to_rich_text(text_node, self.node_lookup, self.stylesheet)?;
 
                 // FIXME: We already calculated the text block in the yoga layout
                 // engine. Either re-use that or pass it into the layout engine?
@@ -360,10 +359,7 @@ impl DrawableNode {
     }
 
     pub fn is_leaf_node(&self) -> bool {
-        match self {
-            Self::Container(_) => false,
-            _ => true,
-        }
+        !matches!(self, Self::Container(_))
     }
 }
 

@@ -124,7 +124,7 @@ impl<'a> LayoutEngine for YogaLayout<'a> {
             let mut layout_node = yoga::Node::from(node_style.clone());
 
             if let DomNode::Text(text_node) = node {
-                let rich_text = dom_node_to_rich_text(text_node, &self.node_lookup, stylesheet)?;
+                let rich_text = dom_node_to_rich_text(text_node, self.node_lookup, stylesheet)?;
 
                 let context = yoga::Context::new(NodeContext {
                     node_id: node.node_id(),

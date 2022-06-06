@@ -84,7 +84,7 @@ impl Style::Mergeable {
         }
 
         if style.debug.is_none() {
-            style.debug = parent_style.debug.clone();
+            style.debug = parent_style.debug;
         }
 
         style

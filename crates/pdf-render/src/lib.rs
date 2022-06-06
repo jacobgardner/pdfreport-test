@@ -62,7 +62,7 @@ pub fn build_pdf_from_dom<W: Write>(
     );
 
     let stylesheet = &doc_structure.stylesheet;
-    let node_lookup = NodeLookup::from_root_node(&doc_structure.root, &stylesheet)?;
+    let node_lookup = NodeLookup::from_root_node(&doc_structure.root, stylesheet)?;
 
     let mut paragraph_layout = ParagraphLayout::new();
     paragraph_layout.load_fonts(&font_collection)?;
@@ -109,12 +109,12 @@ pub fn build_pdf_from_dom<W: Write>(
     // })?;
 
     for drawable_node in paginated_layout.paginated_nodes().iter() {
-        pdf_builder.draw_node(&drawable_node)?;
+        pdf_builder.draw_node(drawable_node)?;
     }
-    
-    let mut pdf_writer = pdf_builder.into_inner();
-    pdf_writer.draw_debug_cursors(&paginated_layout.debug_cursors);
-    
+
+    let pdf_writer = pdf_builder.into_inner();
+    // pdf_writer.draw_debug_cursors(&paginated_layout.debug_cursors);
+
     // pdf_builder.draw_debug_cursors(&paginated_layout.debug_cursors);
 
     // for (node, parent) in doc_structure.root.block_iter() {

@@ -110,9 +110,6 @@ impl ParagraphLayout {
             });
         }
         
-        
-        println!("Paragraph Height: {} != {}", Pt(paragraph.height() as f64), height);
-
         Ok(rendered_text_block)
     }
 }

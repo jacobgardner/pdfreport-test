@@ -100,15 +100,14 @@ impl<'a> PrintPdfWriter<'a> {
     pub fn draw_debug_cursors(&mut self, debug_cursors: &[DebugCursor]) {
         let font = self
             .font_collection
-            .lookup_font(&"Inter", &FontAttributes::bold())
+            .lookup_font("Inter", &FontAttributes::bold())
             .unwrap();
 
         let font = self.get_font(font.font_id()).unwrap();
 
         for (idx, cursor) in debug_cursors.iter().enumerate() {
-            
             // println!("Cursor: {} - {}", cursor.page_index, cursor.position.y);
-            
+
             let layer = self.get_base_layer(cursor.page_index);
             layer.set_outline_color(Color::black().into());
             layer.set_fill_color(printpdf::Color::Rgb(Rgb {
@@ -155,7 +154,10 @@ impl<'a> PrintPdfWriter<'a> {
             );
 
             layer.set_font(&font, 12.);
-            layer.write_text(&format!("{}:{} - {}", idx, cursor.position.y, cursor.label), &font);
+            layer.write_text(
+                &format!("{}:{} - {}", idx, cursor.position.y, cursor.label),
+                &font,
+            );
 
             layer.end_text_section();
         }
@@ -224,7 +226,7 @@ impl<'a> UnstructuredDocumentWriter for PrintPdfWriter<'a> {
             ));
 
             for span in line.rich_text.0.iter() {
-                let font = self.set_base_layer_style(layout.page_index, &layer, &span)?;
+                let font = self.set_base_layer_style(layout.page_index, &layer, span)?;
 
                 layer.write_text(span.text.clone(), font.as_ref());
             }
@@ -240,8 +242,10 @@ impl<'a> UnstructuredDocumentWriter for PrintPdfWriter<'a> {
     fn draw_node(&mut self, node: &PaginatedNode) -> Result<&mut Self, DocumentGenerationError> {
         let node_style = node.drawable_node.style();
 
-        self.draw_container(&node.layout, &node_style)?;
+        self.draw_container(&node.layout, node_style)?;
 
+        // Remove this allow once we have image rendering
+        #[allow(clippy::single_match)]
         match &node.drawable_node {
             DrawableNode::Text(text_node) => {
                 self.draw_text_block(&node.layout, node_style, &text_node.text_block)?;
@@ -250,7 +254,6 @@ impl<'a> UnstructuredDocumentWriter for PrintPdfWriter<'a> {
         }
 
         Ok(self)
-        // todo!()
     }
 }
 
@@ -295,9 +298,9 @@ impl<'a> PrintPdfWriter<'a> {
             height: border_rect.height - (style.padding.top + style.padding.bottom),
         };
 
-        margin_rect.top = Pt::from(self.page_size.height) - margin_rect.top;
-        border_rect.top = Pt::from(self.page_size.height) - border_rect.top;
-        content_rect.top = Pt::from(self.page_size.height) - content_rect.top;
+        margin_rect.top = self.page_size.height - margin_rect.top;
+        border_rect.top = self.page_size.height - border_rect.top;
+        content_rect.top = self.page_size.height - content_rect.top;
 
         self.draw_rect(
             *page_number,
@@ -345,9 +348,8 @@ impl<'a> PrintPdfWriter<'a> {
         let first_layer = layers[0];
 
         let page = self.raw_pdf_doc.get_page(*page_index);
-        let layer = page.get_layer(first_layer);
 
-        layer
+        page.get_layer(first_layer)
     }
 
     fn set_base_layer_style(
