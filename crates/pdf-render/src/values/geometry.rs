@@ -1,6 +1,6 @@
 use std::{
     fmt::Display,
-    ops::{Add, AddAssign, Sub},
+    ops::{Add, AddAssign, Sub, SubAssign},
 };
 
 use serde::Deserialize;
@@ -95,6 +95,12 @@ impl Add for Pt {
 impl AddAssign for Pt {
     fn add_assign(&mut self, rhs: Self) {
         *self = *self + rhs;
+    }
+}
+
+impl SubAssign for Pt {
+    fn sub_assign(&mut self, rhs: Self) {
+        *self = *self - rhs;
     }
 }
 

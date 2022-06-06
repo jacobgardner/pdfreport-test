@@ -70,7 +70,7 @@ impl<'a, 'b> NodeVisitor<DomNode> for PaginationVisitor<'a, 'b> {
         }
 
         self.pagination_engine
-            .draw_paginated_node(&mut self.draw_cursor, &node_layout, node)?;
+            .draw_paginated_node(&mut self.draw_cursor, node_layout.clone(), node)?;
 
         self.prior_sibling_layout = node_layout;
         self.prior_sibling_style = style.clone();

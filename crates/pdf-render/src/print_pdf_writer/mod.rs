@@ -107,7 +107,7 @@ impl<'a> PrintPdfWriter<'a> {
 
         for (idx, cursor) in debug_cursors.iter().enumerate() {
             
-            println!("Cursor: {} - {}", cursor.page_index, cursor.position.y);
+            // println!("Cursor: {} - {}", cursor.page_index, cursor.position.y);
             
             let layer = self.get_base_layer(cursor.page_index);
             layer.set_outline_color(Color::black().into());
@@ -145,7 +145,7 @@ impl<'a> PrintPdfWriter<'a> {
                 is_clipping_path: false,
             };
 
-            layer.set_outline_thickness(5.);
+            layer.set_outline_thickness(0.5);
             layer.add_shape(line);
 
             layer.begin_text_section();
@@ -155,7 +155,7 @@ impl<'a> PrintPdfWriter<'a> {
             );
 
             layer.set_font(&font, 12.);
-            layer.write_text(&format!("{} - {}", idx, cursor.label), &font);
+            layer.write_text(&format!("{}:{} - {}", idx, cursor.position.y, cursor.label), &font);
 
             layer.end_text_section();
         }
@@ -367,6 +367,7 @@ impl<'a> PrintPdfWriter<'a> {
         let mut new_style = style.clone();
         if style.font_id != Some(font.font_id()) || style.font_size != Some(span.size) {
             layer.set_font(font_ref.as_ref(), span.size.0);
+            layer.set_line_height(span.size.0);
 
             new_style.font_id = Some(font.font_id());
             new_style.font_size = Some(span.size);

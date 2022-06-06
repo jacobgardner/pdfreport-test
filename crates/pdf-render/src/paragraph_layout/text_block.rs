@@ -16,10 +16,11 @@ pub struct RenderedTextBlock {
 
 impl RenderedTextBlock {
     pub fn height(&self) -> Pt {
-        Pt(self
+        self
             .lines
             .iter()
-            .fold(0., |acc, line| acc + line.line_metrics.height.0))
+            .fold(Pt(0.), |acc, line| acc + line.line_metrics.height)
+            // .fold(Pt(0.), |acc, line| acc + line.line_metrics.ascent - line.line_metrics.descent)
     }
 
     pub fn width(&self) -> Pt {

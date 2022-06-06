@@ -50,10 +50,14 @@ extern "C" fn measure_func(
         .downcast_mut::<NodeContext>()
         .unwrap();
 
+    // This width excludes the margin & padding so it should be exclusively the
+    // content width
+    let content_width = Pt(width as f64);
+
     let text_block = context.paragraph_layout.calculate_layout(
         ParagraphStyle::default(),
         &context.rich_text,
-        Pt(width as f64) - context.style.padding.left - context.style.padding.right,
+        content_width,
     );
 
     match text_block {

@@ -82,6 +82,7 @@ impl ParagraphLayout {
         let mut paragraph_style = skia_layout::ParagraphStyle::new();
 
         paragraph_style.set_text_align(layout_style.align.into());
+        // paragraph_style.set_text_height_behavior(skia_layout::TextHeightBehavior::DisableAll);
 
         let mut paragraph_builder =
             ParagraphBuilder::new(&paragraph_style, self.skia_font_collection.clone());
@@ -97,13 +98,20 @@ impl ParagraphLayout {
         paragraph.layout(width.0 as f32);
 
         let mut rendered_text_block = RenderedTextBlock { lines: vec![] };
+        
 
+        let mut height = Pt(0.);
         for line_metrics in paragraph.get_line_metrics().iter() {
+            // println!("{} != {}", line_metrics.height,  line_metrics.ascent - line_metrics.descent);
+            height += Pt(line_metrics.height as f64);
             rendered_text_block.lines.push(RenderedTextLine {
                 rich_text: rich_text.substr(line_metrics.start_index, line_metrics.end_index)?,
                 line_metrics: line_metrics.into(),
             });
         }
+        
+        
+        println!("Paragraph Height: {} != {}", Pt(paragraph.height() as f64), height);
 
         Ok(rendered_text_block)
     }
