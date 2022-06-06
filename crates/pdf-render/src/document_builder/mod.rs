@@ -2,91 +2,24 @@
 //!  document (like a PDF)
 
 use crate::{
-    block_layout::paginated_layout::PaginatedNode,
-    error::DocumentGenerationError,
-    paragraph_layout::RenderedTextBlock,
-    stylesheet::Style,
-    values::{Pt, Size},
+    block_layout::paginated_layout::PaginatedNode, error::DocumentGenerationError,
+    paragraph_layout::RenderedTextBlock, stylesheet::Style,
 };
 
 pub use self::document_writer::UnstructuredDocumentWriter;
 
 pub struct DocumentBuilder<Writer: UnstructuredDocumentWriter> {
     unstructured_doc_writer: Writer,
-    page_size: Size<Pt>,
 }
 
 mod document_writer;
 
 impl<Writer: UnstructuredDocumentWriter> DocumentBuilder<Writer> {
-    pub fn new(raw_document_writer: Writer, page_size: impl Into<Size<Pt>>) -> Self {
+    pub fn new(raw_document_writer: Writer) -> Self {
         Self {
             unstructured_doc_writer: raw_document_writer,
-            page_size: page_size.into(),
         }
     }
-
-    // pub fn draw_dom_node(
-    //     &mut self,
-    //     dom_node: &DomNode,
-    //     node_lookup: &NodeLookup,
-    //     layout: &NodeLayout,
-    // ) -> Result<&mut Self, DocumentGenerationError> {
-    //     let style = node_lookup.get_style(dom_node.node_id());
-
-    //     if style.debug {
-    //         let mut margin_rect = Rect {
-    //             left: layout.left - Pt(style.margin.left),
-    //             top: layout.top - Pt(style.margin.top),
-    //             width: layout.width + Pt(style.margin.right + style.margin.left),
-    //             height: layout.height + Pt(style.margin.top + style.margin.bottom),
-    //         };
-
-    //         let mut border_rect = Rect {
-    //             left: layout.left,
-    //             top: layout.top,
-    //             width: layout.width,
-    //             height: layout.height,
-    //         };
-
-    //         let mut content_rect = Rect {
-    //             left: border_rect.left + Pt(style.padding.left),
-    //             top: border_rect.top + Pt(style.padding.top),
-    //             width: border_rect.width - Pt(style.padding.right + style.padding.left),
-    //             height: border_rect.height - Pt(style.padding.top + style.padding.bottom),
-    //         };
-
-    //         margin_rect.top = Pt::from(page_sizes::LETTER.height) - margin_rect.top;
-    //         border_rect.top = Pt::from(page_sizes::LETTER.height) - border_rect.top;
-    //         content_rect.top = Pt::from(page_sizes::LETTER.height) - content_rect.top;
-
-    //         self.unstructured_doc_writer.draw_rect(
-    //             margin_rect,
-    //             Pt(1.),
-    //             Some(Color::try_from("green").unwrap()),
-    //             None,
-    //             None,
-    //         );
-
-    //         self.unstructured_doc_writer.draw_rect(
-    //             border_rect,
-    //             Pt(1.),
-    //             Some(Color::try_from("red").unwrap()),
-    //             None,
-    //             None,
-    //         );
-
-    //         self.unstructured_doc_writer.draw_rect(
-    //             content_rect,
-    //             Pt(1.),
-    //             Some(Color::try_from("blue").unwrap()),
-    //             None,
-    //             None,
-    //         );
-    //     }
-
-    //     Ok(self)
-    // }
 
     pub fn write_text_block(
         &mut self,
@@ -116,8 +49,6 @@ impl<Writer: UnstructuredDocumentWriter> DocumentBuilder<Writer> {
 
 #[cfg(test)]
 mod tests {
-    use crate::page_sizes;
-
     use super::*;
 
     struct MockDocWriter {
@@ -157,8 +88,7 @@ mod tests {
     fn can_write_line() {
         let writer = MockDocWriter::new("Test Title");
 
-        let mut _builder: DocumentBuilder<MockDocWriter> =
-            DocumentBuilder::new(writer, page_sizes::LETTER);
+        let mut _builder: DocumentBuilder<MockDocWriter> = DocumentBuilder::new(writer);
 
         // let f1 = FontId::new();
 

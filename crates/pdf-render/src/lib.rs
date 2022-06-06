@@ -86,7 +86,7 @@ pub fn build_pdf_from_dom<W: Write>(
         Pt::from(page_sizes::LETTER.height),
     )?;
 
-    let mut pdf_builder = DocumentBuilder::new(pdf_writer, page_sizes::LETTER);
+    let mut pdf_builder = DocumentBuilder::new(pdf_writer);
 
     // pdf_builder.draw_node(&PaginatedNode {
     //     layout: PaginatedLayout {

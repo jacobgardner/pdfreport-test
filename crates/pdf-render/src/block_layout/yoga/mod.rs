@@ -127,10 +127,8 @@ impl<'a> LayoutEngine for YogaLayout<'a> {
                 let rich_text = dom_node_to_rich_text(text_node, self.node_lookup, stylesheet)?;
 
                 let context = yoga::Context::new(NodeContext {
-                    node_id: node.node_id(),
                     rich_text,
                     paragraph_layout: paragraph_layout.clone(),
-                    style: node_style,
                     text_block: None,
                     calculate_error: None,
                 });
