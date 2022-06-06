@@ -1,6 +1,6 @@
 use std::ops::Range;
 
-use printpdf::{calculate_points_for_circle, Point, Line};
+use printpdf::{calculate_points_for_circle, Line, Point};
 
 use crate::{
     stylesheet::BorderRadiusStyle,
@@ -42,25 +42,33 @@ impl<'a> PrintPdfWriter<'a> {
                 // 4 points per corner & 2 points per edge
                 let mut points: Vec<(printpdf::Point, bool)> = Vec::with_capacity(4 * 4 + 4 * 2);
 
-                // TODO: Skip any corners where the radius is 0
                 // TODO: Optimization: Don't recalculate corners that have matching radius
-                let circle_points = calculate_points_for_circle(printpdf::Pt(border_radius.top_left), printpdf::Pt(0.), printpdf::Pt(0.));
-                points.extend(circle_points[TOP_LEFT_CORNER].iter().map(|&(pt, b)| (Point { x: pt.x + printpdf::Pt(border_radius.top_left) + start.x, y: pt.y - printpdf::Pt(border_radius.top_left) + start.y}, b)));
-                points.push((Point { x: start.x + printpdf::Pt(border_radius.top_left), y: start.y, }, false));
-                points.push((Point { x: end.x - printpdf::Pt(border_radius.top_left), y: start.y, }, false));
+                if border_radius.top_left > Pt(0.) {
+                    let circle_points = calculate_points_for_circle(border_radius.top_left.into(), printpdf::Pt(0.), printpdf::Pt(0.));
+                    points.extend(circle_points[TOP_LEFT_CORNER].iter().map(|&(pt, b)| (Point { x: pt.x + border_radius.top_left.into() + start.x, y: pt.y - border_radius.top_left.into() + start.y}, b)));
+                }
+                points.push((Point { x: start.x + border_radius.top_left.into(), y: start.y, }, false));
+                points.push((Point { x: end.x - border_radius.top_left.into(), y: start.y, }, false));
 
-                let circle_points = calculate_points_for_circle(printpdf::Pt(border_radius.top_right), printpdf::Pt(0.), printpdf::Pt(0.));
-                points.extend(circle_points[TOP_RIGHT_CORNER].iter().map(|&(pt, b)| (Point { x: pt.x - printpdf::Pt(border_radius.top_right) + end.x, y: pt.y - printpdf::Pt(border_radius.top_right) + start.y}, b)));
-                points.push((Point { x: end.x, y: start.y - printpdf::Pt(border_radius.top_right), }, false));
-                points.push((Point { x: end.x, y: end.y + printpdf::Pt(border_radius.top_right), }, false));
+                if border_radius.top_right > Pt(0.) {
+                    let circle_points = calculate_points_for_circle(border_radius.top_right.into(), printpdf::Pt(0.), printpdf::Pt(0.));
+                    points.extend(circle_points[TOP_RIGHT_CORNER].iter().map(|&(pt, b)| (Point { x: pt.x - border_radius.top_right.into() + end.x, y: pt.y - border_radius.top_right.into() + start.y}, b)));
+                }
+                points.push((Point { x: end.x, y: start.y - border_radius.top_right.into(), }, false));
+                points.push((Point { x: end.x, y: end.y + border_radius.top_right.into(), }, false));
 
-                let circle_points = calculate_points_for_circle(printpdf::Pt(border_radius.bottom_right), printpdf::Pt(0.), printpdf::Pt(0.));
-                points.extend(circle_points[BOTTOM_RIGHT_CORNER].iter().map(|&(pt, b)| (Point { x: pt.x - printpdf::Pt(border_radius.bottom_right) + end.x, y: pt.y + printpdf::Pt(border_radius.bottom_right) + end.y}, b)));
-                points.push((Point { x: end.x - printpdf::Pt(border_radius.bottom_right), y: end.y, }, false));
-                points.push((Point { x: start.x + printpdf::Pt(border_radius.bottom_right), y: end.y , }, false));
+                if border_radius.bottom_right > Pt(0.) {
+                    let circle_points = calculate_points_for_circle(border_radius.bottom_right.into(), printpdf::Pt(0.), printpdf::Pt(0.));
+                    points.extend(circle_points[BOTTOM_RIGHT_CORNER].iter().map(|&(pt, b)| (Point { x: pt.x - border_radius.bottom_right.into() + end.x, y: pt.y + border_radius.bottom_right.into() + end.y}, b)));
+                }
+                points.push((Point { x: end.x - border_radius.bottom_right.into(), y: end.y, }, false));
+                points.push((Point { x: start.x + border_radius.bottom_right.into(), y: end.y , }, false));
 
-                let circle_points = calculate_points_for_circle(printpdf::Pt(border_radius.bottom_left), printpdf::Pt(0.), printpdf::Pt(0.));
-                points.extend(circle_points[BOTTOM_LEFT_CORNER].iter().map(|&(pt, b)| (Point { x: pt.x + printpdf::Pt(border_radius.bottom_left) + start.x, y: pt.y + printpdf::Pt(border_radius.bottom_left) + end.y}, b)));
+
+                if border_radius.bottom_left > Pt(0.) {
+                    let circle_points = calculate_points_for_circle(border_radius.bottom_left.into(), printpdf::Pt(0.), printpdf::Pt(0.));
+                    points.extend(circle_points[BOTTOM_LEFT_CORNER].iter().map(|&(pt, b)| (Point { x: pt.x + border_radius.bottom_left.into() + start.x, y: pt.y + border_radius.bottom_left.into() + end.y}, b)));
+                }
 
                 points
             },

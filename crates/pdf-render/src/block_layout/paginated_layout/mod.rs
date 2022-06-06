@@ -11,7 +11,7 @@ use crate::{
     paragraph_layout::{ParagraphLayout, ParagraphStyle, RenderedTextBlock},
     rich_text::dom_node_conversion::dom_node_to_rich_text,
     stylesheet::{BreakInside, Direction, FlexWrap, Style, Stylesheet},
-    utils::{node_lookup::NodeLookup, tree_iter::TreeNode},
+    utils::{node_lookup::NodeLookup, tree_iter::TreeNode, debug_cursor::DebugCursor},
     values::{Point, Pt},
 };
 
@@ -39,12 +39,6 @@ impl Display for DrawCursor {
     }
 }
 
-pub struct DebugCursor {
-    pub page_index: usize,
-    pub position: Point<Pt>,
-    pub label: String,
-}
-
 pub struct PaginatedLayoutEngine<'a> {
     node_avoids_page_break: HashMap<NodeId, bool>,
     node_lookup: &'a NodeLookup<'a>,
@@ -60,7 +54,6 @@ impl<'a> PaginatedLayoutEngine<'a> {
     pub fn new(
         root_node: &DomNode,
         layout_engine: &'a dyn LayoutEngine,
-        // absolute_layout: &HashMap<NodeId, NodeLayout>,
         node_lookup: &'a NodeLookup,
         paragraph_layout: &'a ParagraphLayout,
         stylesheet: &'a Stylesheet,
@@ -147,15 +140,6 @@ impl<'a> PaginatedLayoutEngine<'a> {
             draw_cursor.page_index += 1;
         }
 
-        self.debug_cursors.push(DebugCursor {
-            page_index: draw_cursor.page_index,
-            position: Point {
-                x: Pt(200.),
-                y: draw_cursor.y_offset,
-            },
-            label: format!("Draw Start - {}", node_layout.height),
-        });
-
         // By this point, the draw cursor is in the correct place to start
         // the current node.
 
@@ -168,8 +152,6 @@ impl<'a> PaginatedLayoutEngine<'a> {
             page_index: draw_cursor.page_index,
             drawable_node,
         };
-
-        // println!("Pn: {:?}", paginated_node.layout);
 
         if let DrawableNode::Text(text_node) = &paginated_node.drawable_node {
             let mut line_offset = 0;

@@ -57,7 +57,6 @@ pub fn dom_node_to_rich_text(
             if let TextChild::Content(content) = node {
                 let mut span = RichTextSpan::from(content.as_str());
 
-                // TODO: Just have span use font styles?
                 span.attributes = FontAttributes {
                     weight: current_style.font.weight,
                     style: current_style.font.style,

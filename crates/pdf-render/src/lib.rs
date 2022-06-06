@@ -88,58 +88,11 @@ pub fn build_pdf_from_dom<W: Write>(
 
     let mut pdf_builder = DocumentBuilder::new(pdf_writer);
 
-    // pdf_builder.draw_node(&PaginatedNode {
-    //     layout: PaginatedLayout {
-    //         layout: NodeLayout {
-    //             left: Pt(0.),
-    //             top: Pt(10.),
-    //             width: Pt(100.),
-    //             height: Pt(100.),
-    //             right: Pt(0.),
-    //         },
-    //         page_number: 10,
-    //     },
-    //     drawable_node: DrawableNode::Text(DrawableTextNode {
-    //         text_block: RenderedTextBlock::default(),
-    //         style: Style::Unmergeable {
-    //             debug: true,
-    //             ..Default::default()
-    //         }
-    //     })
-    // })?;
-
     for drawable_node in paginated_layout.paginated_nodes().iter() {
         pdf_builder.draw_node(drawable_node)?;
     }
 
     let pdf_writer = pdf_builder.into_inner();
-    // pdf_writer.draw_debug_cursors(&paginated_layout.debug_cursors);
-
-    // pdf_builder.draw_debug_cursors(&paginated_layout.debug_cursors);
-
-    // for (node, parent) in doc_structure.root.block_iter() {
-    //     let layout = layout_engine.get_node_layout(node.node_id());
-    //     pdf_builder.draw_dom_node(node, &node_lookup, &layout)?;
-    //     if let DomNode::Text(text_node) = node {
-    //         let style = node_lookup.get_style(text_node);
-    //         let rich_text = dom_node_to_rich_text(text_node, &node_lookup, stylesheet)?;
-
-    //         // FIXME: We already calculated the text block in the yoga layout
-    //         // engine. Either re-use that or pass it into the layout engine?
-    //         let text_block = paragraph_layout
-    //             .calculate_layout(
-    //                 ParagraphStyle::left(),
-    //                 &rich_text,
-    //                 layout.width - Pt(style.padding.left + style.padding.right),
-    //             )
-    //             .unwrap();
-
-    //         let node_layout = paginated_layout.get_node_layout(node.node_id());
-
-    //         // TODO: Can we change this to take a ref instead?
-    //         pdf_builder.write_text_block(text_block, &node_layout, &style)?;
-    //     }
-    // }
 
     pdf_writer.save(pdf_doc_writer)
 }

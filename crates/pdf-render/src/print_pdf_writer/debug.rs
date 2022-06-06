@@ -1,9 +1,10 @@
 use printpdf::{Line, Point, Rgb};
 
 use crate::{
-    block_layout::paginated_layout::{DebugCursor, PaginatedNode},
+    block_layout::paginated_layout::PaginatedNode,
     fonts::FontAttributes,
-    stylesheet::Style,
+    stylesheet::{BorderRadiusStyle, Style},
+    utils::debug_cursor::DebugCursor,
     values::{Color, Mm, Pt, Rect},
 };
 
@@ -22,8 +23,8 @@ impl<'a> PrintPdfWriter<'a> {
         let mut margin_rect = Rect {
             left: layout.left - style.margin.left,
             top: layout.top - style.margin.top,
-            width: layout.width + (style.margin.right + style.margin.left),
-            height: layout.height + (style.margin.top + style.margin.bottom),
+            width: layout.width + style.margin.horizontal(),
+            height: layout.height + style.margin.vertical(),
         };
 
         let mut border_rect = Rect {
@@ -36,8 +37,8 @@ impl<'a> PrintPdfWriter<'a> {
         let mut content_rect = Rect {
             left: border_rect.left + style.padding.left,
             top: border_rect.top + style.padding.top,
-            width: border_rect.width - (style.padding.right + style.padding.left),
-            height: border_rect.height - (style.padding.top + style.padding.bottom),
+            width: border_rect.width - style.padding.horizontal(),
+            height: border_rect.height - style.padding.vertical(),
         };
 
         margin_rect.top = self.page_size.height - margin_rect.top;
@@ -50,7 +51,7 @@ impl<'a> PrintPdfWriter<'a> {
             Pt(1.),
             Some(Color::try_from("green").unwrap()),
             None,
-            None,
+            Some(BorderRadiusStyle::Unmergeable::new(Pt(10.))),
         );
 
         self.draw_rect(
@@ -59,7 +60,7 @@ impl<'a> PrintPdfWriter<'a> {
             Pt(1.),
             Some(Color::try_from("red").unwrap()),
             None,
-            None,
+            Some(BorderRadiusStyle::Unmergeable::new(Pt(7.5))),
         );
 
         self.draw_rect(
@@ -68,7 +69,7 @@ impl<'a> PrintPdfWriter<'a> {
             Pt(1.),
             Some(Color::try_from("blue").unwrap()),
             None,
-            None,
+            Some(BorderRadiusStyle::Unmergeable::new(Pt(5.))),
         );
     }
 

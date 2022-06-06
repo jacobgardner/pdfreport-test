@@ -26,3 +26,13 @@ impl Default for EdgeStyle::Unmergeable {
         }
     }
 }
+
+impl EdgeStyle::Unmergeable {
+    pub fn horizontal(&self) -> Pt {
+        self.left + self.right
+    }
+
+    pub fn vertical(&self) -> Pt {
+        self.top + self.bottom
+    }
+}

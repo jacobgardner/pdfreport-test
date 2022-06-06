@@ -5,3 +5,4 @@ pub mod node_lookup;
 pub mod parent_lookup;
 pub mod tree_iter;
 pub mod unique_id;
+pub mod debug_cursor;

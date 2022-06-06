@@ -1,23 +1,39 @@
 use optional_merge_derive::mergeable;
 use ts_rs::TS;
+use crate::values::Pt;
 
 #[mergeable]
 #[derive(TS, Clone, Debug, PartialEq)]
 #[ts(export)]
 pub struct BorderRadiusStyle {
-    pub top_right: f64,
-    pub bottom_right: f64,
-    pub bottom_left: f64,
-    pub top_left: f64,
+    #[ts(type = "string | number")]
+    pub top_right: Pt,
+    #[ts(type = "string | number")]
+    pub bottom_right: Pt,
+    #[ts(type = "string | number")]
+    pub bottom_left: Pt,
+    #[ts(type = "string | number")]
+    pub top_left: Pt,
 }
 
 impl Default for BorderRadiusStyle::Unmergeable {
     fn default() -> Self {
         Self {
-            top_right: 0.,
-            bottom_right: 0.,
-            bottom_left: 0.,
-            top_left: 0.,
+            top_right: Pt(0.),
+            bottom_right: Pt(0.),
+            bottom_left: Pt(0.),
+            top_left: Pt(0.),
         }
+    }
+}
+
+impl BorderRadiusStyle::Unmergeable {
+    pub fn new(radius: Pt) -> Self {
+        Self {
+            top_right: radius,
+            bottom_right: radius,
+            bottom_left: radius,
+            top_left: radius,
+        } 
     }
 }

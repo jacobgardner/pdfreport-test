@@ -40,26 +40,3 @@ impl DrawableNode {
         !matches!(self, Self::Container(_))
     }
 }
-
-// #[derive(Clone, Debug)]
-// pub struct PaginatedLayout {
-//     // TODO: Rename to something better
-//     pub layout: NodeLayout,
-//     pub page_index: usize,
-// }
-
-// impl PaginatedLayout {
-//     pub fn left(&self) -> Pt {
-//         self.layout.left
-//     }
-
-//     pub fn top(&self) -> Pt {
-//         self.layout.top
-//     }
-// }
-
-// impl Display for PaginatedLayout {
-//     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-//         write!(f, "Page {} -> {}", self.page_index, self.layout)
-//     }
-// }
