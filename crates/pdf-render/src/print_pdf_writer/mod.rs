@@ -14,7 +14,7 @@ use printpdf::{
 };
 
 use crate::{
-    block_layout::paginated_layout::{DebugCursor, DrawableNode, PaginatedLayout, PaginatedNode},
+    block_layout::paginated_layout::{DebugCursor, DrawableNode, PaginatedNode},
     document_builder::UnstructuredDocumentWriter,
     error::{DocumentGenerationError, InternalServerError},
     fonts::{FontAttributes, FontCollection, FontId},
@@ -207,16 +207,17 @@ impl<'a> PrintPdfWriter<'a> {
 impl<'a> UnstructuredDocumentWriter for PrintPdfWriter<'a> {
     fn draw_text_block(
         &mut self,
-        layout: &PaginatedLayout,
+        node: &PaginatedNode,
         style: &Style::Unmergeable,
         text_block: &RenderedTextBlock,
     ) -> Result<&mut Self, DocumentGenerationError> {
-        let layer = self.get_base_layer(layout.page_index);
+        let layer = self.get_base_layer(node.page_index);
 
         layer.begin_text_section();
 
-        let x = printpdf::Pt::from(style.padding.left + layout.left());
-        let y = printpdf::Pt::from(self.page_size.height - (layout.top() + style.padding.top));
+        let x = printpdf::Pt::from(style.padding.left + node.page_layout.left);
+        let y =
+            printpdf::Pt::from(self.page_size.height - (node.page_layout.top + style.padding.top));
 
         let mut current_y = y;
         for line in text_block.lines.iter() {
@@ -226,7 +227,7 @@ impl<'a> UnstructuredDocumentWriter for PrintPdfWriter<'a> {
             ));
 
             for span in line.rich_text.0.iter() {
-                let font = self.set_base_layer_style(layout.page_index, &layer, span)?;
+                let font = self.set_base_layer_style(node.page_index, &layer, span)?;
 
                 layer.write_text(span.text.clone(), font.as_ref());
             }
@@ -242,13 +243,13 @@ impl<'a> UnstructuredDocumentWriter for PrintPdfWriter<'a> {
     fn draw_node(&mut self, node: &PaginatedNode) -> Result<&mut Self, DocumentGenerationError> {
         let node_style = node.drawable_node.style();
 
-        self.draw_container(&node.layout, node_style)?;
+        self.draw_container(node, node_style)?;
 
         // Remove this allow once we have image rendering
         #[allow(clippy::single_match)]
         match &node.drawable_node {
             DrawableNode::Text(text_node) => {
-                self.draw_text_block(&node.layout, node_style, &text_node.text_block)?;
+                self.draw_text_block(node, node_style, &text_node.text_block)?;
             }
             _ => {}
         }
@@ -260,22 +261,24 @@ impl<'a> UnstructuredDocumentWriter for PrintPdfWriter<'a> {
 impl<'a> PrintPdfWriter<'a> {
     fn draw_container(
         &mut self,
-        layout: &PaginatedLayout,
+        node: &PaginatedNode,
         container_style: &Style::Unmergeable,
     ) -> Result<&mut Self, DocumentGenerationError> {
         if container_style.debug {
-            self.draw_debug_outlines(layout, container_style);
+            self.draw_debug_outlines(node, container_style);
         }
 
         Ok(self)
     }
 
-    fn draw_debug_outlines(&mut self, layout: &PaginatedLayout, style: &Style::Unmergeable) {
-        let PaginatedLayout {
-            layout,
-            // TODO: Figure out how to pattern match to deference
-            page_index: page_number,
-        } = layout;
+    fn draw_debug_outlines(&mut self, node: &PaginatedNode, style: &Style::Unmergeable) {
+        let PaginatedNode {
+            page_layout: layout,
+            page_index,
+            ..
+        } = node;
+        
+        let page_index = *page_index;
 
         let mut margin_rect = Rect {
             left: layout.left - style.margin.left,
@@ -303,7 +306,7 @@ impl<'a> PrintPdfWriter<'a> {
         content_rect.top = self.page_size.height - content_rect.top;
 
         self.draw_rect(
-            *page_number,
+            page_index,
             margin_rect,
             Pt(1.),
             Some(Color::try_from("green").unwrap()),
@@ -312,7 +315,7 @@ impl<'a> PrintPdfWriter<'a> {
         );
 
         self.draw_rect(
-            *page_number,
+            page_index,
             border_rect,
             Pt(1.),
             Some(Color::try_from("red").unwrap()),
@@ -321,7 +324,7 @@ impl<'a> PrintPdfWriter<'a> {
         );
 
         self.draw_rect(
-            *page_number,
+            page_index,
             content_rect,
             Pt(1.),
             Some(Color::try_from("blue").unwrap()),
@@ -330,8 +333,8 @@ impl<'a> PrintPdfWriter<'a> {
         );
     }
 
-    fn get_base_layer(&mut self, page_number: usize) -> PdfLayerReference {
-        while page_number >= self.page_layer_indices.len() {
+    fn get_base_layer(&mut self, page_index: usize) -> PdfLayerReference {
+        while page_index >= self.page_layer_indices.len() {
             let (page_index, layer_index) = self.raw_pdf_doc.add_page(
                 Mm::from(self.page_size.width).into(),
                 Mm::from(self.page_size.height).into(),
@@ -344,7 +347,7 @@ impl<'a> PrintPdfWriter<'a> {
             self.current_style_by_page.push(CurrentStyles::default());
         }
 
-        let (page_index, layers) = &self.page_layer_indices[page_number];
+        let (page_index, layers) = &self.page_layer_indices[page_index];
         let first_layer = layers[0];
 
         let page = self.raw_pdf_doc.get_page(*page_index);
@@ -354,7 +357,7 @@ impl<'a> PrintPdfWriter<'a> {
 
     fn set_base_layer_style(
         &mut self,
-        page_number: usize,
+        page_index: usize,
         layer: &PdfLayerReference,
         span: &RichTextSpan,
     ) -> Result<Rc<IndirectFontRef>, DocumentGenerationError> {
@@ -362,7 +365,7 @@ impl<'a> PrintPdfWriter<'a> {
             .font_collection
             .lookup_font(&span.font_family, &span.attributes)?;
 
-        let style = &self.current_style_by_page[page_number];
+        let style = &self.current_style_by_page[page_index];
 
         let font_ref = self.get_font(font.font_id())?;
 
@@ -381,21 +384,21 @@ impl<'a> PrintPdfWriter<'a> {
             new_style.color = Some(span.color.clone());
         }
 
-        self.current_style_by_page[page_number] = new_style;
+        self.current_style_by_page[page_index] = new_style;
 
         Ok(font_ref)
     }
 
     fn draw_rect(
         &mut self,
-        page_number: usize,
+        page_index: usize,
         rect: Rect<Pt>,
         border_width: Pt,
         border_color: Option<Color>,
         background_color: Option<Color>,
         border_radius: Option<BorderRadiusStyle::Unmergeable>,
     ) {
-        let layer = self.get_base_layer(page_number);
+        let layer = self.get_base_layer(page_index);
 
         let start = Point {
             x: rect.left.into(),

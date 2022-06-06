@@ -1,8 +1,6 @@
 use crate::{
-    block_layout::paginated_layout::{PaginatedLayout, PaginatedNode},
-    error::DocumentGenerationError,
-    paragraph_layout::RenderedTextBlock,
-    stylesheet::Style,
+    block_layout::paginated_layout::PaginatedNode, error::DocumentGenerationError,
+    paragraph_layout::RenderedTextBlock, stylesheet::Style,
 };
 
 pub trait UnstructuredDocumentWriter {
@@ -19,7 +17,7 @@ pub trait UnstructuredDocumentWriter {
 
     fn draw_text_block(
         &mut self,
-        layout: &PaginatedLayout,
+        layout: &PaginatedNode,
         style: &Style::Unmergeable,
         text_block: &RenderedTextBlock,
     ) -> Result<&mut Self, DocumentGenerationError>;

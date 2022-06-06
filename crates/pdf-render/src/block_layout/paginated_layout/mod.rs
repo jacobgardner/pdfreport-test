@@ -1,5 +1,9 @@
 use std::{collections::HashMap, fmt::Display};
-mod node_visitor;
+mod paginated_node;
+
+pub use paginated_node::{
+    DrawableContainerNode, DrawableNode, DrawableTextNode, PaginatedNode,
+};
 
 use crate::{
     doc_structure::{DomNode, HasNodeId, NodeId},
@@ -11,32 +15,7 @@ use crate::{
     values::{Point, Pt},
 };
 
-use self::node_visitor::PaginationVisitor;
-
 use super::layout_engine::{LayoutEngine, NodeLayout};
-
-#[derive(Clone, Debug)]
-pub struct PaginatedLayout {
-    // TODO: Rename to something better
-    pub layout: NodeLayout,
-    pub page_index: usize,
-}
-
-impl PaginatedLayout {
-    pub fn left(&self) -> Pt {
-        self.layout.left
-    }
-
-    pub fn top(&self) -> Pt {
-        self.layout.top
-    }
-}
-
-impl Display for PaginatedLayout {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "Page {} -> {}", self.page_index, self.layout)
-    }
-}
 
 pub struct DrawCursor {
     y_offset: Pt,
@@ -67,7 +46,6 @@ pub struct DebugCursor {
 }
 
 pub struct PaginatedLayoutEngine<'a> {
-    layouts: HashMap<NodeId, PaginatedLayout>,
     node_avoids_page_break: HashMap<NodeId, bool>,
     node_lookup: &'a NodeLookup<'a>,
     paginated_nodes: Vec<PaginatedNode>,
@@ -77,9 +55,6 @@ pub struct PaginatedLayoutEngine<'a> {
     page_height: Pt,
     pub debug_cursors: Vec<DebugCursor>,
 }
-
-// Json Processed -> Flexbox layout (yoga) -> Text layout -> Pagination Layout
-// -> PDF writer
 
 impl<'a> PaginatedLayoutEngine<'a> {
     pub fn new(
@@ -92,7 +67,6 @@ impl<'a> PaginatedLayoutEngine<'a> {
         page_height: Pt,
     ) -> Result<Self, DocumentGenerationError> {
         let mut paginated_layout_engine = Self {
-            layouts: HashMap::new(),
             node_avoids_page_break: HashMap::new(),
             node_lookup,
             paragraph_layout,
@@ -114,21 +88,34 @@ impl<'a> PaginatedLayoutEngine<'a> {
     ) -> Result<&mut Self, DocumentGenerationError> {
         // Probably not the most efficient way to do this
         for (node, _) in root_node.block_iter() {
+            // if node is no-break and first child of parent, then parent is
+            // also no break
             if self.does_node_avoid_page_break(node) {
                 self.node_avoids_page_break.insert(node.node_id(), true);
                 self.apply_page_break_avoid_rules(node);
             }
-
-            // if node is no-break and first child of parent, then parent is
-            // also no break
         }
 
-        // We want the relative offset between the previous node and the current
-        // to calculate the adjusted position. ()
+        let mut draw_cursor = DrawCursor {
+            y_offset: Pt(0.),
+            page_index: 0,
+            page_break_debt: Pt(0.),
+        };
 
-        let mut visitor = PaginationVisitor::new(self);
+        let mut prior_sibling_layout = NodeLayout::default();
 
-        root_node.visit_nodes(&mut visitor, None)?;
+        for (node, _parent) in root_node.block_iter() {
+            let node_layout = self.layout_engine.get_node_layout(node.node_id());
+
+            let cursor_offset =
+                node_layout.top - prior_sibling_layout.top - draw_cursor.page_break_debt;
+
+            draw_cursor.y_offset += cursor_offset;
+
+            self.draw_paginated_node(&mut draw_cursor, node_layout.clone(), node)?;
+
+            prior_sibling_layout = node_layout;
+        }
 
         Ok(self)
     }
@@ -148,11 +135,12 @@ impl<'a> PaginatedLayoutEngine<'a> {
             ..node_layout.clone()
         };
 
-        if adjusted_layout.bottom() > self.page_height && (adjusted_layout.top > self.page_height
-            || *self
-                .node_avoids_page_break
-                .get(&node.node_id())
-                .unwrap_or(&false))
+        if adjusted_layout.bottom() > self.page_height
+            && (adjusted_layout.top > self.page_height
+                || *self
+                    .node_avoids_page_break
+                    .get(&node.node_id())
+                    .unwrap_or(&false))
         {
             adjusted_layout.top = Pt(0.);
             draw_cursor.y_offset = Pt(0.);
@@ -176,10 +164,8 @@ impl<'a> PaginatedLayoutEngine<'a> {
             .unwrap();
 
         let paginated_node = PaginatedNode {
-            layout: PaginatedLayout {
-                layout: adjusted_layout,
-                page_index: draw_cursor.page_index,
-            },
+            page_layout: adjusted_layout,
+            page_index: draw_cursor.page_index,
             drawable_node,
         };
 
@@ -202,21 +188,11 @@ impl<'a> PaginatedLayoutEngine<'a> {
                     bottom + style.padding.top + draw_cursor.y_offset > self.page_height
                 });
 
-                // if let Some(idx) = page_break_index if idx > 1
                 let block_height = match page_break_index {
                     Some(idx) if idx > 0 => cumulative_height[idx - 1],
                     Some(_) => Pt(0.),
                     None => cumulative_height.last().cloned().unwrap_or(Pt(0.)),
                 };
-
-                // let block_height = page_break_index
-                //     .map(|idx| {
-                //         if idx > 0 {
-                //             cumulative_height[idx - 1]
-                //         } else {
-                //         }
-                //     })
-                //     .unwrap_or(Pt(0.));
 
                 let page_break = page_break_index
                     .map(|break_offset| break_offset + line_offset)
@@ -239,13 +215,11 @@ impl<'a> PaginatedLayoutEngine<'a> {
                 };
 
                 let pn = PaginatedNode {
-                    layout: PaginatedLayout {
-                        layout: NodeLayout {
-                            top: draw_cursor.y_offset,
-                            ..node_layout.clone()
-                        },
-                        page_index: draw_cursor.page_index,
+                    page_layout: NodeLayout {
+                        top: draw_cursor.y_offset,
+                        ..node_layout.clone()
                     },
+                    page_index: draw_cursor.page_index,
                     drawable_node: DrawableNode::Text(DrawableTextNode {
                         text_block: partial_text_block,
                         style: style.clone(),
@@ -307,10 +281,6 @@ impl<'a> PaginatedLayoutEngine<'a> {
         Ok(drawable_node)
     }
 
-    pub fn get_node_layout(&self, node_id: NodeId) -> &PaginatedLayout {
-        self.layouts.get(&node_id).unwrap()
-    }
-
     pub fn apply_page_break_avoid_rules(&mut self, node: &DomNode) {
         while let Some(parent) = self.node_lookup.get_parent(node) {
             if parent.children()[0].node_id() == node.node_id() {
@@ -339,43 +309,4 @@ impl<'a> PaginatedLayoutEngine<'a> {
             || style.flex.direction != Direction::Column
             || style.flex.wrap != FlexWrap::NoWrap
     }
-}
-
-pub struct DrawableNodeIter {}
-
-#[derive(Clone, Debug)]
-pub enum DrawableNode {
-    Text(DrawableTextNode),
-    Container(DrawableContainerNode),
-    // Image(DrawableImageNode)
-}
-
-impl DrawableNode {
-    pub fn style(&self) -> &Style::Unmergeable {
-        match self {
-            Self::Text(node) => &node.style,
-            Self::Container(node) => &node.style,
-        }
-    }
-
-    pub fn is_leaf_node(&self) -> bool {
-        !matches!(self, Self::Container(_))
-    }
-}
-
-#[derive(Clone, Debug)]
-pub struct DrawableTextNode {
-    pub text_block: RenderedTextBlock,
-    pub style: Style::Unmergeable,
-}
-
-#[derive(Clone, Debug)]
-pub struct DrawableContainerNode {
-    pub style: Style::Unmergeable,
-}
-
-#[derive(Clone, Debug)]
-pub struct PaginatedNode {
-    pub layout: PaginatedLayout,
-    pub drawable_node: DrawableNode,
 }

@@ -101,7 +101,6 @@ impl ParagraphLayout {
 
         let mut height = Pt(0.);
         for line_metrics in paragraph.get_line_metrics().iter() {
-            // println!("{} != {}", line_metrics.height,  line_metrics.ascent - line_metrics.descent);
             height += Pt(line_metrics.height as f64);
             rendered_text_block.lines.push(RenderedTextLine {
                 rich_text: rich_text.substr(line_metrics.start_index, line_metrics.end_index)?,

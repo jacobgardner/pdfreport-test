@@ -2,7 +2,7 @@
 //!  document (like a PDF)
 
 use crate::{
-    block_layout::paginated_layout::{PaginatedLayout, PaginatedNode},
+    block_layout::paginated_layout::PaginatedNode,
     error::DocumentGenerationError,
     paragraph_layout::RenderedTextBlock,
     stylesheet::Style,
@@ -90,12 +90,12 @@ impl<Writer: UnstructuredDocumentWriter> DocumentBuilder<Writer> {
 
     pub fn write_text_block(
         &mut self,
-        layout: &PaginatedLayout,
+        node: &PaginatedNode,
         style: &Style::Unmergeable,
         text_block: &RenderedTextBlock,
     ) -> Result<&mut Self, DocumentGenerationError> {
         self.unstructured_doc_writer
-            .draw_text_block(layout, style, text_block)?;
+            .draw_text_block(node, style, text_block)?;
 
         Ok(self)
     }
@@ -137,7 +137,7 @@ mod tests {
     impl UnstructuredDocumentWriter for MockDocWriter {
         fn draw_text_block(
             &mut self,
-            _layout: &PaginatedLayout,
+            _node: &PaginatedNode,
             _style: &Style::Unmergeable,
             _text_block: &RenderedTextBlock,
         ) -> Result<&mut Self, DocumentGenerationError> {
