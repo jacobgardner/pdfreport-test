@@ -51,17 +51,11 @@ impl<Writer: UnstructuredDocumentWriter> DocumentBuilder<Writer> {
 mod tests {
     use super::*;
 
-    struct MockDocWriter {
-        title: String,
-        lines: Vec<String>,
-    }
+    struct MockDocWriter {}
 
     impl MockDocWriter {
-        fn new(doc_title: &str) -> Self {
-            Self {
-                title: doc_title.to_owned(),
-                lines: vec![],
-            }
+        fn new(_doc_title: &str) -> Self {
+            Self {}
         }
     }
 
