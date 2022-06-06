@@ -98,7 +98,6 @@ impl ParagraphLayout {
         paragraph.layout(width.0 as f32);
 
         let mut rendered_text_block = RenderedTextBlock { lines: vec![] };
-        
 
         let mut height = Pt(0.);
         for line_metrics in paragraph.get_line_metrics().iter() {
@@ -109,7 +108,7 @@ impl ParagraphLayout {
                 line_metrics: line_metrics.into(),
             });
         }
-        
+
         Ok(rendered_text_block)
     }
 }

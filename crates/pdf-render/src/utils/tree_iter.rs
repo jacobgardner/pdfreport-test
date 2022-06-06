@@ -47,13 +47,25 @@ pub trait TreeNode: Sized {
 //type VisitorFn<T> = Fn(&T, Option<&T>) -> Result<(), DocumentGenerationError>;
 
 pub trait NodeVisitor<T> {
-    fn node_enter(&mut self, _node: &T, _parent: Option<&T>) -> Result<(), DocumentGenerationError> {
+    fn node_enter(
+        &mut self,
+        _node: &T,
+        _parent: Option<&T>,
+    ) -> Result<(), DocumentGenerationError> {
         Ok(())
     }
-    fn node_visit(&mut self, _node: &T, _parent: Option<&T>) -> Result<(), DocumentGenerationError> {
+    fn node_visit(
+        &mut self,
+        _node: &T,
+        _parent: Option<&T>,
+    ) -> Result<(), DocumentGenerationError> {
         Ok(())
     }
-    fn node_leave(&mut self, _node: &T, _parent: Option<&T>) -> Result<(), DocumentGenerationError> {
+    fn node_leave(
+        &mut self,
+        _node: &T,
+        _parent: Option<&T>,
+    ) -> Result<(), DocumentGenerationError> {
         Ok(())
     }
     // pub node_enter: Option<Enter>,
