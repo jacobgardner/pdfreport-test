@@ -148,11 +148,11 @@ impl<'a> PaginatedLayoutEngine<'a> {
             ..node_layout.clone()
         };
 
-        if adjusted_layout.bottom() > self.page_height && adjusted_layout.top > self.page_height
+        if adjusted_layout.bottom() > self.page_height && (adjusted_layout.top > self.page_height
             || *self
                 .node_avoids_page_break
                 .get(&node.node_id())
-                .unwrap_or(&false)
+                .unwrap_or(&false))
         {
             adjusted_layout.top = Pt(0.);
             draw_cursor.y_offset = Pt(0.);
