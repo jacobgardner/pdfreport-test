@@ -54,10 +54,18 @@ pub fn build_pdf_from_dom<W: Write>(
     doc_structure: &doc_structure::DocStructure,
     pdf_doc_writer: W,
 ) -> Result<W, DocumentGenerationError> {
+    
+    let page_size = if doc_structure.page_size.to_lowercase() == "letter" {
+        page_sizes::LETTER
+    } else {
+        unimplemented!("Only letter is supported right now currently due to laziness");
+    };
+    
     let font_collection = load_fonts_from_doc_structure(&doc_structure.fonts)?;
     let pdf_writer = PrintPdfWriter::new(
         &doc_structure.document_title,
-        page_sizes::LETTER,
+        page_size.clone(),
+        doc_structure.page_margins.clone(),
         &font_collection,
     );
 
@@ -71,7 +79,7 @@ pub fn build_pdf_from_dom<W: Write>(
 
     let mut layout_engine = YogaLayout::new(&node_lookup);
     layout_engine.build_node_layout(
-        page_sizes::LETTER.width.into(),
+        Pt::from(page_size.width) - doc_structure.page_margins.horizontal(),
         &doc_structure.root,
         stylesheet,
         paragraph_layout.clone(),
@@ -83,7 +91,7 @@ pub fn build_pdf_from_dom<W: Write>(
         &node_lookup,
         &paragraph_layout,
         stylesheet,
-        Pt::from(page_sizes::LETTER.height),
+        Pt::from(page_size.height) - doc_structure.page_margins.vertical(),
     )?;
 
     let mut pdf_builder = DocumentBuilder::new(pdf_writer);

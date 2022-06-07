@@ -21,15 +21,15 @@ impl<'a> PrintPdfWriter<'a> {
         let page_index = *page_index;
 
         let mut margin_rect = Rect {
-            left: layout.left - style.margin.left,
-            top: layout.top - style.margin.top,
+            left: layout.left - style.margin.left + self.page_margins.left,
+            top: layout.top - style.margin.top + self.page_margins.top,
             width: layout.width + style.margin.horizontal(),
             height: layout.height + style.margin.vertical(),
         };
 
         let mut border_rect = Rect {
-            left: layout.left,
-            top: layout.top,
+            left: layout.left + self.page_margins.left,
+            top: layout.top + self.page_margins.top,
             width: layout.width,
             height: layout.height,
         };

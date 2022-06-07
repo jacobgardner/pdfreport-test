@@ -17,14 +17,19 @@ pub use image_node::ImageNode;
 pub use styled_node::StyledNode;
 pub use text_node::{TextChild, TextNode};
 
-use crate::{stylesheet::Stylesheet, utils::unique_id::create_id};
+use crate::{
+    stylesheet::{EdgeStyle, Stylesheet},
+    utils::unique_id::create_id,
+};
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct DocStructure {
     pub filename: String,
     pub document_title: String,
-
+    pub page_size: String,
+    #[serde(default)]
+    pub page_margins: EdgeStyle::Unmergeable,
     pub fonts: Vec<FontFamilyInfo>,
     pub stylesheet: Stylesheet,
     pub root: DomNode,

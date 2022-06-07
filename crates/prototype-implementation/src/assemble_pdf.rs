@@ -10,7 +10,6 @@ use stretch::{node::MeasureFunc, prelude::*};
 
 use crate::dom::DomNode;
 use crate::page_sizes::A4;
-use crate::page_sizes::LETTER;
 use crate::{
     block_layout::{BlockLayout, ImageComputeFn, TextComputeFn},
     dom::{nodes::TextNodeIterItem, FontFamilyInfo, PdfDom},

@@ -1,6 +1,13 @@
 {
   "filename": "example.pdf",
   "documentTitle": "Example PDF",
+  "pageSize": "letter",
+  "pageMargins": {
+    "top": 5, 
+    "bottom": 5, 
+    "left": 5, 
+    "right": 5
+  },
   "fonts": [
     {
       "family_name": "Inter",

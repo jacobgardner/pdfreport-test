@@ -180,6 +180,7 @@ pub fn mergeable(
             use merges::Merges;
             use serde::Deserialize;
 
+            #[derive(Deserialize)]
             #original_ast
 
             #[derive(Default, Deserialize)]

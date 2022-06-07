@@ -21,7 +21,7 @@ use crate::{
     fonts::{FontCollection, FontId},
     paragraph_layout::RenderedTextBlock,
     rich_text::RichTextSpan,
-    stylesheet::Style,
+    stylesheet::{Style, EdgeStyle},
     values::{Color, Mm, Pt, Size},
 };
 
@@ -43,7 +43,7 @@ pub struct PrintPdfWriter<'a> {
     page_layer_indices: Vec<(PdfPageIndex, Vec<PdfLayerIndex>)>,
     font_collection: &'a FontCollection,
     page_size: Size<Pt>,
-
+    page_margins: EdgeStyle::Unmergeable,
     current_style_by_page: Vec<CurrentStyles>,
 }
 
@@ -51,6 +51,7 @@ impl<'a> PrintPdfWriter<'a> {
     pub fn new(
         doc_title: &str,
         page_size: impl Into<Size<Mm>>,
+        page_margins: impl Into<EdgeStyle::Unmergeable>,
         font_collection: &'a FontCollection,
     ) -> Self {
         let dimensions = page_size.into();
@@ -67,6 +68,7 @@ impl<'a> PrintPdfWriter<'a> {
             fonts: FontLookup::new(),
             page_layer_indices: vec![(page_index, vec![layer_index])],
             font_collection,
+            page_margins: page_margins.into(),
             page_size: dimensions.into(),
             current_style_by_page: vec![CurrentStyles::default()],
         }
@@ -124,9 +126,9 @@ impl<'a> UnstructuredDocumentWriter for PrintPdfWriter<'a> {
 
         layer.begin_text_section();
 
-        let x = printpdf::Pt::from(style.padding.left + node.page_layout.left);
+        let x = printpdf::Pt::from(style.padding.left + node.page_layout.left + self.page_margins.left);
         let y =
-            printpdf::Pt::from(self.page_size.height - (node.page_layout.top + style.padding.top));
+            printpdf::Pt::from(self.page_size.height - (node.page_layout.top + style.padding.top + self.page_margins.top));
 
         let mut current_y = y;
         for line in text_block.lines.iter() {

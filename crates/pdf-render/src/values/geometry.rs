@@ -5,7 +5,7 @@ use std::{
 
 use serde::Deserialize;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Deserialize)]
 pub struct Size<T> {
     pub width: T,
     pub height: T,

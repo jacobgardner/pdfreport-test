@@ -1,6 +1,13 @@
 {
   "filename": "example.pdf",
   "documentTitle": "Example PDF",
+  "pageSize": "Letter",
+  "pageMargins": {
+    "top": 15, 
+    "bottom": 15, 
+    "left": 15, 
+    "right": 15
+  },
   "fonts": [
     {
       "family_name": "Inter",
@@ -105,18 +112,6 @@
       "color": "#A98765",
       "font": {
         "family": "Inter"
-      },
-      "margin": {
-        "left": 10,
-        "right": 10,
-        "top": 40,
-        "bottom": 40
-      },
-      "padding": {
-        "left": 10,
-        "right": 10,
-        "top": 20,
-        "bottom": 20
       }
     },
     "first": {
