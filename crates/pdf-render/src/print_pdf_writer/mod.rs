@@ -21,7 +21,7 @@ use crate::{
     fonts::{FontCollection, FontId},
     paragraph_layout::RenderedTextBlock,
     rich_text::RichTextSpan,
-    stylesheet::{Style, EdgeStyle},
+    stylesheet::{EdgeStyle, Style},
     values::{Color, Mm, Pt, Size},
 };
 
@@ -126,9 +126,12 @@ impl<'a> UnstructuredDocumentWriter for PrintPdfWriter<'a> {
 
         layer.begin_text_section();
 
-        let x = printpdf::Pt::from(style.padding.left + node.page_layout.left + self.page_margins.left);
-        let y =
-            printpdf::Pt::from(self.page_size.height - (node.page_layout.top + style.padding.top + self.page_margins.top));
+        let x =
+            printpdf::Pt::from(style.padding.left + node.page_layout.left + self.page_margins.left);
+        let y = printpdf::Pt::from(
+            self.page_size.height
+                - (node.page_layout.top + style.padding.top + self.page_margins.top),
+        );
 
         let mut current_y = y;
         for line in text_block.lines.iter() {

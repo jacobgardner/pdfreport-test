@@ -1,6 +1,5 @@
 use crate::{
-    block_layout::layout_engine::NodeLayout, paragraph_layout::RenderedTextBlock,
-    stylesheet::Style,
+    block_layout::layout_engine::NodeLayout, paragraph_layout::RenderedTextBlock, stylesheet::Style,
 };
 
 #[derive(Clone, Debug)]

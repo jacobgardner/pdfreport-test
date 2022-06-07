@@ -2,7 +2,6 @@ use std::fmt::Display;
 
 use crate::values::Pt;
 
-
 pub(super) struct DrawCursor {
     pub y_offset: Pt,
     pub page_index: usize,

@@ -19,7 +19,11 @@ impl FontLookup {
         self.0.borrow_mut().insert(font_id, Rc::new(font_ref));
     }
 
-    pub(super) fn insert_and_get(&self, font_id: FontId, font_ref: IndirectFontRef) -> Rc<IndirectFontRef> {
+    pub(super) fn insert_and_get(
+        &self,
+        font_id: FontId,
+        font_ref: IndirectFontRef,
+    ) -> Rc<IndirectFontRef> {
         self.insert(font_id, font_ref);
 
         self.get(font_id)

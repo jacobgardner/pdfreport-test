@@ -1,6 +1,6 @@
+use crate::values::Pt;
 use optional_merge_derive::mergeable;
 use ts_rs::TS;
-use crate::values::Pt;
 
 #[mergeable]
 #[derive(TS, Clone, Debug, PartialEq)]
@@ -34,6 +34,6 @@ impl BorderRadiusStyle::Unmergeable {
             bottom_right: radius,
             bottom_left: radius,
             top_left: radius,
-        } 
+        }
     }
 }

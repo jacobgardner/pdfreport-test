@@ -54,13 +54,12 @@ pub fn build_pdf_from_dom<W: Write>(
     doc_structure: &doc_structure::DocStructure,
     pdf_doc_writer: W,
 ) -> Result<W, DocumentGenerationError> {
-    
     let page_size = if doc_structure.page_size.to_lowercase() == "letter" {
         page_sizes::LETTER
     } else {
         unimplemented!("Only letter is supported right now currently due to laziness");
     };
-    
+
     let font_collection = load_fonts_from_doc_structure(&doc_structure.fonts)?;
     let pdf_writer = PrintPdfWriter::new(
         &doc_structure.document_title,
