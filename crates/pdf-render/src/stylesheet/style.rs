@@ -74,10 +74,10 @@ impl Style::Mergeable {
     pub fn merge_inherited_styles(&self, parent_style: &Style::Mergeable) -> Style::Mergeable {
         let mut style = self.clone();
 
-        style.font = if let Some(font) = style.font {
-            font.merge_optional(&parent_style.font)
+        style.font = if let Some(font) = &parent_style.font {
+            font.merge_optional(&style.font)
         } else {
-            parent_style.font.clone()
+            style.font.clone()
         };
 
         if style.color.is_none() {
