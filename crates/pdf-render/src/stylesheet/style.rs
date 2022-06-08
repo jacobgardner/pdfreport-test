@@ -9,7 +9,7 @@ use super::{BorderStyle, EdgeStyle, FlexStyle, FontStyles, PageBreakRule};
 
 #[mergeable]
 #[derive(TS, Clone, Debug, PartialEq)]
-#[ts(export)]
+#[ts(export, rename_all="camelCase")]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct Style {
     #[mergeable(nested)]

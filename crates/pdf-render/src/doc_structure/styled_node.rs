@@ -1,8 +1,10 @@
 use serde::Deserialize;
+use ts_rs::TS;
 
 use super::{has_node_id::HasNodeId, DomNode, NodeId};
 
-#[derive(Clone, Default, Deserialize, Debug)]
+#[derive(TS, Clone, Default, Deserialize, Debug)]
+#[ts(export)]
 pub struct StyledNode {
     #[serde(skip)]
     pub node_id: NodeId,

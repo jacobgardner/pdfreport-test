@@ -1,4 +1,5 @@
 use serde::Deserialize;
+use ts_rs::TS;
 
 use crate::utils::tree_iter::{TreeIterator, TreeNode};
 
@@ -6,8 +7,9 @@ use super::{ImageNode, NodeId, StyledNode, TextNode};
 
 pub use super::HasNodeId;
 
-#[derive(Clone, Deserialize, Debug)]
+#[derive(TS, Clone, Deserialize, Debug)]
 #[serde(tag = "type")]
+#[ts(export)]
 pub enum DomNode {
     Styled(StyledNode),
     Text(TextNode),

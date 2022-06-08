@@ -1,10 +1,12 @@
 use serde::Deserialize;
+use ts_rs::TS;
 
 use crate::utils::tree_iter::{TreeIterator, TreeNode};
 
 use super::{has_node_id::HasNodeId, NodeId};
 
-#[derive(Default, Deserialize, Debug, Clone)]
+#[derive(TS, Default, Deserialize, Debug, Clone)]
+#[ts(export)]
 pub struct TextNode {
     #[serde(skip)]
     pub node_id: NodeId,
@@ -13,8 +15,9 @@ pub struct TextNode {
     pub children: Vec<TextChild>,
 }
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(TS, Deserialize, Debug, Clone)]
 #[serde(untagged)]
+#[ts(export)]
 pub enum TextChild {
     Content(String),
     TextNode(TextNode),

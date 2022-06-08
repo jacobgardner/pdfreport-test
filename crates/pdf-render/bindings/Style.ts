@@ -4,4 +4,4 @@ import type { FlexStyle } from "./FlexStyle";
 import type { FontStyles } from "./FontStyles";
 import type { PageBreakRule } from "./PageBreakRule";
 
-export interface Style { border?: BorderStyle, font?: FontStyles, color?: string, margin?: EdgeStyle, padding?: EdgeStyle, background_color?: string, flex?: FlexStyle, width?: string, height?: string, debug?: boolean, break_before?: PageBreakRule, break_after?: PageBreakRule, break_inside?: PageBreakRule, }
+export interface Style { border?: BorderStyle, font?: FontStyles, color?: string, margin?: EdgeStyle, padding?: EdgeStyle, backgroundColor?: string, flex?: FlexStyle, width?: string, height?: string, debug?: boolean, breakBefore?: PageBreakRule, breakAfter?: PageBreakRule, breakInside?: PageBreakRule, }

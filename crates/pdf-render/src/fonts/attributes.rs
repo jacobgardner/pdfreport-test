@@ -2,7 +2,8 @@ use num_derive::FromPrimitive;
 use serde::Deserialize;
 use ts_rs::TS;
 
-#[derive(Deserialize, Default, Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(TS, Deserialize, Default, Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[ts(export, rename_all = "camelCase")]
 pub struct FontAttributes {
     #[serde(default)]
     pub weight: FontWeight,

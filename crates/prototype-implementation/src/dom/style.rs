@@ -171,6 +171,7 @@ impl Default for FontStyles {
 }
 
 #[derive(MergeOptional, Clone, Debug, PartialEq)]
+#[serde(rename_all = "camelCase")]
 pub struct Style {
     #[nested]
     pub border: BorderStyle,

@@ -4,7 +4,7 @@ use ts_rs::TS;
 
 #[mergeable]
 #[derive(TS, Clone, Debug, PartialEq)]
-#[ts(export)]
+#[ts(export, rename_all="camelCase")]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct BorderRadiusStyle {
     #[ts(type = "string | number")]

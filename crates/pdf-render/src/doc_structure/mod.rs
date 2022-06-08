@@ -16,21 +16,25 @@ pub use has_node_id::HasNodeId;
 pub use image_node::ImageNode;
 pub use styled_node::StyledNode;
 pub use text_node::{TextChild, TextNode};
+use ts_rs::TS;
 
 use crate::{
     stylesheet::{EdgeStyle, Stylesheet},
     utils::unique_id::create_id,
 };
 
-#[derive(Debug, Deserialize)]
+#[derive(TS, Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
+#[ts(export, rename_all = "camelCase")]
 pub struct DocStructure {
     pub filename: String,
     pub document_title: String,
     pub page_size: String,
     #[serde(default)]
+    #[ts(type="EdgeStyle")]
     pub page_margins: EdgeStyle::Unmergeable,
     pub fonts: Vec<FontFamilyInfo>,
+    #[ts(type="Style")]
     pub stylesheet: Stylesheet,
     pub root: DomNode,
 }

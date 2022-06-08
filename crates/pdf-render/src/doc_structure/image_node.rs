@@ -1,8 +1,10 @@
 use serde::Deserialize;
+use ts_rs::TS;
 
 use super::{has_node_id::HasNodeId, NodeId};
 
-#[derive(Clone, Deserialize, Debug)]
+#[derive(TS, Clone, Deserialize, Debug)]
+#[ts(export)]
 pub struct ImageNode {
     #[serde(skip)]
     pub node_id: NodeId,
