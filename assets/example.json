@@ -107,7 +107,6 @@
   ],
   "stylesheet": {
     "root": {
-      "debug": false,
       "color": "#444A5A",
       "font": {
         "size": "16pt",
@@ -153,7 +152,7 @@
       }
     },
     "break": {
-      "breakBefore": "Always"
+      "breakAfter": "Always"
     },
     "p": {}
   },

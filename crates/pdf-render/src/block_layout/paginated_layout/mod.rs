@@ -100,14 +100,17 @@ impl<'a> PaginatedLayoutEngine<'a> {
 
         let does_node_start_below_break = adjusted_layout.top > self.page_height;
         let does_node_end_below_break = adjusted_layout.bottom() > self.page_height;
-        let does_node_require_break_before =
-            style.break_before == PageBreakRule::Always && draw_cursor.y_offset != Pt(0.);
+        let does_node_require_break_before = style.break_before == PageBreakRule::Always;
 
         let should_node_start_on_next_page = does_node_require_break_before
             || does_node_start_below_break
             || (does_node_end_below_break && does_node_avoid_break);
 
-        if should_node_start_on_next_page {
+        let is_already_broken = draw_cursor.y_offset == Pt(0.);
+
+        if !is_already_broken && should_node_start_on_next_page {
+            println!("{does_node_start_below_break} {does_node_end_below_break} {does_node_require_break_before}");
+            println!("{adjusted_layout:?}");
             adjusted_layout.top = Pt(0.);
             draw_cursor.y_offset = Pt(0.);
             draw_cursor.page_index += 1;
