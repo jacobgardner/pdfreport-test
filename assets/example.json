@@ -123,7 +123,8 @@
     "flagpole": {
       "backgroundColor": "#EDF6F9",
       "margin": {
-        "right": "10pt"
+        "right": "10pt",
+        "bottom": "5pt"
       },
       "padding": {
         "top": "24pt",
