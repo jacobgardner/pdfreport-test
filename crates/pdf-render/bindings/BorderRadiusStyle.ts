@@ -1,2 +1,2 @@
 
-export interface BorderRadiusStyle { top_right: number, bottom_right: number, bottom_left: number, top_left: number, }
+export interface BorderRadiusStyle { top_right?: string | number, bottom_right?: string | number, bottom_left?: string | number, top_left?: string | number, }
