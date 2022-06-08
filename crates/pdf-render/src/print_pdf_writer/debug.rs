@@ -3,7 +3,7 @@ use printpdf::{Line, Point, Rgb};
 use crate::{
     block_layout::paginated_layout::PaginatedNode,
     fonts::FontAttributes,
-    stylesheet::{BorderRadiusStyle, Style},
+    stylesheet::{BorderRadiusStyle, EdgeStyle, Style},
     utils::debug_cursor::DebugCursor,
     values::{Color, Mm, Pt, Rect},
 };
@@ -48,7 +48,7 @@ impl<'a> PrintPdfWriter<'a> {
         self.draw_rect(
             page_index,
             margin_rect,
-            Pt(1.),
+            EdgeStyle::Unmergeable::new(Pt(1.)),
             Some(Color::try_from("green").unwrap()),
             None,
             Some(BorderRadiusStyle::Unmergeable::new(Pt(10.))),
@@ -57,7 +57,7 @@ impl<'a> PrintPdfWriter<'a> {
         self.draw_rect(
             page_index,
             border_rect,
-            Pt(1.),
+            EdgeStyle::Unmergeable::new(Pt(1.)),
             Some(Color::try_from("red").unwrap()),
             None,
             Some(BorderRadiusStyle::Unmergeable::new(Pt(7.5))),
@@ -66,9 +66,9 @@ impl<'a> PrintPdfWriter<'a> {
         self.draw_rect(
             page_index,
             content_rect,
-            Pt(1.),
+            EdgeStyle::Unmergeable::new(Pt(1.)),
             Some(Color::try_from("blue").unwrap()),
-            None,
+            Some(Color::try_from("pink").unwrap()),
             Some(BorderRadiusStyle::Unmergeable::new(Pt(5.))),
         );
     }

@@ -16,6 +16,9 @@ num-derive = "*"
 bytes = "*"
 skia-safe = { version = "*", features = ["textlayout"] }
 ts-rs = { version = "*" }
+lazy_static = "*"
+regex = "*"
+
 
 color_processing = "*"
 polyhorn-yoga = "*"

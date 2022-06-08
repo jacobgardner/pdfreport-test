@@ -53,6 +53,7 @@ impl TryFrom<&str> for Color {
     type Error = UserInputError;
 
     fn try_from(value: &str) -> Result<Self, Self::Error> {
+        println!("Color: {value}");
         let (r, g, b, a) = color_processing::Color::new_string(value)?.get_rgba();
 
         Ok(Color { r, g, b, a })

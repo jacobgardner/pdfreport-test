@@ -1,6 +1,13 @@
 {
   "filename": "example.pdf",
   "documentTitle": "Example PDF",
+  "pageSize": "letter",
+  "pageMargins": {
+    "top": 20, 
+    "right": 20, 
+    "bottom": 20, 
+    "left": 20
+  },
   "fonts": [
     {
       "family_name": "Inter",
@@ -101,117 +108,46 @@
   ],
   "stylesheet": {
     "root": {
-      "debug": true,
-      "color": "#A98765",
+      "debug": false,
+      "color": "#444A5A",
       "font": {
         "family": "Inter"
-      },
-      "margin": {
-        "left": 10,
-        "right": 10,
-        "top": 40,
-        "bottom": 40
-      },
+      }
+    },
+    "flagpole": {
+      "backgroundColor": "#EDF6F9",
       "padding": {
-        "left": 10,
-        "right": 10,
-        "top": 20,
-        "bottom": 20
-      }
-    },
-    "first": {
-      "margin": {
-        "top": 50,
-        "left": 4,
-        "right": 4,
-        "bottom": 100
-      },
-      "padding": {
-        "top": 10,
-        "left": 4,
-        "right": 4,
-        "bottom": 10
-      }
-    },
-    "container": {
-      "margin": {
-        "top": 100,
-        "left": 4,
-        "right": 4,
-        "bottom": 50
-      },
-      "padding": {
-        "top": 10,
-        "left": 4,
-        "right": 4,
-        "bottom": 10
-      },
-      "flex": {
-        "direction": "Row"
-      }
-    },
-    "big": {
-      "padding": {
-        "top": 20,
-        "left": 20,
-        "right": 20,
-        "bottom": 20
-      },
-      "font": {
-        "size": 62
-      }
-    },
-    "c1": {
-      "flex": {
-        "shrink": 1,
-        "grow": 1
-      }
-    },
-    "c2": {
-      "color": "blue",
-      "font": {
-        "weight": "ExtraBold"
-      },
-      "flex": {
-        "shrink": 2,
-        "grow": 2
-      }
-    },
-    "h1": {
-      "font": {
-        "size": 20
-      },
-      "flex": {
-        "direction": "Column"
-      },
-      "margin": {
-        "top": 5,
-        "left": 5,
-        "right": 5,
-        "bottom": 5
-      },
-      "padding": {
-        "top": 5,
-        "left": 5,
-        "right": 5,
-        "bottom": 5
+        "top": "24pt",
+        "right": "24pt",
+        "left": "24pt",
+        "bottom": "24pt"
       },
       "border": {
-        "width": 1,
-        "color": "#ABCDEF",
+        "width": {
+          "left": "150pt"
+
+        },
+        "color": "#0080AD",
         "radius": {
-          "topRight": 5,
-          "bottomRight": 5
+          "topRight": "12pt",
+          "bottomRight": "12pt"
         }
       }
     },
-    "italic": {
-      "color": "pink",
+    "h3": {
       "font": {
-        "weight": "ExtraLight",
-        "size": 12,
-        "style": "Italic"
+        "size": "12pt",
+        "weight": "ExtraBold"
+      },
+      "margin": {
+        "bottom": "16pt"
       }
+    },
+    "p": {
+       "font": {
+        "size": "16pt",
+        "weight": "Regular"
+      }     
     }
   },
   "root": {
@@ -220,156 +156,22 @@
       "root"
     ],
     "children": [
-      {
-        "type": "Text",
-        "styles": [
-          "h1",
-          "first"
-        ],
-        "children": [
-          "This is some long text ",
-          {
-            "styles": [
-              "italic"
-            ],
-            "children": [
-              "italic text that continues on to the next line if there is enough text to wrap??"
-            ]
-          }
-        ]
-      },
-      {
-        "type": "Styled",
-        "styles": [
-          "container"
-        ],
-        "children": [
-          {
-            "type": "Text",
-            "styles": [
-              "h1",
-              "c1"
-            ],
-            "children": [
-              "This is some header text ",
-              {
-                "styles": [
-                  "italic"
-                ],
-                "children": [
-                  "italic text that continues on to the next line if there is enough text to wrap??"
-                ]
-              }
-            ]
-          },
-          {
-            "type": "Text",
-            "styles": [
-              "h1",
-              "c2"
-            ],
-            "children": [
-              "This is some header text ",
-              {
-                "styles": [
-                  "italic"
-                ],
-                "children": [
-                  "italic text that continues on to the next line if there is enough text to wrap??"
-                ]
-              }
-            ]
-          }
-        ]
-      },
-      {
-        "type": "Styled",
-        "styles": [
-          "container"
-        ],
-        "children": [
-          {
-            "type": "Text",
-            "styles": [
-              "h1",
-              "c1"
-            ],
-            "children": [
-              "This is some header text ",
-              {
-                "styles": [
-                  "italic"
-                ],
-                "children": [
-                  "italic text that continues on to the next line if there is enough text to wrap??"
-                ]
-              }
-            ]
-          },
-          {
-            "type": "Text",
-            "styles": [
-              "h1",
-              "c2"
-            ],
-            "children": [
-              "This is some header text ",
-              {
-                "styles": [
-                  "italic"
-                ],
-                "children": [
-                  "italic text that continues on to the next line if there is enough text to wrap??"
-                ]
-              }
-            ]
-          }
-        ]
-      },
- {
-        "type": "Styled",
-        "styles": [
-          "container"
-        ],
-        "children": [
-          {
-            "type": "Text",
-            "styles": [
-              "h1",
-              "c1"
-            ],
-            "children": [
-              "This is some header text ",
-              {
-                "styles": [
-                  "italic"
-                ],
-                "children": [
-                  "italic text that continues on to the next line if there is enough text to wrap??"
-                ]
-              }
-            ]
-          },
-          {
-            "type": "Text",
-            "styles": [
-              "h1",
-              "c2"
-            ],
-            "children": [
-              "This is some header text ",
-              {
-                "styles": [
-                  "italic"
-                ],
-                "children": [
-                  "italic text that continues on to the next line if there is enough text to wrap??"
-                ]
-              }
-            ]
-          }
-        ]
-      }     
+        {
+          "type": "Styled",
+          "styles": ["flagpole"],
+          "children": [
+            {
+              "type": "Text",
+              "styles": ["h3"],
+              "children": ["HOW OTHERS MIGHT VIEW YOU"]
+            }, 
+            {
+              "type": "Text",
+              "styles": ["p"],
+              "children": ["Others are likely to view you as someone able to make decisions when required. While you might spend more time than others evaluating your options before committing, you are likely able to arrive at a decision in most instances."]
+            }
+          ]
+        } 
     ]
   }
 }

@@ -1301,6 +1301,7 @@ version = "0.1.0"
 dependencies = [
  "bytes",
  "color_processing",
+ "lazy_static",
  "merges",
  "num",
  "num-derive",
@@ -1308,6 +1309,7 @@ dependencies = [
  "optional-merge-derive",
  "polyhorn-yoga",
  "printpdf",
+ "regex",
  "serde",
  "skia-safe",
  "thiserror",

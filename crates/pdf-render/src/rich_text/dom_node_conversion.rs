@@ -64,7 +64,7 @@ pub fn dom_node_to_rich_text(
 
                 span.color = current_style.color;
                 span.font_family = current_style.font.family;
-                span.size = Pt(current_style.font.size as f64);
+                span.size = current_style.font.size;
 
                 rich_text_spans.push(span);
             }

@@ -28,6 +28,15 @@ impl Default for EdgeStyle::Unmergeable {
 }
 
 impl EdgeStyle::Unmergeable {
+    pub fn new(size: Pt) -> Self {
+        Self {
+            top: size,
+            right: size,
+            bottom: size,
+            left: size,
+        }
+    }
+
     pub fn horizontal(&self) -> Pt {
         self.left + self.right
     }

@@ -282,3 +282,13 @@ impl<'a> PaginatedLayoutEngine<'a> {
             || style.flex.wrap != FlexWrap::NoWrap
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_parent_page_break_logic() {
+        
+    }
+}

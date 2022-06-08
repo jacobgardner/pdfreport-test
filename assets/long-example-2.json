@@ -136,10 +136,10 @@
         "bottom": 4
       },
       "padding": {
-        "top": 10,
+        "top": 5,
         "left": 4,
         "right": 4,
-        "bottom": 10
+        "bottom": 5
       },
       "flex": {
         "direction": "Row"

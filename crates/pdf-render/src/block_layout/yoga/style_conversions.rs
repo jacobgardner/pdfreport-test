@@ -43,7 +43,10 @@ impl From<Style::Unmergeable> for yoga::Node {
     fn from(style: Style::Unmergeable) -> Self {
         let mut layout_node = yoga::Node::new();
 
-        layout_node.set_border(Edge::All, style.border.width);
+        layout_node.set_border(Edge::Top, style.border.width.top.0 as f32);
+        layout_node.set_border(Edge::Right, style.border.width.right.0 as f32);
+        layout_node.set_border(Edge::Bottom, style.border.width.bottom.0 as f32);
+        layout_node.set_border(Edge::Left, style.border.width.left.0 as f32);
 
         layout_node.set_margin(Edge::Top, style.margin.top.into());
         layout_node.set_margin(Edge::Right, style.margin.right.into());

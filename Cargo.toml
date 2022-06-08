@@ -24,6 +24,9 @@ develop = []
 
 [workspace]
 members = ["crates/*"]
+
+# This was the original prototype that we're keeping around just until we've
+# implemented everything from it. 
 exclude = ["crates/prototype-implementation"]
 
 [dependencies]

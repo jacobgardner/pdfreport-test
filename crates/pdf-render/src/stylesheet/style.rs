@@ -23,6 +23,7 @@ impl Default for BreakInside {
 #[mergeable]
 #[derive(TS, Clone, Debug, PartialEq)]
 #[ts(export)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct Style {
     #[mergeable(nested)]
     pub border: BorderStyle,
@@ -35,7 +36,7 @@ pub struct Style {
     #[mergeable(nested)]
     pub padding: EdgeStyle,
     #[ts(type = "string")]
-    pub background_color: Color,
+    pub background_color: Option<Color>,
     #[mergeable(nested)]
     pub flex: FlexStyle,
     pub width: String,
@@ -48,7 +49,7 @@ impl Default for Style::Unmergeable {
     fn default() -> Self {
         Self {
             color: Color::black(),
-            background_color: Color::white(),
+            background_color: None,
             width: String::from("auto"),
             height: String::from("auto"),
             border: Default::default(),

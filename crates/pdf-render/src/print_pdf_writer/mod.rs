@@ -10,6 +10,7 @@ use printpdf::{
     PdfPageIndex, TextMatrix,
 };
 
+mod corners;
 mod debug;
 mod font_lookup;
 mod rect;
@@ -25,7 +26,7 @@ use crate::{
     values::{Color, Mm, Pt, Size},
 };
 
-use self::font_lookup::FontLookup;
+use self::{corners::Circles, font_lookup::FontLookup};
 
 #[derive(Clone, Default)]
 struct CurrentStyles {
@@ -45,6 +46,7 @@ pub struct PrintPdfWriter<'a> {
     page_size: Size<Pt>,
     page_margins: EdgeStyle::Unmergeable,
     current_style_by_page: Vec<CurrentStyles>,
+    circle_cache: Circles,
 }
 
 impl<'a> PrintPdfWriter<'a> {
@@ -71,6 +73,7 @@ impl<'a> PrintPdfWriter<'a> {
             page_margins: page_margins.into(),
             page_size: dimensions.into(),
             current_style_by_page: vec![CurrentStyles::default()],
+            circle_cache: Default::default(),
         }
     }
 
@@ -178,6 +181,22 @@ impl<'a> PrintPdfWriter<'a> {
         node: &PaginatedNode,
         container_style: &Style::Unmergeable,
     ) -> Result<&mut Self, DocumentGenerationError> {
+        let rect = crate::values::Rect {
+            left: node.page_layout.left + self.page_margins.left,
+            top: self.page_size.height - (node.page_layout.top + self.page_margins.top),
+            width: node.page_layout.width,
+            height: node.page_layout.height,
+        };
+
+        self.draw_rect(
+            node.page_index,
+            rect,
+            container_style.border.width.clone(),
+            Some(container_style.border.color.clone()),
+            container_style.background_color.clone(),
+            Some(container_style.border.radius.clone()),
+        );
+
         if container_style.debug {
             self.draw_debug_outlines(node, container_style);
         }
