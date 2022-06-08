@@ -1,5 +1,3 @@
-use polyhorn_yoga::Layout;
-
 use crate::{
     block_layout::layout_engine::NodeLayout,
     doc_structure::{DomNode, HasNodeId},

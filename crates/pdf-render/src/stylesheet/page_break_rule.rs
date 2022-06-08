@@ -4,9 +4,9 @@ use ts_rs::TS;
 #[derive(TS, Clone, Debug, PartialEq, Deserialize)]
 #[ts(export)]
 pub enum PageBreakRule {
-  Auto,
-  Avoid,
-  Always
+    Auto,
+    Avoid,
+    Always,
 }
 
 impl Default for PageBreakRule {

@@ -279,7 +279,6 @@ impl<'a> PaginatedLayoutEngine<'a> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
 
     #[test]
     fn test_parent_page_break_logic() {}

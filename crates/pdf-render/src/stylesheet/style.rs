@@ -1,6 +1,6 @@
 use merges::Merges;
 use optional_merge_derive::mergeable;
-use serde::Deserialize;
+
 use ts_rs::TS;
 
 use crate::values::Color;
@@ -46,7 +46,7 @@ impl Default for Style::Unmergeable {
             margin: Default::default(),
             padding: Default::default(),
             flex: Default::default(),
-            
+
             break_before: Default::default(),
             break_after: Default::default(),
             break_inside: Default::default(),
