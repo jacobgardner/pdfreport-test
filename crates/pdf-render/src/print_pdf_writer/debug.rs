@@ -68,7 +68,7 @@ impl<'a> PrintPdfWriter<'a> {
             content_rect,
             EdgeStyle::Unmergeable::new(Pt(1.)),
             Some(Color::try_from("blue").unwrap()),
-            Some(Color::try_from("pink").unwrap()),
+            None,
             Some(BorderRadiusStyle::Unmergeable::new(Pt(5.))),
         );
     }

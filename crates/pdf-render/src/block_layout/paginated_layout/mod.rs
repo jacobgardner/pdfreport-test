@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 mod draw_cursor;
+mod layout_visitor;
 mod paginated_node;
 
 use draw_cursor::DrawCursor;
@@ -11,10 +12,12 @@ use crate::{
     error::DocumentGenerationError,
     paragraph_layout::{ParagraphLayout, ParagraphStyle, RenderedTextBlock},
     rich_text::dom_node_conversion::dom_node_to_rich_text,
-    stylesheet::{BreakInside, Direction, FlexWrap, Style, Stylesheet},
+    stylesheet::{Direction, FlexWrap, PageBreakRule, Style, Stylesheet},
     utils::{debug_cursor::DebugCursor, node_lookup::NodeLookup, tree_iter::TreeNode},
     values::{Point, Pt},
 };
+
+use self::layout_visitor::LayoutVisitor;
 
 use super::layout_engine::{LayoutEngine, NodeLayout};
 
@@ -68,26 +71,9 @@ impl<'a> PaginatedLayoutEngine<'a> {
             }
         }
 
-        let mut draw_cursor = DrawCursor {
-            y_offset: Pt(0.),
-            page_index: 0,
-            page_break_debt: Pt(0.),
-        };
+        let mut visitor = LayoutVisitor::new(self);
 
-        let mut prior_sibling_layout = NodeLayout::default();
-
-        for (node, _parent) in root_node.block_iter() {
-            let node_layout = self.layout_engine.get_node_layout(node.node_id());
-
-            let cursor_offset =
-                node_layout.top - prior_sibling_layout.top - draw_cursor.page_break_debt;
-
-            draw_cursor.y_offset += cursor_offset;
-
-            self.draw_paginated_node(&mut draw_cursor, node_layout.clone(), node)?;
-
-            prior_sibling_layout = node_layout;
-        }
+        root_node.visit_nodes(&mut visitor, None)?;
 
         Ok(self)
     }
@@ -107,13 +93,21 @@ impl<'a> PaginatedLayoutEngine<'a> {
             ..node_layout.clone()
         };
 
-        if adjusted_layout.bottom() > self.page_height
-            && (adjusted_layout.top > self.page_height
-                || *self
-                    .node_avoids_page_break
-                    .get(&node.node_id())
-                    .unwrap_or(&false))
-        {
+        let does_node_avoid_break = *self
+            .node_avoids_page_break
+            .get(&node.node_id())
+            .unwrap_or(&false);
+
+        let does_node_start_below_break = adjusted_layout.top > self.page_height;
+        let does_node_end_below_break = adjusted_layout.bottom() > self.page_height;
+        let does_node_require_break_before =
+            style.break_before == PageBreakRule::Always && draw_cursor.y_offset != Pt(0.);
+
+        let should_node_start_on_next_page = does_node_require_break_before
+            || does_node_start_below_break
+            || (does_node_end_below_break && does_node_avoid_break);
+
+        if should_node_start_on_next_page {
             adjusted_layout.top = Pt(0.);
             draw_cursor.y_offset = Pt(0.);
             draw_cursor.page_index += 1;
@@ -277,7 +271,7 @@ impl<'a> PaginatedLayoutEngine<'a> {
                 .node_avoids_page_break
                 .get(&node.node_id())
                 .unwrap_or(&false)
-            || style.break_inside != BreakInside::Auto
+            || style.break_inside != PageBreakRule::Auto
             || style.flex.direction != Direction::Column
             || style.flex.wrap != FlexWrap::NoWrap
     }

@@ -115,8 +115,16 @@
         "family": "Inter"
       }
     },
+    "container": {
+      "flex": {
+        "direction": "Row"
+      }
+    },
     "flagpole": {
       "backgroundColor": "#EDF6F9",
+      "margin": {
+        "right": "10pt"
+      },
       "padding": {
         "top": "24pt",
         "right": "24pt",
@@ -143,6 +151,9 @@
         "bottom": "16pt"
       }
     },
+    "break": {
+      "breakBefore": "Always"
+    },
     "p": {}
   },
   "root": {
@@ -151,18 +162,126 @@
     "children": [
       {
         "type": "Styled",
-        "styles": ["flagpole"],
+        "styles": ["container"],
         "children": [
           {
-            "type": "Text",
-            "styles": ["h3"],
-            "children": ["HOW OTHERS MIGHT VIEW YOU"]
+            "type": "Styled",
+            "styles": ["flagpole"],
+            "children": [
+              {
+                "type": "Text",
+                "styles": ["h3"],
+                "children": ["HOW OTHERS MIGHT VIEW YOU"]
+              },
+              {
+                "type": "Text",
+                "styles": ["p"],
+                "children": [
+                  "Others are likely to view you as someone able to make decisions when required. While you might spend more time than others evaluating your options before committing, you are likely able to arrive at a decision in most instances."
+                ]
+              }
+            ]
           },
           {
-            "type": "Text",
-            "styles": ["p"],
+            "type": "Styled",
+            "styles": ["flagpole"],
             "children": [
-              "Others are likely to view you as someone able to make decisions when required. While you might spend more time than others evaluating your options before committing, you are likely able to arrive at a decision in most instances."
+              {
+                "type": "Text",
+                "styles": ["h3"],
+                "children": ["HOW OTHERS MIGHT VIEW YOU"]
+              },
+              {
+                "type": "Text",
+                "styles": ["p"],
+                "children": [
+                  "Others are likely to view you as someone able to make decisions when required. While you might spend more time than others evaluating your options before committing, you are likely able to arrive at a decision in most instances."
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "Styled",
+        "styles": ["container", "break"],
+        "children": [
+          {
+            "type": "Styled",
+            "styles": ["flagpole"],
+            "children": [
+              {
+                "type": "Text",
+                "styles": ["h3"],
+                "children": ["HOW OTHERS MIGHT VIEW YOU"]
+              },
+              {
+                "type": "Text",
+                "styles": ["p"],
+                "children": [
+                  "Others are likely to view you as someone able to make decisions when required. While you might spend more time than others evaluating your options before committing, you are likely able to arrive at a decision in most instances."
+                ]
+              }
+            ]
+          },
+          {
+            "type": "Styled",
+            "styles": ["flagpole"],
+            "children": [
+              {
+                "type": "Text",
+                "styles": ["h3"],
+                "children": ["HOW OTHERS MIGHT VIEW YOU"]
+              },
+              {
+                "type": "Text",
+                "styles": ["p"],
+                "children": [
+                  "Others are likely to view you as someone able to make decisions when required. While you might spend more time than others evaluating your options before committing, you are likely able to arrive at a decision in most instances."
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "Styled",
+        "styles": ["container"],
+        "children": [
+          {
+            "type": "Styled",
+            "styles": ["flagpole"],
+            "children": [
+              {
+                "type": "Text",
+                "styles": ["h3"],
+                "children": ["HOW OTHERS MIGHT VIEW YOU"]
+              },
+              {
+                "type": "Text",
+                "styles": ["p"],
+                "children": [
+                  "Others are likely to view you as someone able to make decisions when required. While you might spend more time than others evaluating your options before committing, you are likely able to arrive at a decision in most instances."
+                ]
+              }
+            ]
+          },
+          {
+            "type": "Styled",
+            "styles": ["flagpole"],
+            "children": [
+              {
+                "type": "Text",
+                "styles": ["h3"],
+                "children": ["HOW OTHERS MIGHT VIEW YOU"]
+              },
+              {
+                "type": "Text",
+                "styles": ["p"],
+                "children": [
+                  "Others are likely to view you as someone able to make decisions when required. While you might spend more time than others evaluating your options before committing, you are likely able to arrive at a decision in most instances."
+                ]
+              }
             ]
           }
         ]

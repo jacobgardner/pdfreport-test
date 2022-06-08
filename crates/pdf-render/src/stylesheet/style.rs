@@ -5,20 +5,7 @@ use ts_rs::TS;
 
 use crate::values::Color;
 
-use super::{BorderStyle, EdgeStyle, FlexStyle, FontStyles};
-
-#[derive(TS, Clone, Debug, PartialEq, Deserialize)]
-#[ts(export)]
-pub enum BreakInside {
-    Auto,
-    Avoid,
-}
-
-impl Default for BreakInside {
-    fn default() -> Self {
-        Self::Auto
-    }
-}
+use super::{BorderStyle, EdgeStyle, FlexStyle, FontStyles, PageBreakRule};
 
 #[mergeable]
 #[derive(TS, Clone, Debug, PartialEq)]
@@ -42,7 +29,9 @@ pub struct Style {
     pub width: String,
     pub height: String,
     pub debug: bool,
-    pub break_inside: BreakInside,
+    pub break_before: PageBreakRule,
+    pub break_after: PageBreakRule,
+    pub break_inside: PageBreakRule,
 }
 
 impl Default for Style::Unmergeable {
@@ -57,6 +46,9 @@ impl Default for Style::Unmergeable {
             margin: Default::default(),
             padding: Default::default(),
             flex: Default::default(),
+            
+            break_before: Default::default(),
+            break_after: Default::default(),
             break_inside: Default::default(),
             debug: false,
         }

@@ -12,6 +12,7 @@ mod edge_style;
 mod flex_style;
 mod flex_values;
 mod font_styles;
+mod page_break_rule;
 mod style;
 
 pub use border_radius::BorderRadiusStyle;
@@ -20,7 +21,8 @@ pub use edge_style::EdgeStyle;
 pub use flex_style::FlexStyle;
 pub use flex_values::*;
 pub use font_styles::FontStyles;
-pub use style::{BreakInside, Style};
+pub use page_break_rule::PageBreakRule;
+pub use style::Style;
 
 use crate::error::{DocumentGenerationError, UserInputError};
 
