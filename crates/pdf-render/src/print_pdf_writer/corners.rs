@@ -14,13 +14,11 @@ const ORIGIN: printpdf::Point = printpdf::Point {
     y: printpdf::Pt(0.),
 };
 
-
 type LinePoint = (printpdf::Point, bool);
 
-const ZERO_RADIUS_CORNER: &[LinePoint; 1] = &[
-  (ORIGIN, false)
-];
+const ZERO_RADIUS_CORNER: &[LinePoint; 1] = &[(ORIGIN, false)];
 
+#[derive(Default)]
 pub(super) struct Circles(RefCell<HashMap<i32, Rc<Circle>>>);
 
 pub(super) struct Circle(Vec<LinePoint>, bool);
@@ -56,12 +54,6 @@ impl Circle {
         } else {
             ZERO_RADIUS_CORNER
         }
-    }
-}
-
-impl Default for Circles {
-    fn default() -> Self {
-        Self(Default::default())
     }
 }
 

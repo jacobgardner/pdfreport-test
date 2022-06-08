@@ -1,8 +1,8 @@
 use optional_merge_derive::mergeable;
 use ts_rs::TS;
 
-use crate::values::Color;
 use crate::stylesheet::EdgeStyle;
+use crate::values::Color;
 
 use super::BorderRadiusStyle;
 
@@ -19,6 +19,7 @@ pub struct BorderStyle {
     pub radius: BorderRadiusStyle,
 }
 
+#[allow(clippy::derivable_impls)]
 impl Default for BorderStyle::Unmergeable {
     fn default() -> Self {
         Self {

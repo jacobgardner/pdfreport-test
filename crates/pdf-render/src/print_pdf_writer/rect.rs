@@ -1,5 +1,3 @@
-use std::ops::Range;
-
 use printpdf::{Line, PdfLayerReference, Point};
 
 use crate::{
@@ -8,11 +6,6 @@ use crate::{
 };
 
 use super::PrintPdfWriter;
-
-const TOP_LEFT_CORNER: Range<usize> = 12..16;
-const TOP_RIGHT_CORNER: Range<usize> = 0..4;
-const BOTTOM_RIGHT_CORNER: Range<usize> = 4..8;
-const BOTTOM_LEFT_CORNER: Range<usize> = 8..12;
 
 impl<'a> PrintPdfWriter<'a> {
     pub(super) fn draw_rect(
@@ -85,12 +78,6 @@ impl<'a> PrintPdfWriter<'a> {
             ),
         ];
 
-        let origin = Point {
-            x: Default::default(),
-            y: Default::default(),
-        };
-
-        // #[rustfmt::skip]
         let points = match border_radius {
             Some(border_radius) if border_radius != BorderRadiusStyle::Unmergeable::default() => {
                 // 4 points per corner & 2 points per edge
@@ -182,7 +169,7 @@ impl<'a> PrintPdfWriter<'a> {
                 Point {
                     x: printpdf::Pt(border_width.right.0 / -2.),
                     y: printpdf::Pt(0.),
-                }
+                },
             );
             draw_border_edge(
                 &layer,
@@ -191,7 +178,7 @@ impl<'a> PrintPdfWriter<'a> {
                 Point {
                     x: printpdf::Pt(0.),
                     y: printpdf::Pt(border_width.bottom.0 / 2.),
-                }
+                },
             );
             draw_border_edge(
                 &layer,
@@ -202,7 +189,7 @@ impl<'a> PrintPdfWriter<'a> {
                 Point {
                     x: printpdf::Pt(border_width.left.0 / 2.),
                     y: printpdf::Pt(0.),
-                }
+                },
             );
         }
 

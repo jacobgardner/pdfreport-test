@@ -57,17 +57,15 @@ pub enum UserInputError {
 
     #[error("Style name does not exist on stylesheet: {style_name}")]
     StyleDoesNotExist { style_name: String },
-    
+
     #[error("Unable to parse unit string in stylesheet: {source_str}")]
     MalformedUnitString { source_str: String },
-     
+
     #[error("Unable to parse unit quantity: {quantity_str}")]
     UnparsableUnitQuantity { quantity_str: String },
-    
+
     #[error("Unit does is not supported: {attached_unit}")]
     UnsupportedUnit { attached_unit: String },
-       
-       
 }
 
 #[derive(Error, Debug)]

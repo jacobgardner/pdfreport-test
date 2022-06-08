@@ -1,5 +1,4 @@
 use std::{
-    error::Error,
     fmt::Display,
     ops::{Add, AddAssign, Sub, SubAssign},
 };
@@ -118,7 +117,8 @@ impl TryFrom<&str> for Pt {
             unit => {
                 return Err(UserInputError::UnsupportedUnit {
                     attached_unit: String::from(unit),
-                })?
+                }
+                .into());
             }
         })
     }
