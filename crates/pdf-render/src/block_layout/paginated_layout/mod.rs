@@ -93,6 +93,7 @@ impl<'a> PaginatedLayoutEngine<'a> {
             ..node_layout.clone()
         };
 
+        // If true, will try to start on the next page if any content spills over
         let does_node_avoid_break = *self
             .node_avoids_page_break
             .get(&node.node_id())
@@ -109,8 +110,6 @@ impl<'a> PaginatedLayoutEngine<'a> {
         let is_already_broken = draw_cursor.y_offset == Pt(0.);
 
         if !is_already_broken && should_node_start_on_next_page {
-            println!("{does_node_start_below_break} {does_node_end_below_break} {does_node_require_break_before}");
-            println!("{adjusted_layout:?}");
             adjusted_layout.top = Pt(0.);
             draw_cursor.y_offset = Pt(0.);
             draw_cursor.page_index += 1;

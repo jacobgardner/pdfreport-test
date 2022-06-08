@@ -142,6 +142,12 @@
         }
       }
     },
+    "flagpole-yellow": {
+      "backgroundColor": "#FFFCF4",
+      "border": {
+        "color": "#FFD166"
+      }
+    },
     "h3": {
       "font": {
         "size": "12pt",
@@ -184,7 +190,7 @@
           },
           {
             "type": "Styled",
-            "styles": ["flagpole"],
+            "styles": ["flagpole", "flagpole-yellow"],
             "children": [
               {
                 "type": "Text",
