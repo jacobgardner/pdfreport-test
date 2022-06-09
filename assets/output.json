@@ -382,7 +382,7 @@
                                       {
                                         "type": "Text",
                                         "styles": ["paragraph"],
-                                        "children": ["With list items"]
+                                        "children": ["• With list items"]
                                       }
                                     ]
                                   },

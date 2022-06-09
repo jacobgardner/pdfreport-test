@@ -6,6 +6,7 @@ use std::fmt::Display;
 use crate::{
     error::DocumentGenerationError,
     fonts::FontAttributes,
+    stylesheet::{Style, TextTransformation},
     values::{Color, Pt},
 };
 
@@ -19,6 +20,35 @@ pub struct RichTextSpan {
     pub font_family: String,
     pub size: Pt,
     pub color: Color,
+    pub letter_spacing: Pt,
+    pub line_height: f64,
+}
+
+impl RichTextSpan {
+    pub fn new(raw_str: &str, style: Style::Unmergeable) -> Self {
+        let line_height = if let Some(line_height) = style.line_height {
+            line_height.0 / style.font.size.0
+        } else {
+            1.0
+        };
+        
+        Self {
+            text: if style.text_transform == TextTransformation::Uppercase {
+                raw_str.to_uppercase()
+            } else {
+                raw_str.to_owned()
+            },
+            attributes: FontAttributes {
+                weight: style.font.weight,
+                style: style.font.style,
+            },
+            color: style.color,
+            font_family: style.font.family,
+            size: style.font.size,
+            letter_spacing: style.font.letter_spacing,
+            line_height,
+        }
+    }
 }
 
 impl From<&str> for RichTextSpan {
@@ -51,17 +81,21 @@ impl RichText {
         line_start_index: usize,
         line_end_index: usize,
     ) -> Result<RichText, DocumentGenerationError> {
+        
         let span_data: Vec<(&RichTextSpan, usize, usize)> = self
             .0
             .iter()
             .scan(0, |current_line_index, span| {
                 let line_start_index = *current_line_index;
-                *current_line_index += span.text.len();
+                *current_line_index += span.text.chars().count();
                 let line_end_index = *current_line_index;
 
                 Some((span, line_start_index, line_end_index))
             })
             .collect();
+            
+        // println!("{:?}", span_data);
+        
 
         let start_span_index = span_data
             .iter()
@@ -104,6 +138,8 @@ impl RichText {
 
             rich_text
         };
+        
+        // println!("{:?}", rich.0);
 
         Ok(rich)
     }

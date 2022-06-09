@@ -32,6 +32,7 @@ use self::{corners::Circles, font_lookup::FontLookup};
 struct CurrentStyles {
     font_id: Option<FontId>,
     font_size: Option<Pt>,
+    letter_spacing: Option<Pt>,
 
     color: Option<Color>,
 }
@@ -236,12 +237,14 @@ impl<'a> PrintPdfWriter<'a> {
             .font_collection
             .lookup_font(&span.font_family, &span.attributes)?;
 
-        let style = &self.current_style_by_page[page_index];
+        let current_style = &self.current_style_by_page[page_index];
 
         let font_ref = self.get_font(font.font_id())?;
 
-        let mut new_style = style.clone();
-        if style.font_id != Some(font.font_id()) || style.font_size != Some(span.size) {
+        let mut new_style = current_style.clone();
+        if current_style.font_id != Some(font.font_id())
+            || current_style.font_size != Some(span.size)
+        {
             layer.set_font(font_ref.as_ref(), span.size.0);
             layer.set_line_height(span.size.0);
 
@@ -249,7 +252,13 @@ impl<'a> PrintPdfWriter<'a> {
             new_style.font_size = Some(span.size);
         }
 
-        if style.color.as_ref() != Some(&span.color) {
+        if current_style.letter_spacing != Some(span.letter_spacing) {
+            layer.set_character_spacing(span.letter_spacing.0);
+            
+            new_style.letter_spacing = Some(span.letter_spacing);
+        }
+
+        if current_style.color.as_ref() != Some(&span.color) {
             layer.set_fill_color(span.color.clone().into());
 
             new_style.color = Some(span.color.clone());

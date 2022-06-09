@@ -23,6 +23,7 @@ pub use flex_values::*;
 pub use font_styles::FontStyles;
 pub use page_break_rule::PageBreakRule;
 pub use style::Style;
+pub use style::TextTransformation;
 
 use crate::error::{DocumentGenerationError, UserInputError};
 

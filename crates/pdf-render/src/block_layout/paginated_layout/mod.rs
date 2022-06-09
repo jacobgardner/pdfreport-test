@@ -115,6 +115,11 @@ impl<'a> PaginatedLayoutEngine<'a> {
             draw_cursor.page_index += 1;
         }
 
+        if draw_cursor.y_offset == Pt(0.) {
+            adjusted_layout.top = Pt(-style.margin.top.0);
+            draw_cursor.y_offset = Pt(-style.margin.top.0);
+        }
+
         // By this point, the draw cursor is in the correct place to start
         // the current node.
 
@@ -219,6 +224,9 @@ impl<'a> PaginatedLayoutEngine<'a> {
         layout: &NodeLayout,
         style: &Style::Unmergeable,
     ) -> Result<DrawableNode, DocumentGenerationError> {
+        
+        let adjusted_style = style.clone();
+        
         let drawable_node = match dom_node {
             DomNode::Text(text_node) => {
                 // FIXME: This should also have already been computed by now
@@ -238,11 +246,11 @@ impl<'a> PaginatedLayoutEngine<'a> {
 
                 DrawableNode::Text(DrawableTextNode {
                     text_block,
-                    style: style.clone(),
+                    style: adjusted_style,
                 })
             }
             _ => DrawableNode::Container(DrawableContainerNode {
-                style: style.clone(),
+                style: adjusted_style,
             }),
         };
 

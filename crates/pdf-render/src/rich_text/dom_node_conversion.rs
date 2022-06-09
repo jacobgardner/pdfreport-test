@@ -31,18 +31,7 @@ pub fn dom_node_to_rich_text(
             };
 
             if let TextChild::Content(content) = node {
-                let mut span = RichTextSpan::from(content.as_str());
-
-                span.attributes = FontAttributes {
-                    weight: current_style.font.weight,
-                    style: current_style.font.style,
-                };
-
-                span.color = current_style.color;
-                span.font_family = current_style.font.family;
-                span.size = current_style.font.size;
-
-                rich_text_spans.push(span);
+                rich_text_spans.push(RichTextSpan::new(content.as_str(), current_style));
             }
         }
     }

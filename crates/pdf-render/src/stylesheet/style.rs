@@ -1,15 +1,16 @@
 use merges::Merges;
 use optional_merge_derive::mergeable;
 
+use serde::Deserialize;
 use ts_rs::TS;
 
-use crate::values::Color;
+use crate::values::{Color, Pt};
 
 use super::{BorderStyle, EdgeStyle, FlexStyle, FontStyles, PageBreakRule};
 
 #[mergeable]
 #[derive(TS, Clone, Debug, PartialEq)]
-#[ts(export, rename_all="camelCase")]
+#[ts(export, rename_all = "camelCase")]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct Style {
     #[mergeable(nested)]
@@ -32,6 +33,23 @@ pub struct Style {
     pub break_before: PageBreakRule,
     pub break_after: PageBreakRule,
     pub break_inside: PageBreakRule,
+    pub text_transform: TextTransformation,
+    #[ts(type = "number | string")]
+    pub line_height: Option<Pt>,
+}
+
+// TODO: Move to its own file
+#[derive(TS, Clone, Debug, PartialEq, Deserialize)]
+#[ts(export, rename_all = "camelCase")]
+pub enum TextTransformation {
+    None,
+    Uppercase,
+}
+
+impl Default for TextTransformation {
+    fn default() -> Self {
+        Self::None
+    }
 }
 
 impl Default for Style::Unmergeable {
@@ -46,10 +64,11 @@ impl Default for Style::Unmergeable {
             margin: Default::default(),
             padding: Default::default(),
             flex: Default::default(),
-
+            text_transform: Default::default(),
             break_before: Default::default(),
             break_after: Default::default(),
             break_inside: Default::default(),
+            line_height: None,
             debug: false,
         }
     }
