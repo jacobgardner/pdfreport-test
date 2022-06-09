@@ -254,7 +254,7 @@ impl<'a> PrintPdfWriter<'a> {
 
         if current_style.letter_spacing != Some(span.letter_spacing) {
             layer.set_character_spacing(span.letter_spacing.0);
-            
+
             new_style.letter_spacing = Some(span.letter_spacing);
         }
 

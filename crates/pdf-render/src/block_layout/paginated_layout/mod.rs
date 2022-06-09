@@ -224,9 +224,8 @@ impl<'a> PaginatedLayoutEngine<'a> {
         layout: &NodeLayout,
         style: &Style::Unmergeable,
     ) -> Result<DrawableNode, DocumentGenerationError> {
-        
         let adjusted_style = style.clone();
-        
+
         let drawable_node = match dom_node {
             DomNode::Text(text_node) => {
                 // FIXME: This should also have already been computed by now

@@ -31,7 +31,7 @@ impl RichTextSpan {
         } else {
             1.0
         };
-        
+
         Self {
             text: if style.text_transform == TextTransformation::Uppercase {
                 raw_str.to_uppercase()
@@ -81,7 +81,6 @@ impl RichText {
         line_start_index: usize,
         line_end_index: usize,
     ) -> Result<RichText, DocumentGenerationError> {
-        
         let span_data: Vec<(&RichTextSpan, usize, usize)> = self
             .0
             .iter()
@@ -93,9 +92,8 @@ impl RichText {
                 Some((span, line_start_index, line_end_index))
             })
             .collect();
-            
+
         // println!("{:?}", span_data);
-        
 
         let start_span_index = span_data
             .iter()
@@ -138,7 +136,7 @@ impl RichText {
 
             rich_text
         };
-        
+
         // println!("{:?}", rich.0);
 
         Ok(rich)

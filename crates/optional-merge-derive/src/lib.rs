@@ -7,10 +7,11 @@ use config::{MERGEABLE_NAME, UNMERGEABLE_NAME};
 use darling::FromMeta;
 use field_options::{extract_field_attrs, FieldOptions, FieldsOptions};
 use proc_macro2::Span;
-use quote::{quote, ToTokens, format_ident};
+use quote::{format_ident, quote, ToTokens};
 use std::str::FromStr;
 use syn::{
-    self, parse_macro_input, parse_quote, Attribute, AttributeArgs, Data, DeriveInput, Fields, Type, LitStr,
+    self, parse_macro_input, parse_quote, Attribute, AttributeArgs, Data, DeriveInput, Fields,
+    LitStr, Type,
 };
 
 fn build_skip_optional_attr() -> Attribute {
@@ -171,11 +172,12 @@ pub fn mergeable(
 
     original_ast.vis = parse_quote! { pub };
     mergeable_ast.vis = parse_quote! { pub };
-    
+
     let rename_as = LitStr::new(&original_name.to_string(), Span::call_site());
-    
-    mergeable_ast.attrs.push(parse_quote! { #[ts(rename = #rename_as)] });
-    
+
+    mergeable_ast
+        .attrs
+        .push(parse_quote! { #[ts(rename = #rename_as)] });
 
     let token_stream = quote! {
 

@@ -1,7 +1,6 @@
 use crate::{
     doc_structure::{TextChild, TextNode},
     error::DocumentGenerationError,
-    fonts::FontAttributes,
     rich_text::RichTextSpan,
     stylesheet::Stylesheet,
     utils::node_lookup::NodeLookup,

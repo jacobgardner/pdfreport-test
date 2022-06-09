@@ -14,7 +14,7 @@ pub use line_metrics::LineMetrics;
 pub use text_block::{RenderedTextBlock, RenderedTextLine};
 
 use skia_layout::{ParagraphBuilder, TypefaceFontProvider};
-use skia_safe::textlayout::{self as skia_layout, TextHeightBehavior};
+use skia_safe::textlayout::{self as skia_layout};
 use skia_safe::{Data, FontMgr, Typeface};
 
 use crate::{

@@ -31,10 +31,10 @@ pub struct DocStructure {
     pub document_title: String,
     pub page_size: String,
     #[serde(default)]
-    #[ts(type="EdgeStyle")]
+    #[ts(type = "EdgeStyle")]
     pub page_margins: EdgeStyle::Unmergeable,
     pub fonts: Vec<FontFamilyInfo>,
-    #[ts(type="Style")]
+    #[ts(type = "Style")]
     pub stylesheet: Stylesheet,
     pub root: DomNode,
 }
