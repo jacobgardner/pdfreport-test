@@ -32,6 +32,10 @@ async fn render_pdf(body: web::Json<DocStructure>) -> HttpResponse {
     pdf_response_from_dom(pdf_dom)
 }
 
+async fn heartbeat() -> HttpResponse {
+    HttpResponse::Ok().finish()
+}
+
 #[cfg(feature = "develop")]
 #[get("/test")]
 async fn test_render_pdf() -> HttpResponse {
@@ -44,8 +48,16 @@ async fn test_render_pdf() -> HttpResponse {
 
 #[actix_web::main]
 async fn main() -> Result<(), std::io::Error> {
-    HttpServer::new(|| {
-        let mut app = App::new().service(render_pdf);
+    let port = std::env::var("PORT").map_or(1234, |str| str.parse().unwrap_or(1234));
+
+    let base_path = std::env::var("BASE_PATH").unwrap_or("/".to_owned());
+
+    HttpServer::new(move || {
+        let mut app = App::new().service(
+            web::scope(&base_path)
+                .service(render_pdf)
+                .route("/health-check", web::get().to(heartbeat)),
+        );
 
         // We don't want the test endpoint in prod builds
         #[cfg(feature = "develop")]
@@ -53,9 +65,11 @@ async fn main() -> Result<(), std::io::Error> {
             app = app.service(test_render_pdf);
         }
 
+        app = app.route("/heartbeat", web::get().to(heartbeat));
+
         app
     })
-    .bind(("0.0.0.0", 1234))?
+    .bind(("0.0.0.0", port))?
     .run()
     .await
 }
