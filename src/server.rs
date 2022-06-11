@@ -33,7 +33,7 @@ async fn render_pdf(body: web::Json<DocStructure>) -> HttpResponse {
 }
 
 async fn heartbeat() -> HttpResponse {
-    HttpResponse::Ok().finish()
+    HttpResponse::Ok().body("Ba-bump")
 }
 
 #[cfg(feature = "develop")]
