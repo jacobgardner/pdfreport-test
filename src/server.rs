@@ -46,9 +46,11 @@ async fn test_render_pdf() -> HttpResponse {
     pdf_response_from_dom(pdf_dom)
 }
 
+const DEFAULT_PORT: u16 = 8181;
+
 #[actix_web::main]
 async fn main() -> Result<(), std::io::Error> {
-    let port = std::env::var("PORT").map_or(1234, |str| str.parse().unwrap_or(1234));
+    let port = std::env::var("PORT").map_or(DEFAULT_PORT, |str| str.parse().unwrap_or(DEFAULT_PORT));
 
     let base_path = std::env::var("BASE_PATH").unwrap_or("/".to_owned());
 
