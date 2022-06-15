@@ -7,7 +7,7 @@ use config::{MERGEABLE_NAME, UNMERGEABLE_NAME};
 use darling::FromMeta;
 use field_options::{extract_field_attrs, FieldOptions, FieldsOptions};
 use proc_macro2::Span;
-use quote::{format_ident, quote, ToTokens};
+use quote::{quote, ToTokens};
 use std::str::FromStr;
 use syn::{
     self, parse_macro_input, parse_quote, Attribute, AttributeArgs, Data, DeriveInput, Fields,

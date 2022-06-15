@@ -34,7 +34,7 @@ pub struct DocStructure {
     #[ts(type = "EdgeStyle")]
     pub page_margins: EdgeStyle::Unmergeable,
     pub fonts: Vec<FontFamilyInfo>,
-    #[ts(type = "Style")]
+    #[ts(type = "Record<string, Style>")]
     pub stylesheet: Stylesheet,
     pub root: DomNode,
 }

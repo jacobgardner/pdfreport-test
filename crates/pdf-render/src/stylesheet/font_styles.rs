@@ -7,7 +7,7 @@ use crate::values::Pt;
 #[mergeable]
 #[derive(TS, Clone, Debug, PartialEq)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-#[ts(export)]
+#[ts(export, rename_all = "camelCase")]
 pub struct FontStyles {
     pub family: String,
     #[ts(type = "string | number")]

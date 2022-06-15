@@ -1,12 +1,11 @@
 use merges::Merges;
 use optional_merge_derive::mergeable;
 
-use serde::Deserialize;
 use ts_rs::TS;
 
 use crate::values::{Color, Pt};
 
-use super::{BorderStyle, EdgeStyle, FlexStyle, FontStyles, PageBreakRule};
+use super::{BorderStyle, EdgeStyle, FlexStyle, FontStyles, PageBreakRule, TextTransformation};
 
 #[mergeable]
 #[derive(TS, Clone, Debug, PartialEq)]
@@ -36,20 +35,6 @@ pub struct Style {
     pub text_transform: TextTransformation,
     #[ts(type = "number | string")]
     pub line_height: Option<Pt>,
-}
-
-// TODO: Move to its own file
-#[derive(TS, Clone, Debug, PartialEq, Deserialize)]
-#[ts(export, rename_all = "camelCase")]
-pub enum TextTransformation {
-    None,
-    Uppercase,
-}
-
-impl Default for TextTransformation {
-    fn default() -> Self {
-        Self::None
-    }
 }
 
 impl Default for Style::Unmergeable {

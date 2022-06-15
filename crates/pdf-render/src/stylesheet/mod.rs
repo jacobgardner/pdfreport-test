@@ -14,6 +14,7 @@ mod flex_values;
 mod font_styles;
 mod page_break_rule;
 mod style;
+mod text_transformation;
 
 pub use border_radius::BorderRadiusStyle;
 pub use border_style::BorderStyle;
@@ -23,7 +24,7 @@ pub use flex_values::*;
 pub use font_styles::FontStyles;
 pub use page_break_rule::PageBreakRule;
 pub use style::Style;
-pub use style::TextTransformation;
+pub use text_transformation::TextTransformation;
 
 use crate::error::{DocumentGenerationError, UserInputError};
 
