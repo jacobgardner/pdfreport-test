@@ -18,6 +18,7 @@ skia-safe = { version = "*", features = ["textlayout"] }
 ts-rs = { version = "*" }
 lazy_static = "*"
 regex = "*"
+tracing = "0.1"
 
 
 color_processing = "*"

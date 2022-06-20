@@ -40,6 +40,7 @@ COPY --from=builder [\
     "/lib/x86_64-linux-gnu/libgcc_s.so.1", \
     "/usr/lib/" ]
 
+ENV RUST_LOG warn,server=info,pdf_render=info
 
 ENTRYPOINT [ "/workspace/server" ]
 # CMD ["./server"]

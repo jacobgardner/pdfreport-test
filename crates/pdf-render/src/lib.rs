@@ -9,6 +9,7 @@ use document_builder::DocumentBuilder;
 use fonts::{FontCollection, FontFamilyCollection};
 use paragraph_layout::ParagraphLayout;
 use print_pdf_writer::PrintPdfWriter;
+use tracing::{span, Level, info};
 
 use std::{io::Write, rc::Rc};
 
@@ -33,6 +34,7 @@ use error::DocumentGenerationError;
 pub fn load_fonts_from_doc_structure(
     fonts: &[FontFamilyInfo],
 ) -> Result<FontCollection, DocumentGenerationError> {
+    let _span = span!(Level::INFO, "Loading fonts...").entered();
     let mut font_collection = FontCollection::new();
 
     for font_family_info in fonts.iter() {
@@ -46,6 +48,8 @@ pub fn load_fonts_from_doc_structure(
 
         font_collection.add_family(font_family)?;
     }
+    
+    info!("Fonts loaded!");
 
     Ok(font_collection)
 }

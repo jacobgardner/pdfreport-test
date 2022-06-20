@@ -34,6 +34,14 @@ actix-web = "*"
 serde = { version = "*", features = ["derive"] }
 serde_json = "*"
 clap = { version = "3.1.18", features = ["derive"] }
+rollbar = { version = "*" }
+backtrace = { version = "*" }
+env_logger = { version = "*" }
+log = { version = "*" }
+logzio = { path = "crates/logzio" }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+tracing-futures = "*"
 
 pdf-render = { path = "crates/pdf-render" }
 
