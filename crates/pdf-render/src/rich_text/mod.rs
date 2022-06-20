@@ -75,11 +75,26 @@ impl Display for RichText {
     }
 }
 
+trait CharToByteIndex {
+    fn get_byte_index_from_char(&self, char_index: usize) -> usize;
+}
+
+impl CharToByteIndex for String {
+    fn get_byte_index_from_char(&self, char_index: usize) -> usize {
+        debug_assert!(char_index <= self.chars().count());
+
+        self.char_indices()
+            .nth(char_index)
+            .map(|(idx, _)| idx)
+            .unwrap_or_else(|| self.len())
+    }
+}
+
 impl RichText {
     pub fn substr(
         &self,
-        line_start_index: usize,
-        line_end_index: usize,
+        char_start_index: usize,
+        char_end_index: usize,
     ) -> Result<RichText, DocumentGenerationError> {
         let span_data: Vec<(&RichTextSpan, usize, usize)> = self
             .0
@@ -95,12 +110,12 @@ impl RichText {
 
         let start_span_index = span_data
             .iter()
-            .position(|&(_, _, line_end_index)| line_end_index > line_start_index)
+            .position(|&(_, _, line_end_index)| line_end_index > char_start_index)
             .unwrap();
 
         let end_span_index = span_data
             .iter()
-            .rposition(|&(_, line_start_index, _)| line_start_index < line_end_index)
+            .rposition(|&(_, line_start_index, _)| line_start_index < char_end_index)
             .unwrap();
 
         let rich = if start_span_index == end_span_index {
@@ -108,8 +123,11 @@ impl RichText {
 
             let (span, start, _) = span_data[start_span_index];
 
+            let byte_start_index = span.text.get_byte_index_from_char(char_start_index - start);
+            let byte_end_index = span.text.get_byte_index_from_char(char_end_index - start);
+
             RichText(vec![RichTextSpan {
-                text: span.text[line_start_index - start..line_end_index - start].to_owned(),
+                text: span.text[byte_start_index..byte_end_index].to_owned(),
                 ..span.clone()
             }])
         } else {
@@ -117,8 +135,12 @@ impl RichText {
 
             let (start_span, start, _) = span_data[start_span_index];
 
+            let byte_start_index = start_span
+                .text
+                .get_byte_index_from_char(char_start_index - start);
+
             rich_text.0.push(RichTextSpan {
-                text: start_span.text[line_start_index - start..].to_owned(),
+                text: start_span.text[byte_start_index..].to_owned(),
                 ..start_span.clone()
             });
 
@@ -127,8 +149,11 @@ impl RichText {
                 .extend(self.0[start_span_index + 1..end_span_index].iter().cloned());
 
             let (end_span, start, _) = span_data[end_span_index];
+            
+            let byte_end_index = end_span.text.get_byte_index_from_char(char_end_index - start);
+            
             rich_text.0.push(RichTextSpan {
-                text: end_span.text[0..line_end_index - start].to_owned(),
+                text: end_span.text[0..byte_end_index].to_owned(),
                 ..end_span.clone()
             });
 
@@ -142,6 +167,76 @@ impl RichText {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn unicode_support() {
+        let line = RichText(vec![
+            RichTextSpan {
+                // 89 characters
+                // 93 bytes
+                size: Pt(32.),
+                .."Your approach to work is one of the most visible parts of your professional “appearance”.".into()
+            },
+            RichTextSpan {
+                // 23 characters
+                // 51 bytes
+                size: Pt(15.),
+                .."🎅🎅🎅🎅🎅🎅🎅🎅 “appearance”.".into()
+            },
+            RichTextSpan {
+                // 9 characters
+                size: Pt(8.),
+                .." lazy dog".into()
+            },
+        ]);
+
+        assert_eq!(line.substr(0, 89).unwrap().0, line.0[0..1]);
+        // 4 santas
+        assert_eq!(
+            line.substr(0, 93).unwrap(),
+            RichText(vec![
+                line.0[0].clone(),
+                RichTextSpan {
+                    size: Pt(15.),
+                    .."🎅🎅🎅🎅".into()
+                }
+            ])
+        );
+        
+        assert_eq!(
+            line.substr(76, 88).unwrap(),
+            RichText(vec![
+                // line.0[0].clone(),
+                RichTextSpan {
+                    size: Pt(32.),
+                    .."“appearance”".into()
+                }
+            ])
+        );
+
+        assert_eq!(
+            line.substr(76, 87).unwrap(),
+            RichText(vec![
+                // line.0[0].clone(),
+                RichTextSpan {
+                    size: Pt(32.),
+                    .."“appearance".into()
+                }
+            ])
+        );
+        
+        assert_eq!(
+            line.substr(76, 89).unwrap(),
+            RichText(vec![
+                // line.0[0].clone(),
+                RichTextSpan {
+                    size: Pt(32.),
+                    .."“appearance”.".into()
+                }
+            ])
+        );
+        
+    }
 
     #[test]
     #[should_panic]

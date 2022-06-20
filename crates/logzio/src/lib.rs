@@ -148,6 +148,10 @@ impl<T: Serialize + Send + 'static> LogzIoSender<T> {
                         break;
                     }
                 }
+                
+                if message_count == 0 {
+                    continue;
+                }
 
                 let mut retry_count = 0;
 
