@@ -93,8 +93,6 @@ impl RichText {
             })
             .collect();
 
-        // println!("{:?}", span_data);
-
         let start_span_index = span_data
             .iter()
             .position(|&(_, _, line_end_index)| line_end_index > line_start_index)
@@ -136,8 +134,6 @@ impl RichText {
 
             rich_text
         };
-
-        // println!("{:?}", rich.0);
 
         Ok(rich)
     }

@@ -1,23 +1,3 @@
-// use log::Level;
-
-// struct ComposedLogger {}
-
-// impl log::Log for ComposedLogger {
-//     fn enabled(&self, metadata: &log::Metadata) -> bool {
-//         metadata.level() <= Level::Info
-//     }
-
-//     fn log(&self, record: &log::Record) {
-//         if self.enabled(record.metadata()) {
-
-//         }
-//     }
-
-//     fn flush(&self) {
-//         todo!()
-//     }
-// }
-
 use logzio::FromTracingData;
 use serde::Serialize;
 use tracing::{field::Visit, span};

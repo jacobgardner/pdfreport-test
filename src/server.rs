@@ -130,8 +130,6 @@ async fn main() -> Result<(), std::io::Error> {
                     .unwrap_or("No Request Id")
                     .to_owned();
 
-                println!("{}", request_id);
-
                 let fut = srv
                     .call(req)
                     .instrument(info_span!("HTTP Request", request_id = request_id.as_str()));
@@ -141,10 +139,6 @@ async fn main() -> Result<(), std::io::Error> {
 
                     Ok(res)
                 }
-
-                // srv.call(req).map(|res| {
-                //     res
-                // })
             })
             .app_data(web::Data::new(AppState {}))
             .service(
