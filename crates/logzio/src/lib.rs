@@ -5,7 +5,7 @@ use std::marker::PhantomData;
 use std::time::Duration;
 use std::{fmt::Debug, time::Instant};
 use tracing::field::Visit;
-use tracing::{span, Event, Subscriber};
+use tracing::{span, Subscriber};
 use tracing_subscriber::registry::LookupSpan;
 use tracing_subscriber::Layer;
 
@@ -35,7 +35,7 @@ impl Serialize for LogzioTimestamp {
     where
         S: serde::Serializer,
     {
-        serializer.serialize_str(&format!("{}", self.0.to_rfc3339()))
+        serializer.serialize_str(&self.0.to_rfc3339())
     }
 }
 
@@ -73,12 +73,12 @@ impl<T: Serialize + Send + 'static> LogzIoSenderBuilder<T> {
     pub fn new(host: String, shipping_token: String) -> Self {
         Self {
             // 1 MiB
-            max_buffer_size: 1024 * 1024 * 1,
+            max_buffer_size: 1024 * 1024,
             max_message_count: 100,
             send_interval: Duration::from_secs(10),
             max_retry_count: 10,
-            host: host,
-            shipping_token: shipping_token,
+            host,
+            shipping_token,
             _message_type: PhantomData,
         }
     }
@@ -189,7 +189,7 @@ impl<T: Serialize + Send + 'static> LogzIoSender<T> {
         let _ = self.message_queue.send(ChannelMessage::LogMessage(msg));
     }
 
-    pub fn flush(&self) -> () {
+    pub fn flush(&self) {
         // Can return an error, but... do we care?
         let _ = self.message_queue.send(ChannelMessage::Flush);
     }
@@ -214,7 +214,7 @@ where
     }
 
     fn flush(&self) {
-        LogzIoSender::flush(&self)
+        LogzIoSender::flush(self)
     }
 }
 
@@ -251,7 +251,11 @@ where
     S: Subscriber + for<'a> LookupSpan<'a>,
     T: FromTracingData + Send + Serialize + 'static,
 {
-    fn on_event(&self, event: &tracing::Event<'_>, ctx: tracing_subscriber::layer::Context<'_, S>) {
+    fn on_event(
+        &self,
+        event: &tracing::Event<'_>,
+        _ctx: tracing_subscriber::layer::Context<'_, S>,
+    ) {
         let mut event_visitor = Visitor::default();
 
         event.record(&mut event_visitor);
@@ -277,7 +281,7 @@ where
         let mut event_visitor = Visitor::default();
 
         attrs.record(&mut event_visitor);
-        
+
         let message = Message {
             timestamp: LogzioTimestamp(Utc::now()),
             // TODO: Future enhancement

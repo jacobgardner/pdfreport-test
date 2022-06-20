@@ -5,7 +5,7 @@ use logzio::{LogzIoSender, LogzIoSenderBuilder};
 use pdf_render::{build_pdf_from_dom, doc_structure::DocStructure, error::DocumentGenerationError};
 
 use rollbar::{self, report_panics};
-use tracing::{info, info_span, Instrument, error};
+use tracing::{error, info, info_span, Instrument};
 use tracing_subscriber::{filter, prelude::*, EnvFilter};
 
 mod logger;
@@ -49,7 +49,6 @@ async fn render_pdf(body: web::Json<DocStructure>, data: web::Data<AppState>) ->
 async fn heartbeat() -> HttpResponse {
     let _span = info_span!("Beginning return heartbeat").entered();
     info!("Heartbeat!");
-    panic!("DEad");
     HttpResponse::Ok().body("Ba-bump")
 }
 
@@ -68,18 +67,15 @@ const DEFAULT_PORT: u16 = 8181;
 
 #[actix_web::main]
 async fn main() -> Result<(), std::io::Error> {
-    let environment = std::env::var("ENV").unwrap_or("local".to_owned());
+    let environment = std::env::var("ENV").unwrap_or_else(|_| "local".to_owned());
     let access_token = std::env::var("LOGGER_SERVER_TOKEN").ok();
+    let logz_shipping_token = std::env::var("LOGGER_TRANSPORTS_REMOTE_TOKEN").ok();
 
-    // TODO: Don't commit me
-    let logz_sender: LogzIoSender<LogData> = LogzIoSenderBuilder::new(
-        "listener.logz.io".to_owned(),
-        "".to_owned(),
-    )
-    .build();
+    let logz_shipping_layer = if let Some(shipping_token) = logz_shipping_token {
+        let logz_sender: LogzIoSender<LogData> =
+            LogzIoSenderBuilder::new("listener.logz.io".to_owned(), shipping_token).build();
 
-    let subscriber = tracing_subscriber::registry()
-        .with(
+        Some(
             logz_sender
                 .with_filter(filter::LevelFilter::INFO)
                 .with_filter(filter::filter_fn(|metadata| {
@@ -87,6 +83,12 @@ async fn main() -> Result<(), std::io::Error> {
                         || metadata.target().starts_with("pdf_render")
                 })),
         )
+    } else {
+        None
+    };
+
+    let subscriber = tracing_subscriber::registry()
+        .with(logz_shipping_layer)
         .with(tracing_subscriber::fmt::layer().with_filter(EnvFilter::from_default_env()));
 
     tracing::subscriber::set_global_default(subscriber).unwrap();
@@ -97,27 +99,25 @@ async fn main() -> Result<(), std::io::Error> {
 
         report_panics!(rollbar_client);
     }
-    
+
     let original_hook = std::panic::take_hook();
-    
+
     std::panic::set_hook(Box::new(move |panic_info| {
-        
         let panic_msg = if let Some(s) = panic_info.payload().downcast_ref::<&str>() {
             format!("Panic Occurred: {s:?}")
         } else {
-            format!("Panic Occurred!")
+            "Panic Occurred!".to_string()
         };
 
         error!(message = panic_msg.as_str());
 
         original_hook(panic_info);
     }));
-    
 
     let port =
         std::env::var("PORT").map_or(DEFAULT_PORT, |str| str.parse().unwrap_or(DEFAULT_PORT));
 
-    let base_path = std::env::var("BASE_PATH").unwrap_or("/".to_owned());
+    let base_path = std::env::var("BASE_PATH").unwrap_or_else(|_| "/".to_owned());
 
     HttpServer::new(move || {
         let mut app = App::new()
