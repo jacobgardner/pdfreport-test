@@ -10,7 +10,7 @@
   },
   "fonts": [
     {
-      "family_name": "Inter",
+      "familyName": "Inter",
       "fonts": [
         {
           "source": "./assets/fonts/inter-static/Inter-Bold.ttf",
