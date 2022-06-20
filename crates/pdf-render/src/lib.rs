@@ -9,7 +9,7 @@ use document_builder::DocumentBuilder;
 use fonts::{FontCollection, FontFamilyCollection};
 use paragraph_layout::ParagraphLayout;
 use print_pdf_writer::PrintPdfWriter;
-use tracing::{span, Level, info};
+use tracing::{info, span, Level};
 
 use std::{io::Write, rc::Rc};
 
@@ -48,7 +48,7 @@ pub fn load_fonts_from_doc_structure(
 
         font_collection.add_family(font_family)?;
     }
-    
+
     info!("Fonts loaded!");
 
     Ok(font_collection)
