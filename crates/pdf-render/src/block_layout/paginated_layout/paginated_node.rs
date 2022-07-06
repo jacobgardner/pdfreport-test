@@ -14,6 +14,17 @@ pub struct DrawableContainerNode {
 }
 
 #[derive(Clone, Debug)]
+pub enum Image {
+    SVG(String),
+}
+
+#[derive(Clone, Debug)]
+pub struct DrawableImageNode {
+    pub style: Style::Unmergeable,
+    pub image: Image,
+}
+
+#[derive(Clone, Debug)]
 pub struct PaginatedNode {
     pub page_layout: NodeLayout,
     pub page_index: usize,
@@ -24,7 +35,7 @@ pub struct PaginatedNode {
 pub enum DrawableNode {
     Text(DrawableTextNode),
     Container(DrawableContainerNode),
-    // Image(DrawableImageNode)
+    Image(DrawableImageNode),
 }
 
 impl DrawableNode {
@@ -32,6 +43,7 @@ impl DrawableNode {
         match self {
             Self::Text(node) => &node.style,
             Self::Container(node) => &node.style,
+            Self::Image(node) => &node.style,
         }
     }
 
@@ -39,3 +51,4 @@ impl DrawableNode {
         !matches!(self, Self::Container(_))
     }
 }
+

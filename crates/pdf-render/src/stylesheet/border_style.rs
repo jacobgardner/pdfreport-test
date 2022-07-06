@@ -13,7 +13,6 @@ use super::BorderRadiusStyle;
 pub struct BorderStyle {
     #[mergeable(nested)]
     pub width: EdgeStyle,
-    #[ts(type = "string")]
     pub color: Color,
     #[mergeable(nested)]
     pub radius: BorderRadiusStyle,

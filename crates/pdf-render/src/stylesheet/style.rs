@@ -16,13 +16,11 @@ pub struct Style {
     pub border: BorderStyle,
     #[mergeable(nested)]
     pub font: FontStyles,
-    #[ts(type = "string")]
     pub color: Color,
     #[mergeable(nested)]
     pub margin: EdgeStyle,
     #[mergeable(nested)]
     pub padding: EdgeStyle,
-    #[ts(type = "string")]
     pub background_color: Option<Color>,
     #[mergeable(nested)]
     pub flex: FlexStyle,
@@ -33,7 +31,6 @@ pub struct Style {
     pub break_after: PageBreakRule,
     pub break_inside: PageBreakRule,
     pub text_transform: TextTransformation,
-    #[ts(type = "number | string")]
     pub line_height: Option<Pt>,
 }
 

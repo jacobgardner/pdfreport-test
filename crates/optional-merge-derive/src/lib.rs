@@ -172,7 +172,7 @@ pub fn mergeable(
 
     original_ast.vis = parse_quote! { pub };
     mergeable_ast.vis = parse_quote! { pub };
-
+    
     let rename_as = LitStr::new(&original_name.to_string(), Span::call_site());
 
     mergeable_ast

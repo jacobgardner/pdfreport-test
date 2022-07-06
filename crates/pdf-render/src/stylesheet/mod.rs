@@ -25,13 +25,31 @@ pub use font_styles::FontStyles;
 pub use page_break_rule::PageBreakRule;
 pub use style::Style;
 pub use text_transformation::TextTransformation;
+use ts_rs::{TS, Dependency};
 
 use crate::error::{DocumentGenerationError, UserInputError};
+
 
 #[derive(Deserialize, Debug, Default)]
 pub struct Stylesheet {
     #[serde(flatten)]
     style_lookup: HashMap<String, Style::Mergeable>,
+}
+
+impl TS for Stylesheet {
+    const EXPORT_TO: Option<&'static str> = None;
+
+    fn name() -> String {
+        "Record<string, Style>".to_string()
+    }
+
+    fn dependencies() -> Vec<ts_rs::Dependency> {
+        vec![Dependency::from_ty::<Style::Mergeable>().unwrap()]
+    }
+
+    fn transparent() -> bool {
+        true
+    }
 }
 
 impl Stylesheet {

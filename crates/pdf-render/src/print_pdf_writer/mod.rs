@@ -7,7 +7,7 @@ use std::{
 
 use printpdf::{
     IndirectFontRef, PdfDocument, PdfDocumentReference, PdfLayerIndex, PdfLayerReference,
-    PdfPageIndex, TextMatrix,
+    PdfPageIndex, Svg, SvgTransform, TextMatrix,
 };
 
 mod corners;
@@ -16,7 +16,7 @@ mod font_lookup;
 mod rect;
 
 use crate::{
-    block_layout::paginated_layout::{DrawableNode, PaginatedNode},
+    block_layout::paginated_layout::{DrawableImageNode, DrawableNode, Image, PaginatedNode},
     document_builder::UnstructuredDocumentWriter,
     error::{DocumentGenerationError, InternalServerError},
     fonts::{FontCollection, FontId},
@@ -163,11 +163,12 @@ impl<'a> UnstructuredDocumentWriter for PrintPdfWriter<'a> {
 
         self.draw_container(node, node_style)?;
 
-        // Remove this allow once we have image rendering
-        #[allow(clippy::single_match)]
         match &node.drawable_node {
             DrawableNode::Text(text_node) => {
                 self.draw_text_block(node, node_style, &text_node.text_block)?;
+            }
+            DrawableNode::Image(image_node) => {
+                self.draw_image(node, image_node)?;
             }
             _ => {}
         }
@@ -177,6 +178,49 @@ impl<'a> UnstructuredDocumentWriter for PrintPdfWriter<'a> {
 }
 
 impl<'a> PrintPdfWriter<'a> {
+    fn draw_image(
+        &mut self,
+        node: &PaginatedNode,
+        image_node: &DrawableImageNode,
+    ) -> Result<&mut Self, DocumentGenerationError> {
+        let layer = self.get_base_layer(node.page_index);
+
+        if let Image::SVG(ref svg_content) = image_node.image {
+            let svg = Svg::parse(&svg_content).unwrap();
+
+            let svg_xobject = svg.into_xobject(&layer);
+
+            let y_position = self.page_size.height
+                - (node.page_layout.top + self.page_margins.top)
+                - node.page_layout.height;
+
+            let doc = roxmltree::Document::parse(&svg_content).unwrap();
+
+            let svg_node = doc
+                .descendants()
+                .find(|node| node.has_tag_name("svg"))
+                .unwrap();
+
+            let svg_width = Pt::from_px(svg_node.attribute("width").unwrap().parse().unwrap());
+            let svg_height = Pt::from_px(svg_node.attribute("height").unwrap().parse().unwrap());
+
+            svg_xobject.add_to_layer(
+                &layer,
+                SvgTransform {
+                    translate_x: Some((node.page_layout.left + self.page_margins.left).into()),
+                    translate_y: Some(y_position.into()),
+                    scale_x: Some((node.page_layout.width / svg_width).0),
+                    scale_y: Some((node.page_layout.height / svg_height).0),
+                    ..Default::default()
+                },
+            );
+        } else {
+            unimplemented!("Only SVGs are currently supported");
+        }
+
+        Ok(self)
+    }
+
     fn draw_container(
         &mut self,
         node: &PaginatedNode,

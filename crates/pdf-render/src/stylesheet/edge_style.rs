@@ -6,13 +6,9 @@ use ts_rs::TS;
 #[derive(TS, Clone, Debug, PartialEq)]
 #[ts(export)]
 pub struct EdgeStyle {
-    #[ts(type = "string | number")]
     pub top: Pt,
-    #[ts(type = "string | number")]
     pub right: Pt,
-    #[ts(type = "string | number")]
     pub bottom: Pt,
-    #[ts(type = "string | number")]
     pub left: Pt,
 }
 

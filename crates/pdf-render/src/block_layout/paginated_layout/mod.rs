@@ -5,7 +5,9 @@ mod paginated_node;
 
 use draw_cursor::DrawCursor;
 
-pub use paginated_node::{DrawableContainerNode, DrawableNode, DrawableTextNode, PaginatedNode};
+pub use paginated_node::{
+    DrawableContainerNode, DrawableImageNode, DrawableNode, DrawableTextNode, Image, PaginatedNode,
+};
 
 use crate::{
     doc_structure::{DomNode, HasNodeId, NodeId},
@@ -248,6 +250,10 @@ impl<'a> PaginatedLayoutEngine<'a> {
                     style: adjusted_style,
                 })
             }
+            DomNode::Image(image_node) => DrawableNode::Image(DrawableImageNode {
+                style: adjusted_style,
+                image: Image::SVG(image_node.content.clone()),
+            }),
             _ => DrawableNode::Container(DrawableContainerNode {
                 style: adjusted_style,
             }),

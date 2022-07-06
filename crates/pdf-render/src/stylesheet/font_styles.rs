@@ -10,11 +10,9 @@ use crate::values::Pt;
 #[ts(export, rename_all = "camelCase")]
 pub struct FontStyles {
     pub family: String,
-    #[ts(type = "string | number")]
     pub size: Pt,
     pub style: FontSlant,
     pub weight: FontWeight,
-    #[ts(type = "string | number")]
     pub letter_spacing: Pt,
 }
 

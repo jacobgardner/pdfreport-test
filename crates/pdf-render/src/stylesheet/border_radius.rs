@@ -7,13 +7,9 @@ use ts_rs::TS;
 #[ts(export, rename_all = "camelCase")]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct BorderRadiusStyle {
-    #[ts(type = "string | number")]
     pub top_right: Pt,
-    #[ts(type = "string | number")]
     pub bottom_right: Pt,
-    #[ts(type = "string | number")]
     pub bottom_left: Pt,
-    #[ts(type = "string | number")]
     pub top_left: Pt,
 }
 

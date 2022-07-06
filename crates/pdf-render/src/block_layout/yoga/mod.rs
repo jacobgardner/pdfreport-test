@@ -14,7 +14,7 @@ use crate::{
     values::Pt,
 };
 
-use self::node_context::NodeContext;
+use self::node_context::TextNodeContext;
 
 use super::layout_engine::{LayoutEngine, NodeLayout};
 
@@ -47,7 +47,7 @@ extern "C" fn measure_func(
 ) -> Size {
     let context = yoga::Node::get_context_mut(&node_ref)
         .unwrap()
-        .downcast_mut::<NodeContext>()
+        .downcast_mut::<TextNodeContext>()
         .unwrap();
 
     // This width excludes the margin & padding so it should be exclusively the
@@ -123,18 +123,26 @@ impl<'a> LayoutEngine for YogaLayout<'a> {
 
             let mut layout_node = yoga::Node::from(node_style.clone());
 
-            if let DomNode::Text(text_node) = node {
-                let rich_text = dom_node_to_rich_text(text_node, self.node_lookup, stylesheet)?;
+            match node {
+                DomNode::Text(text_node) => {
+                    let rich_text = dom_node_to_rich_text(text_node, self.node_lookup, stylesheet)?;
 
-                let context = yoga::Context::new(NodeContext {
-                    rich_text,
-                    paragraph_layout: paragraph_layout.clone(),
-                    text_block: None,
-                    calculate_error: None,
-                });
+                    let context = yoga::Context::new(TextNodeContext {
+                        rich_text,
+                        paragraph_layout: paragraph_layout.clone(),
+                        text_block: None,
+                        calculate_error: None,
+                    });
 
-                layout_node.set_context(Some(context));
-                layout_node.set_measure_func(Some(measure_func));
+                    layout_node.set_context(Some(context));
+                    layout_node.set_measure_func(Some(measure_func));
+                }
+                DomNode::Image(image_node) => {
+                    layout_node.set_width(image_node.width.into());
+                    layout_node.set_height(image_node.height.into());
+
+                }
+                _ => {}
             }
 
             if let Some(parent) = parent {
@@ -165,7 +173,7 @@ impl<'a> LayoutEngine for YogaLayout<'a> {
 
 fn check_node_for_error(node: &yoga::Node) -> Result<(), DocumentGenerationError> {
     if let Some(context) = node.get_own_context_mut() {
-        let context = context.downcast_mut::<NodeContext>().unwrap();
+        let context = context.downcast_mut::<TextNodeContext>().unwrap();
 
         let err = context.calculate_error.take();
 
