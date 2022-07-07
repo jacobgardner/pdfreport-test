@@ -123,6 +123,7 @@
       "backgroundColor": "pink"
     },
     "flagpole": {
+      "backgroundColor": "yellow",
       "margin": {
         "right": "10pt",
         "bottom": "1pt"

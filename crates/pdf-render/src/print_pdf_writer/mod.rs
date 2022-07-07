@@ -16,7 +16,10 @@ mod font_lookup;
 mod rect;
 
 use crate::{
-    block_layout::paginated_layout::{DrawableImageNode, DrawableNode, Image, PaginatedNode},
+    block_layout::{
+        layout_engine::NodeLayout,
+        paginated_layout::{DrawableImageNode, DrawableNode, Image, PaginatedNode},
+    },
     document_builder::UnstructuredDocumentWriter,
     error::{DocumentGenerationError, InternalServerError},
     fonts::{FontCollection, FontId},
@@ -178,6 +181,15 @@ impl<'a> UnstructuredDocumentWriter for PrintPdfWriter<'a> {
 }
 
 impl<'a> PrintPdfWriter<'a> {
+    fn get_placement_coords(&self, layout: &NodeLayout) -> (Pt, Pt) {
+        let x_position = layout.left + self.page_margins.left;
+        let y_position = self.page_size.height
+            - (layout.top + self.page_margins.top)
+            - layout.height;
+
+        (x_position, y_position)
+    }
+
     fn draw_image(
         &mut self,
         node: &PaginatedNode,
@@ -190,9 +202,7 @@ impl<'a> PrintPdfWriter<'a> {
 
             let svg_xobject = svg.into_xobject(&layer);
 
-            let y_position = self.page_size.height
-                - (node.page_layout.top + self.page_margins.top)
-                - node.page_layout.height;
+            let (x_position, y_position) = self.get_placement_coords(&node.page_layout);
 
             let doc = roxmltree::Document::parse(&svg_content).unwrap();
 
@@ -207,7 +217,7 @@ impl<'a> PrintPdfWriter<'a> {
             svg_xobject.add_to_layer(
                 &layer,
                 SvgTransform {
-                    translate_x: Some((node.page_layout.left + self.page_margins.left).into()),
+                    translate_x: Some(x_position.into()),
                     translate_y: Some(y_position.into()),
                     scale_x: Some((node.page_layout.width / svg_width).0),
                     scale_y: Some((node.page_layout.height / svg_height).0),
@@ -226,9 +236,12 @@ impl<'a> PrintPdfWriter<'a> {
         node: &PaginatedNode,
         container_style: &Style::Unmergeable,
     ) -> Result<&mut Self, DocumentGenerationError> {
+        
+        let coords = self.get_placement_coords(&node.page_layout);
+        
         let rect = crate::values::Rect {
-            left: node.page_layout.left + self.page_margins.left,
-            top: self.page_size.height - (node.page_layout.top + self.page_margins.top),
+            left: coords.0,
+            top: coords.1,
             width: node.page_layout.width,
             height: node.page_layout.height,
         };

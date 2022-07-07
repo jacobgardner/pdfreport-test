@@ -19,35 +19,34 @@ impl<'a> PrintPdfWriter<'a> {
     ) {
         let layer = self.get_base_layer(page_index);
 
+        // bottom-left
         let start = Point {
             x: rect.left.into(),
             y: rect.top.into(),
         };
 
+        // top-right
         let end = Point {
             x: (rect.left + rect.width).into(),
-            y: (rect.top - rect.height).into(),
+            y: (rect.top + rect.height).into(),
         };
 
         let mut edge_ranges = [0..1, 1..2, 2..3, 3..4];
-        // let mut top_range = 0..1;
-        // let mut right_range = 1..2;
-        // let mut bottom_range = 2..3;
-        // let mut left_range = 3..4;
+
 
         let corners = &[
             Point {
                 x: start.x,
-                y: start.y,
+                y: end.y,
             },
             Point {
                 x: end.x,
-                y: start.y,
+                y: end.y,
             },
-            Point { x: end.x, y: end.y },
+            Point { x: end.x, y: start.y },
             Point {
                 x: start.x,
-                y: end.y,
+                y: start.y,
             },
         ];
 
@@ -57,22 +56,22 @@ impl<'a> PrintPdfWriter<'a> {
             (
                 Point {
                     x: start.x,
-                    y: start.y,
+                    y: end.y,
                 },
                 false,
             ),
             (
                 Point {
                     x: end.x,
-                    y: start.y,
+                    y: end.y,
                 },
                 false,
             ),
-            (Point { x: end.x, y: end.y }, false),
+            (Point { x: end.x, y: start.y }, false),
             (
                 Point {
                     x: start.x,
-                    y: end.y,
+                    y: start.y,
                 },
                 false,
             ),
