@@ -33,7 +33,6 @@ impl<'a> PrintPdfWriter<'a> {
 
         let mut edge_ranges = [0..1, 1..2, 2..3, 3..4];
 
-
         let corners = &[
             Point {
                 x: start.x,
