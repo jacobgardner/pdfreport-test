@@ -1,0 +1,30 @@
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" role="img" aria-label="22" width="1200" height="146" viewBox="0 0 600 73"
+  xmlns="http://www.w3.org/2000/svg">
+  <path d="M0 20 H 300 M320 0 V73 M420 0 V73 M550 0 V73" stroke="black" />
+
+  <text x="20" y="20" fill="#444A5A" text-anchor="start" font-size="15"
+    font-family="Inter, Arial, Helvetica, sans-serif" dominant-baseline="auto">
+    AUTO
+  </text>
+  <text x="120" y="20" fill="#444A5A" text-anchor="start" font-size="15"
+    font-family="Inter, Arial, Helvetica, sans-serif" dominant-baseline="middle">
+    MIDDLE
+  </text>
+  <text x="220" y="20" fill="#444A5A" text-anchor="start" font-size="15"
+    font-family="Inter, Arial, Helvetica, sans-serif" dominant-baseline="hanging">
+    HANGING
+  </text>
+  
+  <text x="320" y="20" fill="#444A5A" text-anchor="start" font-size="15"
+    font-family="Inter, Arial, Helvetica, sans-serif" dominant-baseline="middle">
+    AUTO
+  </text>
+  <text x="420" y="20" fill="#444A5A" text-anchor="middle" font-size="15"
+    font-family="Inter, Arial, Helvetica, sans-serif" dominant-baseline="middle">
+    MIDDLE
+  </text>
+  <text x="550" y="20" fill="#444A5A" text-anchor="end" font-size="15"
+    font-family="Inter, Arial, Helvetica, sans-serif" dominant-baseline="middle">
+    HANGING
+  </text>
+</svg>
