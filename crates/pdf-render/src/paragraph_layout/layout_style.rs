@@ -12,6 +12,17 @@ impl Default for TextAlign {
     }
 }
 
+impl TextAlign {
+    pub fn from_anchor(anchor: &str) -> Self {
+        match anchor.to_lowercase().as_ref() {
+            "start" => Self::Left,
+            "middle" => Self::Center,
+            "end" => Self::Right,
+            _ => Self::Left,
+        }
+    }
+}
+
 #[derive(Default)]
 pub struct ParagraphStyle {
     pub align: TextAlign,

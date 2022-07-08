@@ -12,6 +12,7 @@ pub use paginated_node::{
 use crate::{
     doc_structure::{DomNode, HasNodeId, NodeId},
     error::DocumentGenerationError,
+    image::Svg,
     paragraph_layout::{ParagraphLayout, ParagraphStyle, RenderedTextBlock},
     rich_text::dom_node_conversion::dom_node_to_rich_text,
     stylesheet::{Direction, FlexWrap, PageBreakRule, Style, Stylesheet},
@@ -252,7 +253,7 @@ impl<'a> PaginatedLayoutEngine<'a> {
             }
             DomNode::Image(image_node) => DrawableNode::Image(DrawableImageNode {
                 style: adjusted_style,
-                image: Image::SVG(image_node.content.clone()),
+                image: Image::Svg(Svg::new(image_node.content.clone(), &self.paragraph_layout)?),
             }),
             _ => DrawableNode::Container(DrawableContainerNode {
                 style: adjusted_style,

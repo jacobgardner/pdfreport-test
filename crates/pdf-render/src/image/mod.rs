@@ -1,13 +1,17 @@
 use crate::{
     error::{DocumentGenerationError, UserInputError},
-    fonts::{FontSlant, FontWeight, FontAttributes},
-    values::{Color, Pt}, paragraph_layout::{RenderedTextBlock, RenderedTextLine, LineMetrics}, rich_text::{RichText, RichTextSpan},
+    fonts::{FontAttributes, FontSlant, FontWeight},
+    paragraph_layout::{ParagraphLayout, ParagraphStyle, RenderedTextBlock, TextAlign},
+    rich_text::{RichText, RichTextSpan},
+    values::{Color, Pt},
 };
 
+#[derive(Debug, Clone)]
 pub struct Svg {
-    parsed_content: String,
+    pub content: String,
     width: Pt,
     height: Pt,
+    text_blocks: Vec<((Pt, Pt), RenderedTextBlock)>,
 }
 
 const SUPPORTED_SVG_TEXT_ATTRIBUTES: [&str; 10] = [
@@ -24,7 +28,10 @@ const SUPPORTED_SVG_TEXT_ATTRIBUTES: [&str; 10] = [
 ];
 
 impl Svg {
-    pub fn new(content: String) -> Result<Self, DocumentGenerationError> {
+    pub fn new(
+        content: String,
+        paragraph_layout: &ParagraphLayout,
+    ) -> Result<Self, DocumentGenerationError> {
         let doc = roxmltree::Document::parse(&content).unwrap();
 
         let svg_node = doc
@@ -40,24 +47,27 @@ impl Svg {
             .map(|height| Pt::try_from(height).unwrap());
 
         let viewbox = svg_node
-            .attribute("viewbox")
+            .attribute("viewBox")
             .map(|viewbox| -> Result<_, DocumentGenerationError> {
                 let p: Vec<_> = viewbox
                     .split(" ")
                     .map(|unit| Pt::try_from(unit))
                     .collect::<Result<Vec<_>, _>>()?;
 
-                assert_eq!(p.len(), 4);
-
-                let [x_offset, y_offset, width, height] = p[..];
-
-                Ok((x_offset, y_offset, width, height))
+                if let [x_offset, y_offset, width, height] = p[..] {
+                    Ok((x_offset, y_offset, width, height))
+                } else {
+                    Err(UserInputError::SvgParseError {
+                        message: "viewBox must have exactly 4 elements".to_string(),
+                    }
+                    .into())
+                }
             })
             .transpose()?;
 
         let (width, height) = if let (Some(width), Some(height)) = (svg_width, svg_height) {
             (width, height)
-        } else if let Some((x_offset, y_offset, viewbox_width, viewbox_height)) = viewbox {
+        } else if let Some((_, _, viewbox_width, viewbox_height)) = viewbox {
             if let Some(width) = svg_width {
                 let scale = width / viewbox_width;
 
@@ -76,6 +86,8 @@ impl Svg {
             }
             .into());
         };
+
+        let mut text_blocks = vec![];
 
         for node in doc.descendants().filter(|n| n.has_tag_name("text")) {
             // The SVG units are in px by default, and we're assuming that here.
@@ -103,12 +115,12 @@ impl Svg {
             }
 
             let x = Pt::try_from(node.attribute("x").unwrap_or("0"))?;
-            let y = Pt::try_from(node.attribute("y").unwrap_or("0"))?;
+            let mut y = Pt::try_from(node.attribute("y").unwrap_or("0"))?;
             let weight = FontWeight::from(node.attribute("font-weight").unwrap_or("regular"));
             let font_style = FontSlant::from(node.attribute("font-style").unwrap_or("normal"));
             let font_size = Pt::try_from(node.attribute("font-size").unwrap_or("12"))?;
             let fill = Color::try_from(node.attribute("fill").unwrap_or("#000000"))?;
-            let anchor = node.attribute("text-anchor").unwrap_or("start");
+            let anchor = TextAlign::from_anchor(node.attribute("text-anchor").unwrap_or("start"));
             let font_stack = node.attribute("font-family").unwrap_or("sans-serif");
             let dominant_baseline = node.attribute("dominant-baseline").unwrap_or("auto");
 
@@ -121,104 +133,87 @@ impl Svg {
 
             let node_text = node.text().unwrap().trim();
 
-            let text_block = RenderedTextBlock {
-                lines: vec![RenderedTextLine {
-                    rich_text: RichText(vec![RichTextSpan {
-                        text: node_text.to_string(),
-                        attributes: FontAttributes {
-                            weight,
-                            style: font_style,
-                        },
-                        font_family: found_font.to_string(),
-                        size: font_size,
-                        color: fill,
-                        letter_spacing: Pt(0.),
-                        line_height: 1.,
-                    }]),
-                    line_metrics: LineMetrics {
-                        ascent: Pt(5.),
-                        descent: Pt(5.),
-                        baseline: Pt(5.),
-                        height: Pt(5.),
-                        width: Pt(5.),
-                        left: Pt(5.),
-                    },
-                }],
+            let rich_text = RichText(vec![RichTextSpan {
+                text: node_text.to_string(),
+                attributes: FontAttributes {
+                    weight,
+                    style: font_style,
+                },
+                font_family: found_font.to_string(),
+                size: font_size,
+                color: fill,
+                letter_spacing: Pt(0.),
+                line_height: 1.,
+            }]);
+
+            let mut text_block = paragraph_layout.calculate_layout(
+                ParagraphStyle::left(),
+                &rich_text,
+                // Large enough to not wrap, hopefully
+                Pt(f64::MAX),
+            )?;
+
+            let line_metric = text_block.lines.first().unwrap().line_metrics.clone();
+
+            // I have no maths proving these. Mostly these are the values that
+            // ended up working
+            y = match dominant_baseline.to_lowercase().as_ref() {
+                "auto" => y - line_metric.ascent,
+                "central" => y - (line_metric.ascent + line_metric.descent) / 2.,
+                "middle" => y - line_metric.ascent + line_metric.descent,
+                "hanging" => y - line_metric.descent,
+                _ => y,
             };
 
-            // self.draw_text_block(
-            //     &PaginatedNode {
-            //             page_layout: NodeLayout {
-            //                 left: paginated_node.page_layout.left + x,
-            //                 right: paginated_node.page_layout.right + x,
-            //                 top: paginated_node.page_layout.top + y,
-            //                 ..paginated_node.page_layout.clone()
-            //             },
-            //             ..paginated_node.clone()
-            //             // page_layout: (),
-            //             // page_index: (),
-            //             // drawable_node: (),
-            //         },
-            //     &Style::Unmergeable::default(),
-            //     &text_block,
-            // )
-            // .unwrap();
+            text_block.lines.iter_mut().for_each(|line| {
+                line.line_metrics.left -= match anchor {
+                    TextAlign::Left => Pt(0.),
+                    TextAlign::Right => line.line_metrics.width,
+                    TextAlign::Center => line.line_metrics.width / 2.,
+                };
+            });
 
-            // let rich = RichText::new(
-            //     node_text,
-            //     RichTextStyle {
-            //         font_family: String::from(found_font),
-            //         font_size,
-            //         weight,
-            //         style: font_style,
-            //         color: (fill.0 as f32, fill.1 as f32, fill.2 as f32),
-            //     },
-            // );
-
-            // let paragraph = layout.compute_paragraph_layout(&rich, Pt(1000.0));
-            // assert_eq!(paragraph.line_metrics.len(), 1);
-
-            // let line_metric = paragraph.line_metrics.first().unwrap();
-
-            // let x_offset = match anchor.to_lowercase().as_str() {
-            //     "start" => Pt(0.0),
-            //     "middle" => line_metric.width / 2.,
-            //     "end" => line_metric.width,
-            //     _ => panic!(""),
-            // };
-
-            // let y_offset = match dominant_baseline.to_lowercase().as_str() {
-            //     "auto" => Pt(0.),
-            //     // TODO: This is wrong, but good enough for initial testing...
-            //     "middle" | "central" => (line_metric.ascent - line_metric.descent) / 2.,
-            //     baseline => panic!("{} as dominant-baseline is not yet supported", baseline),
-            // };
-
-            // layer.set_text_matrix(TextMatrix::Translate(
-            //     start.x + x - x_offset,
-            //     start.y + y - y_offset,
-            // ));
-
-            // let font_lookup = FontLookup {
-            //     family_name: found_font,
-            //     weight,
-            //     style: font_style,
-            // };
-
-            // let current_font = self.writer.lookup_font(&font_lookup)?;
-
-            // layer.set_font(current_font, font_size.0);
-            // layer.set_fill_color(printpdf::Color::Rgb(Rgb::new(fill.0, fill.1, fill.2, None)));
-
-            // self.write_text(&layer, node_text, &font_lookup)?;
+            text_blocks.push(((x, y), text_block));
         }
 
         Ok(Self {
-            parsed_content: content,
+            content,
             width,
             height,
+            text_blocks,
         })
     }
 
-    pub fn text_from_dims(&self, width: f64, height: f64) {}
+    pub fn computed_scale(&self, width: Pt, height: Pt) -> (f64, f64) {
+        (width / self.width, height / self.height)
+    }
+
+    pub fn text_from_dims(
+        &self,
+        width: Pt,
+        height: Pt,
+    ) -> impl Iterator<Item = ((Pt, Pt), RenderedTextBlock)> + '_ {
+        let (scale_x, scale_y) = self.computed_scale(width, height);
+
+        self.text_blocks
+            .iter()
+            .cloned()
+            .map(move |(mut point, mut block)| {
+                for line in block.lines.iter_mut() {
+                    for rich_text_span in line.rich_text.0.iter_mut() {
+                        rich_text_span.line_height *= scale_y;
+                        rich_text_span.size *= scale_y;
+                    }
+
+                    line.line_metrics.ascent *= scale_y;
+                    line.line_metrics.baseline *= scale_y;
+                    line.line_metrics.descent *= scale_y;
+                    line.line_metrics.height *= scale_y;
+                    line.line_metrics.left *= scale_x;
+                    line.line_metrics.width *= scale_x;
+                }
+
+                ((point.0 * scale_x, point.1 * scale_y), block)
+            })
+    }
 }

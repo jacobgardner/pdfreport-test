@@ -1,6 +1,6 @@
 use std::{
     fmt::Display,
-    ops::{Add, AddAssign, Div, Sub, SubAssign, Mul},
+    ops::{Add, AddAssign, Div, Sub, SubAssign, Mul, MulAssign},
 };
 
 use regex::Regex;
@@ -175,11 +175,25 @@ impl Div for Pt {
     }
 }
 
+impl Div<f64> for Pt {
+    type Output = Pt; 
+    
+    fn div(self, rhs: f64) -> Self::Output {
+        Pt(self.0 / rhs)
+    }
+}
+
 impl Mul<f64> for Pt {
     type Output = Pt;
 
     fn mul(self, rhs: f64) -> Self::Output {
         Pt(self.0 * rhs)
+    }
+}
+
+impl MulAssign<f64> for Pt {
+    fn mul_assign(&mut self, rhs: f64) {
+        *self = *self * rhs;
     }
 }
 

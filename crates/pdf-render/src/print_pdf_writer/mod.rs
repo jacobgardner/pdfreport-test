@@ -206,31 +206,37 @@ impl<'a> PrintPdfWriter<'a> {
     #[allow(irrefutable_let_patterns)]
     fn draw_image(
         &mut self,
-        svg: &crate::image::Svg,
         paginated_node: &PaginatedNode,
+        image_node: &DrawableImageNode,
         // image_node: &DrawableImageNode,
     ) -> Result<&mut Self, DocumentGenerationError> {
         let layer = self.get_base_layer(paginated_node.page_index);
 
-        if let Image::SVG(ref svg_content) = image_node.image {
-            let svg = Svg::parse(&svg_content).unwrap();
+        if let Image::Svg(ref svg) = image_node.image {
+            let parsed_svg = Svg::parse(&svg.content).unwrap();
 
-            let svg_xobject = svg.into_xobject(&layer);
+            let svg_xobject = parsed_svg.into_xobject(&layer);
+
+            let NodeLayout { width, height, .. } = paginated_node.page_layout;
 
             let (x_position, y_position) = self.get_placement_coords(&paginated_node.page_layout);
+            let (x_scale, y_scale) = svg.computed_scale(
+                paginated_node.page_layout.width,
+                paginated_node.page_layout.height,
+            );
 
-            let doc = roxmltree::Document::parse(&svg_content).unwrap();
+            // let doc = roxmltree::Document::parse(&svg_content).unwrap();
 
-            let svg_node = doc
-                .descendants()
-                .find(|node| node.has_tag_name("svg"))
-                .unwrap();
+            // let svg_node = doc
+            //     .descendants()
+            //     .find(|node| node.has_tag_name("svg"))
+            //     .unwrap();
 
-            let svg_width = Pt::from_px(svg_node.attribute("width").unwrap().parse().unwrap());
-            let svg_height = Pt::from_px(svg_node.attribute("height").unwrap().parse().unwrap());
+            // let svg_width = Pt::from_px(svg_node.attribute("width").unwrap().parse().unwrap());
+            // let svg_height = Pt::from_px(svg_node.attribute("height").unwrap().parse().unwrap());
 
-            let x_scale = paginated_node.page_layout.width / svg_width;
-            let y_scale = paginated_node.page_layout.height / svg_height;
+            // let x_scale = paginated_node.page_layout.width / svg_width;
+            // let y_scale = paginated_node.page_layout.height / svg_height;
 
             svg_xobject.add_to_layer(
                 &layer,
@@ -243,75 +249,13 @@ impl<'a> PrintPdfWriter<'a> {
                 },
             );
 
-            for node in doc.descendants().filter(|n| n.has_tag_name("text")) {
-                // The SVG units are in px by default, and we're assuming that here.
-                //  We have to convert that to Pt which printpdf has a method for, but it
-                //  takes a usize, but the svg pixels can be fractions so... we replicate that
-                //  here
-                //
-
-                // TODO: Document/warn that we currently do NOT support text nodes in nested transformations
-                //  OR add support for it.
-                for _ancestor in node.ancestors() {
-                    // Here check if any ancestors do transformations and warn about
-                    // them OR augment the x/y below based on them
-                }
-
-                let unsupported_attribute = node.attributes().iter().find(|a| {
-                    !SUPPORTED_SVG_TEXT_ATTRIBUTES.contains(&a.name().to_lowercase().as_str())
-                });
-
-                if let Some(unsupported_attribute) = unsupported_attribute {
-                    panic!(
-                        "<text .../> attribute, {}, is not yet supported",
-                        unsupported_attribute.name()
-                    );
-                }
-
-                let x = Pt::try_from(node.attribute("x").unwrap_or("0"))? * x_scale;
-                let y = Pt::try_from(node.attribute("y").unwrap_or("0"))? * y_scale;
-                let weight = FontWeight::from(node.attribute("font-weight").unwrap_or("regular"));
-                let font_style = FontSlant::from(node.attribute("font-style").unwrap_or("normal"));
-                let font_size = Pt::try_from(node.attribute("font-size").unwrap_or("12"))? * y_scale;
-                // TODO: Don't unwrap
-                let fill = Color::try_from(node.attribute("fill").unwrap_or("#000000")).unwrap();
-                let anchor = node.attribute("text-anchor").unwrap_or("start");
-                let font_stack = node.attribute("font-family").unwrap_or("sans-serif");
-                let dominant_baseline = node.attribute("dominant-baseline").unwrap_or("auto");
-
-                // TODO: Don't hardcode
-                let found_font = "Inter"; // self.find_best_font_from_stack(font_stack)?;
-
-                if !node.children().all(|n| n.is_text()) {
-                    panic!("For <text>, we only support all text child nodes for now");
-                }
-
-                let node_text = node.text().unwrap().trim();
-
-                let text_block = RenderedTextBlock {
-                    lines: vec![RenderedTextLine {
-                        rich_text: RichText(vec![RichTextSpan {
-                            text: node_text.to_string(),
-                            attributes: FontAttributes {
-                                weight,
-                                style: font_style,
-                            },
-                            font_family: found_font.to_string(),
-                            size: font_size,
-                            color: fill,
-                            letter_spacing: Pt(0.),
-                            line_height: 1.,
-                        }]),
-                        line_metrics: LineMetrics { ascent: Pt(5.), descent: Pt(5.), baseline: Pt(5.), height: Pt(5.), width: Pt(5.), left: Pt(5.) },
-                    }],
-                };
-
+            for (point, text_block) in svg.text_from_dims(width, height) {
                 self.draw_text_block(
                     &PaginatedNode {
                         page_layout: NodeLayout {
-                            left: paginated_node.page_layout.left + x,
-                            right: paginated_node.page_layout.right + x,
-                            top: paginated_node.page_layout.top + y,
+                            left: paginated_node.page_layout.left + point.0 ,
+                            right: paginated_node.page_layout.right + point.0 ,
+                            top: paginated_node.page_layout.top + point.1 ,
                             ..paginated_node.page_layout.clone()
                         },
                         ..paginated_node.clone()
@@ -321,55 +265,8 @@ impl<'a> PrintPdfWriter<'a> {
                     },
                     &Style::Unmergeable::default(),
                     &text_block,
-                ).unwrap();
-
-                // let rich = RichText::new(
-                //     node_text,
-                //     RichTextStyle {
-                //         font_family: String::from(found_font),
-                //         font_size,
-                //         weight,
-                //         style: font_style,
-                //         color: (fill.0 as f32, fill.1 as f32, fill.2 as f32),
-                //     },
-                // );
-
-                // let paragraph = layout.compute_paragraph_layout(&rich, Pt(1000.0));
-                // assert_eq!(paragraph.line_metrics.len(), 1);
-
-                // let line_metric = paragraph.line_metrics.first().unwrap();
-
-                // let x_offset = match anchor.to_lowercase().as_str() {
-                //     "start" => Pt(0.0),
-                //     "middle" => line_metric.width / 2.,
-                //     "end" => line_metric.width,
-                //     _ => panic!(""),
-                // };
-
-                // let y_offset = match dominant_baseline.to_lowercase().as_str() {
-                //     "auto" => Pt(0.),
-                //     // TODO: This is wrong, but good enough for initial testing...
-                //     "middle" | "central" => (line_metric.ascent - line_metric.descent) / 2.,
-                //     baseline => panic!("{} as dominant-baseline is not yet supported", baseline),
-                // };
-
-                // layer.set_text_matrix(TextMatrix::Translate(
-                //     start.x + x - x_offset,
-                //     start.y + y - y_offset,
-                // ));
-
-                // let font_lookup = FontLookup {
-                //     family_name: found_font,
-                //     weight,
-                //     style: font_style,
-                // };
-
-                // let current_font = self.writer.lookup_font(&font_lookup)?;
-
-                // layer.set_font(current_font, font_size.0);
-                // layer.set_fill_color(printpdf::Color::Rgb(Rgb::new(fill.0, fill.1, fill.2, None)));
-
-                // self.write_text(&layer, node_text, &font_lookup)?;
+                )
+                .unwrap();
             }
         } else {
             unimplemented!("Only SVGs are currently supported");

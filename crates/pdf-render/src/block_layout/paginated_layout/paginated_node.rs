@@ -1,5 +1,5 @@
 use crate::{
-    block_layout::layout_engine::NodeLayout, paragraph_layout::RenderedTextBlock, stylesheet::Style,
+    block_layout::layout_engine::NodeLayout, paragraph_layout::RenderedTextBlock, stylesheet::Style, image::Svg,
 };
 
 #[derive(Clone, Debug)]
@@ -15,7 +15,7 @@ pub struct DrawableContainerNode {
 
 #[derive(Clone, Debug)]
 pub enum Image {
-    SVG(String),
+    Svg(Svg),
 }
 
 #[derive(Clone, Debug)]
