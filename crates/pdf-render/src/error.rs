@@ -66,6 +66,9 @@ pub enum UserInputError {
 
     #[error("Unit does is not supported: {attached_unit}")]
     UnsupportedUnit { attached_unit: String },
+    
+    #[error("Svg Parse Error: {message}")]
+    SvgParseError { message: String }
 }
 
 #[derive(Error, Debug)]

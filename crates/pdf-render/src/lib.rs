@@ -28,6 +28,7 @@ pub mod rich_text;
 pub mod stylesheet;
 pub mod utils;
 pub mod values;
+pub mod image;
 
 use error::DocumentGenerationError;
 
