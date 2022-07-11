@@ -225,19 +225,6 @@ impl<'a> PrintPdfWriter<'a> {
                 paginated_node.page_layout.height,
             );
 
-            // let doc = roxmltree::Document::parse(&svg_content).unwrap();
-
-            // let svg_node = doc
-            //     .descendants()
-            //     .find(|node| node.has_tag_name("svg"))
-            //     .unwrap();
-
-            // let svg_width = Pt::from_px(svg_node.attribute("width").unwrap().parse().unwrap());
-            // let svg_height = Pt::from_px(svg_node.attribute("height").unwrap().parse().unwrap());
-
-            // let x_scale = paginated_node.page_layout.width / svg_width;
-            // let y_scale = paginated_node.page_layout.height / svg_height;
-
             svg_xobject.add_to_layer(
                 &layer,
                 SvgTransform {
@@ -259,9 +246,6 @@ impl<'a> PrintPdfWriter<'a> {
                             ..paginated_node.page_layout.clone()
                         },
                         ..paginated_node.clone()
-                        // page_layout: (),
-                        // page_index: (),
-                        // drawable_node: (),
                     },
                     &Style::Unmergeable::default(),
                     &text_block,
