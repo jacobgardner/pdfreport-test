@@ -24,3 +24,31 @@ impl TryFrom<&str> for DominantBaseline {
         Ok(baseline)
     }
 }
+
+
+pub trait LowerCaseAttribute {
+    fn lc_has_attribute(&self, attribute: &str) -> bool;
+    fn lc_attribute(&self, attribute: &str) -> Option<&str>;
+}
+
+impl<'a, 'b> LowerCaseAttribute for roxmltree::Node<'a, 'b> {
+    fn lc_has_attribute(&self, attribute: &str) -> bool {
+        debug_assert!(
+            attribute == attribute.to_lowercase(),
+            "Must provide attribute name in lowercase"
+        );
+        todo!()
+    }
+
+    fn lc_attribute(&self, attribute: &str) -> Option<&str> {
+        debug_assert!(
+            attribute == attribute.to_lowercase(),
+            "Must provide attribute name in lowercase"
+        );
+
+        self.attributes()
+            .iter()
+            .find(|&attr| attr.name().to_lowercase() == attribute)
+            .map(|attr| attr.value())
+    }
+}

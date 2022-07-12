@@ -6,9 +6,16 @@ use crate::{
     values::{Color, Pt},
 };
 
-use self::attributes::DominantBaseline;
+use self::attributes::{DominantBaseline, LowerCaseAttribute};
 
 mod attributes;
+
+// #[derive(Debug, Clone)]
+// pub struct TextBlock {
+//     x: Pt,
+//     y: Pt,
+//     text_block: RenderedTextBlock,
+// }
 
 #[derive(Debug, Clone)]
 pub struct Svg {
@@ -16,33 +23,6 @@ pub struct Svg {
     width: Pt,
     height: Pt,
     text_blocks: Vec<((Pt, Pt), RenderedTextBlock)>,
-}
-
-trait LowerCaseAttribute {
-    fn lc_has_attribute(&self, attribute: &str) -> bool;
-    fn lc_attribute(&self, attribute: &str) -> Option<&str>;
-}
-
-impl<'a, 'b> LowerCaseAttribute for roxmltree::Node<'a, 'b> {
-    fn lc_has_attribute(&self, attribute: &str) -> bool {
-        debug_assert!(
-            attribute == attribute.to_lowercase(),
-            "Must provide attribute name in lowercase"
-        );
-        todo!()
-    }
-
-    fn lc_attribute(&self, attribute: &str) -> Option<&str> {
-        debug_assert!(
-            attribute == attribute.to_lowercase(),
-            "Must provide attribute name in lowercase"
-        );
-
-        self.attributes()
-            .iter()
-            .find(|&attr| attr.name().to_lowercase() == attribute)
-            .map(|attr| attr.value())
-    }
 }
 
 const SUPPORTED_SVG_TEXT_ATTRIBUTES: [&str; 11] = [
@@ -159,8 +139,13 @@ impl Svg {
                 node.lc_attribute("dominant-baseline").unwrap_or("auto"),
             )?;
 
-            // TODO: Don't hardcode
-            let found_font = "Inter"; // self.find_best_font_from_stack(font_stack)?;
+            let found_font = paragraph_layout.find_best_font_from_stack(
+                font_stack
+                    .split(",")
+                    .map(str::trim)
+                    .map(|font| font.trim_matches('"').to_string())
+                    .collect(),
+            )?;
 
             if !node.children().all(|n| n.is_text()) {
                 panic!("For <text>, we only support all text child nodes for now");
@@ -232,7 +217,7 @@ impl Svg {
         self.text_blocks
             .iter()
             .cloned()
-            .map(move |(mut point, mut block)| {
+            .map(move |(point, mut block)| {
                 for line in block.lines.iter_mut() {
                     for rich_text_span in line.rich_text.0.iter_mut() {
                         rich_text_span.line_height *= scale_y;

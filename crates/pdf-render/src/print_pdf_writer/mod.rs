@@ -22,9 +22,9 @@ use crate::{
     },
     document_builder::UnstructuredDocumentWriter,
     error::{DocumentGenerationError, InternalServerError},
-    fonts::{FontAttributes, FontCollection, FontId, FontSlant, FontWeight},
-    paragraph_layout::{LineMetrics, RenderedTextBlock, RenderedTextLine},
-    rich_text::{RichText, RichTextSpan},
+    fonts::{FontCollection, FontId},
+    paragraph_layout::RenderedTextBlock,
+    rich_text::RichTextSpan,
     stylesheet::{EdgeStyle, Style},
     values::{Color, Mm, Pt, Size},
 };
@@ -180,19 +180,6 @@ impl<'a> UnstructuredDocumentWriter for PrintPdfWriter<'a> {
     }
 }
 
-const SUPPORTED_SVG_TEXT_ATTRIBUTES: [&str; 10] = [
-    "id",
-    "x",
-    "y",
-    "font-weight",
-    "font-style",
-    "font-size",
-    "fill",
-    "text-anchor",
-    "font-family",
-    "dominant-baseline",
-];
-
 impl<'a> PrintPdfWriter<'a> {
     fn get_placement_coords(&self, layout: &NodeLayout) -> (Pt, Pt) {
         let x_position = layout.left + self.page_margins.left;
@@ -240,9 +227,9 @@ impl<'a> PrintPdfWriter<'a> {
                 self.draw_text_block(
                     &PaginatedNode {
                         page_layout: NodeLayout {
-                            left: paginated_node.page_layout.left + point.0 ,
-                            right: paginated_node.page_layout.right + point.0 ,
-                            top: paginated_node.page_layout.top + point.1 ,
+                            left: paginated_node.page_layout.left + point.0,
+                            right: paginated_node.page_layout.right + point.0,
+                            top: paginated_node.page_layout.top + point.1,
                             ..paginated_node.page_layout.clone()
                         },
                         ..paginated_node.clone()

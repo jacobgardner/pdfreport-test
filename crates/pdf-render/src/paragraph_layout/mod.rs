@@ -17,6 +17,7 @@ use skia_layout::{ParagraphBuilder, TypefaceFontProvider};
 use skia_safe::textlayout::{self as skia_layout};
 use skia_safe::{Data, FontMgr, Typeface};
 
+use crate::error::UserInputError;
 use crate::{
     error::{DocumentGenerationError, InternalServerError},
     fonts::FontCollection,
@@ -40,6 +41,23 @@ impl ParagraphLayout {
         Self {
             skia_font_collection: skia_layout::FontCollection::new(),
             font_families: HashSet::new(),
+        }
+    }
+
+    pub fn find_best_font_from_stack(
+        &self,
+        stack: Vec<String>,
+    ) -> Result<String, UserInputError> {
+        let found_font = stack
+            .iter()
+            .find(|&font| self.font_families.get(font).is_some());
+
+        if let Some(font) = found_font {
+            Ok(font.clone())
+        } else {
+            Err(UserInputError::SvgParseError {
+                message: format!("Unable to find loaded font from stack: {stack:?}"),
+            })
         }
     }
 
