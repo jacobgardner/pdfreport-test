@@ -13,7 +13,7 @@ mergeable_fn! {
     mergeable => {
         #[derive(TS, Clone, Debug, PartialEq, Deserialize)]
         #[ts(export, rename_all = "camelCase")]
-        #[serde(rename_all = "camelCase", deny_unknown_fields, skip_serializing_if = "Option::is_none")]
+        #[serde(rename_all = "camelCase", deny_unknown_fields)]
         pub struct MergeableBorderStyle;
     },
     unmergeable => {
@@ -36,7 +36,7 @@ mergeable_fn! {
     mergeable => {
         #[derive(TS, Clone, Debug, PartialEq, Deserialize)]
         #[ts(export, rename_all = "camelCase")]
-        #[serde(rename_all = "camelCase", deny_unknown_fields, skip_serializing_if = "Option::is_none")]
+        #[serde(rename_all = "camelCase", deny_unknown_fields)]
         pub struct MergeableStyle;
     },
     unmergeable => {

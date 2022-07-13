@@ -1,40 +1,52 @@
 use merges::Merges;
-use optional_merge_derive::mergeable;
+use optional_merge_derive::mergeable_fn;
 
+use serde::Deserialize;
+use serde_with::skip_serializing_none;
 use ts_rs::TS;
 
 use crate::values::{Color, Pt};
 
 use super::{BorderStyle, EdgeStyle, FlexStyle, FontStyles, PageBreakRule, TextTransformation};
 
-#[mergeable]
-#[derive(TS, Clone, Debug, PartialEq)]
-#[ts(export, rename_all = "camelCase")]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub struct Style {
-    #[mergeable(nested)]
-    pub border: BorderStyle,
-    #[mergeable(nested)]
-    pub font: FontStyles,
-    pub color: Color,
-    #[mergeable(nested)]
-    pub margin: EdgeStyle,
-    #[mergeable(nested)]
-    pub padding: EdgeStyle,
-    pub background_color: Option<Color>,
-    #[mergeable(nested)]
-    pub flex: FlexStyle,
-    pub width: String,
-    pub height: String,
-    pub debug: bool,
-    pub break_before: PageBreakRule,
-    pub break_after: PageBreakRule,
-    pub break_inside: PageBreakRule,
-    pub text_transform: TextTransformation,
-    pub line_height: Option<Pt>,
+mergeable_fn! {
+    source => {
+        pub struct Style {
+            #[mergeable(nested)]
+            pub border: BorderStyle,
+            #[mergeable(nested)]
+            pub font: FontStyles,
+            pub color: Color,
+            #[mergeable(nested)]
+            pub margin: EdgeStyle,
+            #[mergeable(nested)]
+            pub padding: EdgeStyle,
+            pub background_color: Option<Color>,
+            #[mergeable(nested)]
+            pub flex: FlexStyle,
+            pub width: String,
+            pub height: String,
+            pub debug: bool,
+            pub break_before: PageBreakRule,
+            pub break_after: PageBreakRule,
+            pub break_inside: PageBreakRule,
+            pub text_transform: TextTransformation,
+            pub line_height: Option<Pt>,
+        }
+    },
+    mergeable => {
+        #[derive(Deserialize, TS, Clone, Debug, PartialEq)]
+        #[ts(export, rename_all = "camelCase")]
+        #[serde(rename_all = "camelCase", deny_unknown_fields)]
+        #[skip_serializing_none]
+        pub struct MergeableStyle;
+    },
+    unmergeable => {
+        pub struct Style;
+    }
 }
 
-impl Default for Style::Unmergeable {
+impl Default for Style {
     fn default() -> Self {
         Self {
             color: Color::black(),
@@ -56,7 +68,7 @@ impl Default for Style::Unmergeable {
     }
 }
 
-impl Style::Mergeable {
+impl MergeableStyle {
     /// This is meant to emulate how if you set a color on a parent, the child
     /// gets that color by default unless overridden
     ///
@@ -64,7 +76,7 @@ impl Style::Mergeable {
     /// even if the parent has a style where the target node does not.
     /// For inherited styles, inherited styles should only "win" where the
     /// target node does not have any style set.
-    pub fn merge_inherited_styles(&self, parent_style: &Style::Mergeable) -> Style::Mergeable {
+    pub fn merge_inherited_styles(&self, parent_style: &MergeableStyle) -> MergeableStyle {
         let mut style = self.clone();
 
         style.font = if let Some(font) = &parent_style.font {
@@ -85,8 +97,8 @@ impl Style::Mergeable {
     }
 }
 
-impl Style::Unmergeable {
-    pub fn merge_style(&self, rhs: &Style::Mergeable) -> Style::Unmergeable {
+impl Style {
+    pub fn merge_style(&self, rhs: &MergeableStyle) -> MergeableStyle {
         let base = Style::Mergeable::from(self.clone());
 
         let merged: Style::Mergeable = base.merge(rhs);
