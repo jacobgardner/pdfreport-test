@@ -12,10 +12,10 @@ impl<'a> PrintPdfWriter<'a> {
         &mut self,
         page_index: usize,
         rect: Rect<Pt>,
-        border_width: EdgeStyle::Unmergeable,
+        border_width: EdgeStyle,
         border_color: Option<Color>,
         background_color: Option<Color>,
-        border_radius: Option<BorderRadiusStyle::Unmergeable>,
+        border_radius: Option<BorderRadiusStyle>,
     ) {
         let layer = self.get_base_layer(page_index);
 
@@ -77,7 +77,7 @@ impl<'a> PrintPdfWriter<'a> {
         ];
 
         let points = match border_radius {
-            Some(border_radius) if border_radius != BorderRadiusStyle::Unmergeable::default() => {
+            Some(border_radius) if border_radius != BorderRadiusStyle::default() => {
                 // 4 points per corner & 2 points per edge
                 let mut points: Vec<(printpdf::Point, bool)> = Vec::with_capacity(4 * 4 + 4 * 2);
 

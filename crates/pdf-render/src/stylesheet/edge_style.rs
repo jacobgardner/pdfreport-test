@@ -1,27 +1,31 @@
 use crate::values::Pt;
-use optional_merge_derive::mergeable;
+use optional_merge_derive::mergeable_fn;
 use ts_rs::TS;
 use serde::Deserialize;
 
-#[mergeable]
-#[derive(TS, Clone, Debug, PartialEq)]
-#[ts(export)]
-pub struct EdgeStyle {
-    pub top: Pt,
-    pub right: Pt,
-    pub bottom: Pt,
-    pub left: Pt,
+
+mergeable_fn! {
+    source => {
+        #[derive(Clone, Debug, PartialEq)]
+        pub struct EdgeStyle {
+            pub top: Pt,
+            pub right: Pt,
+            pub bottom: Pt,
+            pub left: Pt,
+        }       
+    }
+    mergeable => {
+        #[derive(Deserialize, TS)]
+        #[ts(export, rename = "EdgeStyle")]
+        pub struct MergeableEdgeStyle;
+    },
+    unmergeable => {
+        #[derive(Deserialize)]
+        pub struct EdgeStyle;
+    }
 }
 
-// impl<'de> Deserialize<'de> for EdgeStyle::Mergeable {
-//     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-//     where
-//         D: serde::Deserializer<'de> {
-//         todo!()
-//     }
-// }
-
-impl Default for EdgeStyle::Unmergeable {
+impl Default for EdgeStyle {
     fn default() -> Self {
         Self {
             top: Pt(0.),
@@ -32,7 +36,7 @@ impl Default for EdgeStyle::Unmergeable {
     }
 }
 
-impl EdgeStyle::Unmergeable {
+impl EdgeStyle {
     pub fn new(size: Pt) -> Self {
         Self {
             top: size,

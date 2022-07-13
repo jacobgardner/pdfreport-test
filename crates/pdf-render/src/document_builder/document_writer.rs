@@ -12,13 +12,13 @@ pub trait UnstructuredDocumentWriter {
     //     border_width: Pt,
     //     border_color: Option<Color>,
     //     background_color: Option<Color>,
-    //     border_radius: Option<BorderRadiusStyle::Unmergeable>,
+    //     border_radius: Option<BorderRadiusStyle>,
     // );
 
     fn draw_text_block(
         &mut self,
         node: &PaginatedNode,
-        style: &Style::Unmergeable,
+        style: &Style,
         text_block: &RenderedTextBlock,
     ) -> Result<&mut Self, DocumentGenerationError>;
 }

@@ -11,7 +11,7 @@ use crate::{
 use super::PrintPdfWriter;
 
 impl<'a> PrintPdfWriter<'a> {
-    pub(super) fn draw_debug_outlines(&mut self, node: &PaginatedNode, style: &Style::Unmergeable) {
+    pub(super) fn draw_debug_outlines(&mut self, node: &PaginatedNode, style: &Style) {
         let PaginatedNode {
             page_layout: layout,
             page_index,
@@ -48,28 +48,28 @@ impl<'a> PrintPdfWriter<'a> {
         self.draw_rect(
             page_index,
             margin_rect,
-            EdgeStyle::Unmergeable::new(Pt(1.)),
+            EdgeStyle::new(Pt(1.)),
             Some(Color::try_from("green").unwrap()),
             None,
-            Some(BorderRadiusStyle::Unmergeable::new(Pt(10.))),
+            Some(BorderRadiusStyle::new(Pt(10.))),
         );
 
         self.draw_rect(
             page_index,
             border_rect,
-            EdgeStyle::Unmergeable::new(Pt(1.)),
+            EdgeStyle::new(Pt(1.)),
             Some(Color::try_from("red").unwrap()),
             None,
-            Some(BorderRadiusStyle::Unmergeable::new(Pt(7.5))),
+            Some(BorderRadiusStyle::new(Pt(7.5))),
         );
 
         self.draw_rect(
             page_index,
             content_rect,
-            EdgeStyle::Unmergeable::new(Pt(1.)),
+            EdgeStyle::new(Pt(1.)),
             Some(Color::try_from("blue").unwrap()),
             None,
-            Some(BorderRadiusStyle::Unmergeable::new(Pt(5.))),
+            Some(BorderRadiusStyle::new(Pt(5.))),
         );
     }
 

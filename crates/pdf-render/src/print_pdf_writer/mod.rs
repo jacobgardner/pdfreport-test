@@ -48,7 +48,7 @@ pub struct PrintPdfWriter<'a> {
     page_layer_indices: Vec<(PdfPageIndex, Vec<PdfLayerIndex>)>,
     font_collection: &'a FontCollection,
     page_size: Size<Pt>,
-    page_margins: EdgeStyle::Unmergeable,
+    page_margins: EdgeStyle,
     current_style_by_page: Vec<CurrentStyles>,
     circle_cache: Circles,
 }
@@ -57,7 +57,7 @@ impl<'a> PrintPdfWriter<'a> {
     pub fn new(
         doc_title: &str,
         page_size: impl Into<Size<Mm>>,
-        page_margins: impl Into<EdgeStyle::Unmergeable>,
+        page_margins: impl Into<EdgeStyle>,
         font_collection: &'a FontCollection,
     ) -> Self {
         let dimensions = page_size.into();
@@ -126,7 +126,7 @@ impl<'a> UnstructuredDocumentWriter for PrintPdfWriter<'a> {
     fn draw_text_block(
         &mut self,
         node: &PaginatedNode,
-        style: &Style::Unmergeable,
+        style: &Style,
         text_block: &RenderedTextBlock,
     ) -> Result<&mut Self, DocumentGenerationError> {
         let layer = self.get_base_layer(node.page_index);
@@ -234,7 +234,7 @@ impl<'a> PrintPdfWriter<'a> {
                         },
                         ..paginated_node.clone()
                     },
-                    &Style::Unmergeable::default(),
+                    &Style::default(),
                     &text_block,
                 )
                 .unwrap();
@@ -249,7 +249,7 @@ impl<'a> PrintPdfWriter<'a> {
     fn draw_container(
         &mut self,
         node: &PaginatedNode,
-        container_style: &Style::Unmergeable,
+        container_style: &Style,
     ) -> Result<&mut Self, DocumentGenerationError> {
         let coords = self.get_placement_coords(&node.page_layout);
 

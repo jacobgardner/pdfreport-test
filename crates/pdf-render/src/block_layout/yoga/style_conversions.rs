@@ -39,8 +39,8 @@ impl From<FlexAlign> for Align {
     }
 }
 
-impl From<Style::Unmergeable> for yoga::Node {
-    fn from(style: Style::Unmergeable) -> Self {
+impl From<Style> for yoga::Node {
+    fn from(style: Style) -> Self {
         let mut layout_node = yoga::Node::new();
 
         layout_node.set_border(Edge::Top, style.border.width.top.0 as f32);

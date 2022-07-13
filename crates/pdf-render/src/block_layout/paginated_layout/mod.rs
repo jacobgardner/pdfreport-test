@@ -148,7 +148,7 @@ impl<'a> PaginatedLayoutEngine<'a> {
     fn draw_text_node(
         &mut self,
         draw_cursor: &mut DrawCursor,
-        style: &mut Style::Unmergeable,
+        style: &mut Style,
         node_layout: &mut NodeLayout,
         text_node: &DrawableTextNode,
     ) -> Result<(), DocumentGenerationError> {
@@ -225,7 +225,7 @@ impl<'a> PaginatedLayoutEngine<'a> {
         &self,
         dom_node: &DomNode,
         layout: &NodeLayout,
-        style: &Style::Unmergeable,
+        style: &Style,
     ) -> Result<DrawableNode, DocumentGenerationError> {
         let adjusted_style = style.clone();
 

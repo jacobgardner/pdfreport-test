@@ -1,2 +1,2 @@
 
-export interface EdgeStyle { top?: string | number, right?: string | number, bottom?: string | number, left?: string | number, }
+export interface EdgeStyle { top: string | number | null, right: string | number | null, bottom: string | number | null, left: string | number | null, }

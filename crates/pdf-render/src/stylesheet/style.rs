@@ -11,6 +11,7 @@ use super::{BorderStyle, EdgeStyle, FlexStyle, FontStyles, PageBreakRule, TextTr
 
 mergeable_fn! {
     source => {
+        #[derive(Clone, Debug, PartialEq)]
         pub struct Style {
             #[mergeable(nested)]
             pub border: BorderStyle,
@@ -35,10 +36,10 @@ mergeable_fn! {
         }
     },
     mergeable => {
-        #[derive(Deserialize, TS, Clone, Debug, PartialEq)]
-        #[ts(export, rename_all = "camelCase")]
-        #[serde(rename_all = "camelCase", deny_unknown_fields)]
+        #[derive(Deserialize, TS, Default)]
+        #[ts(export, rename_all = "camelCase", rename = "Style")]
         #[skip_serializing_none]
+        #[serde(rename_all = "camelCase", deny_unknown_fields)]
         pub struct MergeableStyle;
     },
     unmergeable => {
@@ -98,10 +99,10 @@ impl MergeableStyle {
 }
 
 impl Style {
-    pub fn merge_style(&self, rhs: &MergeableStyle) -> MergeableStyle {
-        let base = Style::Mergeable::from(self.clone());
+    pub fn merge_style(&self, rhs: &MergeableStyle) -> Style {
+        let base = MergeableStyle::from(self.clone());
 
-        let merged: Style::Mergeable = base.merge(rhs);
+        let merged: MergeableStyle = base.merge(rhs);
 
         merged.into()
     }

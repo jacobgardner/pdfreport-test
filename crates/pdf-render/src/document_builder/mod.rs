@@ -24,7 +24,7 @@ impl<Writer: UnstructuredDocumentWriter> DocumentBuilder<Writer> {
     pub fn write_text_block(
         &mut self,
         node: &PaginatedNode,
-        style: &Style::Unmergeable,
+        style: &Style,
         text_block: &RenderedTextBlock,
     ) -> Result<&mut Self, DocumentGenerationError> {
         self.unstructured_doc_writer
@@ -63,7 +63,7 @@ mod tests {
         fn draw_text_block(
             &mut self,
             _node: &PaginatedNode,
-            _style: &Style::Unmergeable,
+            _style: &Style,
             _text_block: &RenderedTextBlock,
         ) -> Result<&mut Self, DocumentGenerationError> {
             todo!()

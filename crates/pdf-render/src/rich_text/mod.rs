@@ -25,7 +25,7 @@ pub struct RichTextSpan {
 }
 
 impl RichTextSpan {
-    pub fn new(raw_str: &str, style: Style::Unmergeable) -> Self {
+    pub fn new(raw_str: &str, style: Style) -> Self {
         let line_height = if let Some(line_height) = style.line_height {
             line_height.0 / style.font.size.0
         } else {

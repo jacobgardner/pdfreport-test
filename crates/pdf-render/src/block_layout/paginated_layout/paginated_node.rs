@@ -5,12 +5,12 @@ use crate::{
 #[derive(Clone, Debug)]
 pub struct DrawableTextNode {
     pub text_block: RenderedTextBlock,
-    pub style: Style::Unmergeable,
+    pub style: Style,
 }
 
 #[derive(Clone, Debug)]
 pub struct DrawableContainerNode {
-    pub style: Style::Unmergeable,
+    pub style: Style,
 }
 
 #[derive(Clone, Debug)]
@@ -20,7 +20,7 @@ pub enum Image {
 
 #[derive(Clone, Debug)]
 pub struct DrawableImageNode {
-    pub style: Style::Unmergeable,
+    pub style: Style,
     pub image: Image,
 }
 
@@ -39,7 +39,7 @@ pub enum DrawableNode {
 }
 
 impl DrawableNode {
-    pub fn style(&self) -> &Style::Unmergeable {
+    pub fn style(&self) -> &Style {
         match self {
             Self::Text(node) => &node.style,
             Self::Container(node) => &node.style,
