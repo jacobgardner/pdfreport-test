@@ -2,16 +2,24 @@ extern crate proc_macro;
 
 mod config;
 mod field_options;
+mod output;
 
 use config::{MERGEABLE_NAME, UNMERGEABLE_NAME};
 use darling::FromMeta;
 use field_options::{extract_field_attrs, FieldOptions, FieldsOptions};
 use proc_macro2::Span;
-use quote::{quote, ToTokens};
-use std::str::FromStr;
+use quote::{format_ident, quote, ToTokens};
+use std::{
+    collections::{HashMap, HashSet},
+    str::FromStr,
+};
 use syn::{
-    self, parse_macro_input, parse_quote, Attribute, AttributeArgs, Data, DeriveInput, Fields,
-    LitStr, Type,
+    self, braced,
+    parse::Parse,
+    parse_macro_input, parse_quote,
+    token::{Brace, Struct},
+    Attribute, AttributeArgs, Data, DataStruct, DeriveInput, ExprStruct, Fields, Ident, ItemStruct,
+    LitStr, Token, Type,
 };
 
 fn build_skip_optional_attr() -> Attribute {
@@ -172,8 +180,24 @@ pub fn mergeable(
 
     original_ast.vis = parse_quote! { pub };
     mergeable_ast.vis = parse_quote! { pub };
-    
+
     let rename_as = LitStr::new(&original_name.to_string(), Span::call_site());
+
+    if !global_options.skip_deserialize {
+        original_ast.attrs.insert(
+            0,
+            parse_quote! {
+                #[derive(Deserialize)]
+            },
+        );
+
+        mergeable_ast.attrs.insert(
+            0,
+            parse_quote! {
+                #[derive(Deserialize)]
+            },
+        );
+    }
 
     mergeable_ast
         .attrs
@@ -187,10 +211,9 @@ pub fn mergeable(
             use merges::Merges;
             use serde::Deserialize;
 
-            #[derive(Deserialize)]
             #original_ast
 
-            #[derive(Default, Deserialize)]
+            #[derive(Default)]
             #mergeable_ast
 
             impl From<#unmergeable_name> for #mergeable_name {
@@ -216,6 +239,104 @@ pub fn mergeable(
                     }
                 }
             }
+        }
+    };
+
+    token_stream.into()
+}
+
+struct AssociatedStruct {
+    key_ident: Ident,
+    source_struct: ItemStruct,
+}
+
+impl Parse for AssociatedStruct {
+    fn parse(input: syn::parse::ParseStream) -> syn::Result<Self> {
+        let type_ident: Ident = input.parse()?;
+
+        input.parse::<Token![=>]>()?;
+        let content;
+
+        braced!(content in input);
+        let original_struct: ItemStruct = content.parse()?;
+        input.parse::<Option<Token![,]>>()?;
+
+        Ok(AssociatedStruct {
+            key_ident: type_ident,
+            source_struct: original_struct,
+        })
+    }
+}
+
+struct Mergeable {
+    source_struct: ItemStruct,
+    mergeable_struct: ItemStruct,
+    unmergeable_struct: ItemStruct,
+}
+
+impl Parse for Mergeable {
+    fn parse(input: syn::parse::ParseStream) -> syn::Result<Self> {
+        let mut associated_keys = HashMap::new();
+
+        while !input.is_empty() {
+            let s: AssociatedStruct = input.parse()?;
+            let associated_key = s.key_ident.to_string();
+
+            if !associated_keys.contains_key(&associated_key) {
+                associated_keys.insert(associated_key, s.source_struct);
+            } else {
+                return Err(syn::Error::new_spanned(
+                    s.key_ident,
+                    format!("Associated key, {associated_key}, was already specified."),
+                ));
+            }
+        }
+
+        let required_keys = ["source", "mergeable", "unmergeable"];
+
+        for key in required_keys {
+            if !associated_keys.contains_key(key) {
+                return Err(syn::Error::new(
+                    input.span(),
+                    format!("mergeable_fn! must have associated key, {key}. See docs for details."),
+                ));
+            }
+        }
+
+        Ok(Mergeable {
+            source_struct: associated_keys.remove("source").unwrap(),
+            mergeable_struct: associated_keys.remove("mergeable").unwrap(),
+            unmergeable_struct: associated_keys.remove("unmergeable").unwrap(),
+        })
+    }
+}
+
+#[proc_macro]
+pub fn mergeable_fn(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+    let Mergeable {
+        source_struct,
+        mut mergeable_struct,
+        mut unmergeable_struct,
+    } = parse_macro_input!(input as Mergeable);
+
+    let mergeable_name = mergeable_struct.ident.clone();
+    let unmergeable_name = unmergeable_struct.ident.clone();
+    
+    mergeable_struct.fields = source_struct.fields.clone();
+    unmergeable_struct.fields = source_struct.fields.clone();
+
+    let token_stream = quote! {
+
+        #mergeable_struct
+
+        #unmergeable_struct
+
+        impl merges::HasMergeableVariant for #unmergeable_name {
+            type MergeableType = #mergeable_name;
+        }
+
+        impl merges::HasUnmergeableVariant for #mergeable_name {
+            type UnmergeableType = #unmergeable_name;
         }
     };
 

@@ -1,6 +1,7 @@
 use crate::values::Pt;
 use optional_merge_derive::mergeable;
 use ts_rs::TS;
+use serde::Deserialize;
 
 #[mergeable]
 #[derive(TS, Clone, Debug, PartialEq)]
@@ -11,6 +12,14 @@ pub struct EdgeStyle {
     pub bottom: Pt,
     pub left: Pt,
 }
+
+// impl<'de> Deserialize<'de> for EdgeStyle::Mergeable {
+//     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+//     where
+//         D: serde::Deserializer<'de> {
+//         todo!()
+//     }
+// }
 
 impl Default for EdgeStyle::Unmergeable {
     fn default() -> Self {

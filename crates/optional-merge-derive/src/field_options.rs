@@ -21,6 +21,7 @@ pub struct FieldOptions {
     pub rename: Option<String>,
     pub use_null_in_serde: bool,
     pub is_nested: bool,
+    pub skip_deserialize: bool,
 }
 
 impl From<MergeableField> for FieldOptions {
@@ -29,6 +30,7 @@ impl From<MergeableField> for FieldOptions {
             rename: None,
             use_null_in_serde: false,
             is_nested: field.nested,
+            skip_deserialize: false
         }
     }
 }

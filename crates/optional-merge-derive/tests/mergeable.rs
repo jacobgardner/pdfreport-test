@@ -1,23 +1,46 @@
-// use optional_merge_derive::mergeable;
+use optional_merge_derive::mergeable_fn;
+use serde::Deserialize;
+use ts_rs::TS;
 
-// #[mergeable]
-// #[derive(Debug, Clone)]
-// struct NestedStruct {}
+mergeable_fn! {
+    source => {
+        struct BorderStyle {
+            pub width: String,
+            pub height: String,
+            pub debug: bool,
+        }
+    },
+    mergeable => {
+        #[derive(TS, Clone, Debug, PartialEq, Deserialize)]
+        #[ts(export, rename_all = "camelCase")]
+        #[serde(rename_all = "camelCase", deny_unknown_fields, skip_serializing_if = "Option::is_none")]
+        pub struct MergeableBorderStyle;
+    },
+    unmergeable => {
+        #[derive(Clone, Debug, PartialEq)]
+        pub struct BorderStyle;
+    },
+}
 
-// #[mergeable]
-// #[derive(Debug, Clone)]
-// struct TestStruct {
-//     bool_test: bool,
-//     #[mergeable(nested)]
-//     nested_struct: NestedStruct,
-// }
 
-// #[test]
-// fn test_unmerged() {
-//     let _original = TestStruct::Unmergeable {
-//         bool_test: true,
-//         nested_struct: NestedStruct::Unmergeable {},
-//     };
-
-//     let _merged = TestStruct::Mergeable::default();
-// }
+mergeable_fn! {
+    source => {
+        struct Style {
+            #[mergeable(nested)]
+            pub border: BorderStyle,
+            pub width: String,
+            pub height: String,
+            pub debug: bool,
+        }
+    },
+    mergeable => {
+        #[derive(TS, Clone, Debug, PartialEq, Deserialize)]
+        #[ts(export, rename_all = "camelCase")]
+        #[serde(rename_all = "camelCase", deny_unknown_fields, skip_serializing_if = "Option::is_none")]
+        pub struct MergeableStyle;
+    },
+    unmergeable => {
+        #[derive(Clone, Debug, PartialEq)]
+        pub struct Style;
+    },
+}

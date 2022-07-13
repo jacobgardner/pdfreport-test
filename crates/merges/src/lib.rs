@@ -25,3 +25,12 @@ pub fn nested_merge<T: Merges>(lhs: &Option<T>, rhs: &Option<T>) -> Option<T> {
 pub fn primitive_merge<T: Clone>(lhs: &Option<T>, rhs: &Option<T>) -> Option<T> {
     rhs.as_ref().or(lhs.as_ref()).cloned()
 }
+
+
+pub trait HasMergeableVariant {
+    type MergeableType;
+}
+
+pub trait HasUnmergeableVariant {
+    type UnmergeableType;
+}
