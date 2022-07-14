@@ -79,6 +79,7 @@ impl MergeableStyle {
     /// target node does not have any style set.
     pub fn merge_inherited_styles(&self, parent_style: &MergeableStyle) -> MergeableStyle {
         let mut style = self.clone();
+        // TODO: There's probably a cleaner way of doing this
 
         style.font = if let Some(font) = &parent_style.font {
             font.merge_optional(&style.font)

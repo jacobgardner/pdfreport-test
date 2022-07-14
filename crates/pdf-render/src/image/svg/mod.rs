@@ -25,7 +25,7 @@ pub struct Svg {
     text_blocks: Vec<((Pt, Pt), RenderedTextBlock)>,
 }
 
-const SUPPORTED_SVG_TEXT_ATTRIBUTES: [&str; 11] = [
+const SUPPORTED_SVG_TEXT_ATTRIBUTES: [&str; 12] = [
     "id",
     "x",
     "y",
@@ -36,6 +36,7 @@ const SUPPORTED_SVG_TEXT_ATTRIBUTES: [&str; 11] = [
     "fill",
     "text-anchor",
     "font-family",
+    "letter-spacing",
     "dominant-baseline",
 ];
 
@@ -138,6 +139,7 @@ impl Svg {
             let dominant_baseline = DominantBaseline::try_from(
                 node.lc_attribute("dominant-baseline").unwrap_or("auto"),
             )?;
+            let letter_spacing = Pt::try_from(node.lc_attribute("letter-spacing").unwrap_or("0"))?;
 
             let found_font = paragraph_layout.find_best_font_from_stack(
                 font_stack
@@ -162,7 +164,7 @@ impl Svg {
                 font_family: found_font.to_string(),
                 size: font_size,
                 color: fill,
-                letter_spacing: Pt(0.),
+                letter_spacing,
                 line_height: 1.,
             }]);
 
@@ -187,10 +189,12 @@ impl Svg {
             text_block.lines.iter_mut().for_each(|line| {
                 line.line_metrics.left -= match anchor {
                     TextAlign::Left => Pt(0.),
-                    TextAlign::Right => line.line_metrics.width,
+                    TextAlign::Right => line.line_metrics.width, // Pt(0.), //line.line_metrics.width,
                     TextAlign::Center => line.line_metrics.width / 2.,
                 };
             });
+
+            // println!()
 
             text_blocks.push(((x, y), text_block));
         }
@@ -222,6 +226,7 @@ impl Svg {
                     for rich_text_span in line.rich_text.0.iter_mut() {
                         rich_text_span.line_height *= scale_y;
                         rich_text_span.size *= scale_y;
+                        rich_text_span.letter_spacing *= scale_x;
                     }
 
                     line.line_metrics.ascent *= scale_y;

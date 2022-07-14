@@ -36,7 +36,6 @@ impl<'a> YogaLayout<'a> {
     }
 }
 
-// TODO: Implement for images as well
 // TODO: We should *PROBABLY* respect the measure mode
 extern "C" fn measure_func(
     node_ref: NodeRef,

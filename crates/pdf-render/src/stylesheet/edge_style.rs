@@ -25,6 +25,12 @@ mergeable_fn! {
     }
 }
 
+// TODO: Add custom deserialize to support "top right bottom left" "vertical
+// horizontal", "all".
+// impl<'de> Deserialize<'de> for MergeableEdgeStyle {
+
+// }
+
 impl Default for EdgeStyle {
     fn default() -> Self {
         Self {
