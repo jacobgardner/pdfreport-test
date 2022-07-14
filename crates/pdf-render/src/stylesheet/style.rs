@@ -79,21 +79,35 @@ impl MergeableStyle {
     /// target node does not have any style set.
     pub fn merge_inherited_styles(&self, parent_style: &MergeableStyle) -> MergeableStyle {
         let mut style = self.clone();
-        // TODO: There's probably a cleaner way of doing this
 
-        style.font = if let Some(font) = &parent_style.font {
-            font.merge_optional(&style.font)
-        } else {
-            style.font.clone()
-        };
-
-        if style.color.is_none() {
-            style.color = parent_style.color.clone();
+        macro_rules! inherited_nest {
+            ($x:ident) => {
+                style.$x = if let Some(field) = &parent_style.$x {
+                    field.merge_optional(&style.$x)
+                } else {
+                    style.$x.clone()
+                };
+            };
+            ($first:ident, $($remainder:ident),+) => {
+                inherited_nest!($first);
+                inherited_nest!($($remainder),+);
+            }
         }
 
-        if style.debug.is_none() {
-            style.debug = parent_style.debug;
+        macro_rules! inherited_field {
+            ($x:ident) => {
+                if style.$x.is_none() {
+                    style.$x = parent_style.$x.clone();
+                }
+            };
+            ($first:ident, $($remainder:ident),+) => {
+                inherited_field!($first);
+                inherited_field!($($remainder),+);
+            }
         }
+
+        inherited_nest!(font);
+        inherited_field!(color, debug);
 
         style
     }

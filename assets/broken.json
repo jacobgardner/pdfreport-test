@@ -1,0 +1,400 @@
+{
+  "filename": "Jacob Gardner - Develop Story Ch1.pdf",
+  "documentTitle": "Jacob Gardner - Develop Story Ch1",
+  "pageSize": "letter",
+  "stylesheet": {
+    "default": {
+      "color": "#444A5A",
+      "font": {"family": "Inter", "size": 12},
+      "padding": {"left": 27, "top": 27, "bottom": 27, "right": 27}
+    },
+    "breakBefore": {"breakBefore": "Always"},
+    "instructionsSeparator": {},
+    "h1": {"font": {"size": 24, "weight": "Bold"}, "margin": {"bottom": 12}},
+    "h2": {
+      "font": {"size": 18.75, "weight": "Light"},
+      "margin": {"bottom": 36}
+    },
+    "h3": {
+      "font": {"size": 9, "weight": "ExtraBold", "letterSpacing": 1.125},
+      "margin": {"bottom": 12},
+      "textTransform": "Uppercase"
+    },
+    "section": {"flex": {"direction": "Column"}},
+    "category": {
+      "breakBefore": "Always",
+      "font": {"weight": "Light", "size": 15},
+      "lineHeight": 27
+    },
+    "chapter": {"breakBefore": "Always"},
+    "callout": {
+      "breakInside": "Avoid",
+      "backgroundColor": "#f1faf6",
+      "border": {
+        "radius": {
+          "topLeft": 4.5,
+          "topRight": 4.5,
+          "bottomLeft": 4.5,
+          "bottomRight": 4.5
+        }
+      },
+      "padding": {"left": 12, "top": 12, "bottom": 12, "right": 12},
+      "margin": {"left": 6}
+    },
+    "flagpoleBase": {
+      "breakInside": "Avoid",
+      "padding": {"left": 18, "top": 18, "bottom": 18, "right": 18},
+      "margin": {"top": 36, "bottom": 36},
+      "border": {
+        "width": {"left": 1.5},
+        "radius": {"topRight": 9, "bottomRight": 9}
+      }
+    },
+    "flagpoleYellow": {
+      "backgroundColor": "#FFFCF4",
+      "border": {"color": "#FFD166"}
+    },
+    "flagpoleBlue": {
+      "border": {"color": "#0080AD"},
+      "backgroundColor": "#EDF6F9"
+    },
+    "measureHeading": {"font": {"size": 18.75, "weight": "Bold"}},
+    "instructionsHeading": {
+      "font": {
+        "weight": "Bold",
+        "size": 15,
+        "letterSpacing": 0.11249999999999999
+      },
+      "lineHeight": 18
+    },
+    "instructionsBox": {
+      "breakInside": "Avoid",
+      "backgroundColor": "#F5F7FA",
+      "padding": {"top": 18, "right": 18, "bottom": 18, "left": 18},
+      "border": {
+        "color": "#E2E4E9",
+        "width": {"top": 1, "right": 1, "bottom": 1, "left": 1},
+        "radius": {
+          "topLeft": 12,
+          "topRight": 12,
+          "bottomLeft": 12,
+          "bottomRight": 12
+        }
+      }
+    },
+    "measureBox": {
+      "breakInside": "Avoid",
+      "padding": {"top": 18, "bottom": 18, "left": 18, "right": 18},
+      "border": {
+        "radius": {
+          "topLeft": 9,
+          "topRight": 9,
+          "bottomLeft": 9,
+          "bottomRight": 9
+        }
+      },
+      "margin": {"bottom": 36},
+      "backgroundColor": "#F5F7FA"
+    },
+    "paragraph": {
+      "breakInside": "Avoid",
+      "margin": {"bottom": 18},
+      "lineHeight": 18
+    },
+    "column": {"flex": {"direction": "Column"}},
+    "row": {"flex": {"direction": "Row"}},
+    "orderedList": {"flex": {"direction": "Column"}},
+    "unorderedList": {"flex": {"direction": "Column"}},
+    "anchor": {},
+    "strong": {"font": {"weight": "Bold"}},
+    "emphasis": {"font": {"style": "Italic"}},
+    "primary": {"flex": {"shrink": 2, "grow": 2}},
+    "sidebar": {"flex": {"shrink": 1, "grow": 1}}
+  },
+  "fonts": [
+    {
+      "familyName": "Inter",
+      "fonts": [
+        {
+          "source": "./assets/fonts/inter-static/Inter-Bold.ttf",
+          "weight": "Bold",
+          "style": "Normal"
+        },
+        {
+          "source": "./assets/fonts/inter-static/Inter-Thin-BETA.ttf",
+          "weight": "Thin",
+          "style": "Normal"
+        },
+        {
+          "source": "./assets/fonts/inter-static/Inter-SemiBold.ttf",
+          "weight": "SemiBold",
+          "style": "Normal"
+        },
+        {
+          "source": "./assets/fonts/inter-static/Inter-ThinItalic-BETA.ttf",
+          "weight": "Thin",
+          "style": "Italic"
+        },
+        {
+          "source": "./assets/fonts/inter-static/Inter-SemiBoldItalic.ttf",
+          "weight": "SemiBold",
+          "style": "Italic"
+        },
+        {
+          "source": "./assets/fonts/inter-static/Inter-ExtraLight-BETA.ttf",
+          "weight": "ExtraLight",
+          "style": "Normal"
+        },
+        {
+          "source": "./assets/fonts/inter-static/Inter-ExtraBoldItalic.ttf",
+          "weight": "ExtraBold",
+          "style": "Italic"
+        },
+        {
+          "source": "./assets/fonts/inter-static/Inter-Light-BETA.ttf",
+          "weight": "Light",
+          "style": "Normal"
+        },
+        {
+          "source": "./assets/fonts/inter-static/Inter-UI-BlackItalic.ttf",
+          "weight": "Black",
+          "style": "Italic"
+        },
+        {
+          "source": "./assets/fonts/inter-static/Inter-BoldItalic.ttf",
+          "weight": "Bold",
+          "style": "Italic"
+        },
+        {
+          "source": "./assets/fonts/inter-static/Inter-Regular.ttf",
+          "weight": "Regular",
+          "style": "Normal"
+        },
+        {
+          "source": "./assets/fonts/inter-static/Inter-Italic.ttf",
+          "weight": "Regular",
+          "style": "Italic"
+        },
+        {
+          "source": "./assets/fonts/inter-static/Inter-ExtraLightItalic-BETA.ttf",
+          "weight": "ExtraLight",
+          "style": "Italic"
+        },
+        {
+          "source": "./assets/fonts/inter-static/Inter-LightItalic-BETA.ttf",
+          "weight": "Light",
+          "style": "Italic"
+        },
+        {
+          "source": "./assets/fonts/inter-static/Inter-ExtraBold.ttf",
+          "weight": "ExtraBold",
+          "style": "Normal"
+        },
+        {
+          "source": "./assets/fonts/inter-static/Inter-Medium.ttf",
+          "weight": "Medium",
+          "style": "Normal"
+        },
+        {
+          "source": "./assets/fonts/inter-static/Inter-Black.ttf",
+          "weight": "Black",
+          "style": "Normal"
+        },
+        {
+          "source": "./assets/fonts/inter-static/Inter-MediumItalic.ttf",
+          "weight": "Medium",
+          "style": "Italic"
+        }
+      ]
+    }
+  ],
+  "pageMargins": {"left": 27, "right": 27, "top": 27, "bottom": 27},
+  "root": {
+    "type": "Styled",
+    "styles": [],
+    "children": [
+      {
+        "type": "Styled",
+        "styles": [],
+        "children": [
+          {
+            "type": "Styled",
+            "styles": ["default", "chapter"],
+            "children": [
+              {
+                "type": "Text",
+                "styles": ["h1"],
+                "children": ["Chapter 1: Your Approach to Work"]
+              },
+              {
+                "type": "Styled",
+                "styles": ["section"],
+                "children": [
+                  {
+                    "type": "Text",
+                    "styles": ["h2"],
+                    "children": ["Introduction"]
+                  },
+
+                  {
+                    "type": "Styled",
+                    "styles": ["column"],
+                    "children": [
+                      {
+                        "type": "Styled",
+                        "styles": ["primary"],
+                        "children": [
+                          {
+                            "type": "Text",
+                            "styles": ["h3"],
+                            "children": ["Explain the groupings"]
+                          },
+                          {
+                            "type": "Text",
+                            "styles": ["paragraph"],
+                            "children": [
+                              "Here's a quick snapshot of what these three groupings mean."
+                            ]
+                          },
+                          {
+                            "type": "Text",
+                            "styles": ["paragraph"],
+                            "children": []
+                          },
+                          {
+                            "type": "Styled",
+                            "styles": ["unorderedList"],
+                            "children": [
+                              {
+                                "type": "Text",
+                                "styles": [],
+                                "children": [
+                                  "• ",
+                                  {
+                                    "type": "Text",
+                                    "styles": ["paragraph"],
+                                    "children": ["lorem"]
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "Text",
+                                "styles": [],
+                                "children": [
+                                  "• ",
+                                  {
+                                    "type": "Text",
+                                    "styles": ["paragraph"],
+                                    "children": ["ipsum"]
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "type": "Styled",
+                            "styles": ["orderedList"],
+                            "children": [
+
+                              {
+                                "type": "Text",
+                                "styles": [],
+                                "children": [
+                                  "2",
+                                  ". ",
+                                  {
+                                    "type": "Text",
+                                    "styles": ["paragraph"],
+                                    "children": [
+                                      "amet ",
+                                      {
+                                        "type": "Text",
+                                        "styles": "anchor",
+                                        "children": ["nulla"]
+                                      },
+                                      " nisi"
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "type": "Styled",
+                        "styles": ["sidebar"],
+                        "children": [
+                          {
+                            "type": "Styled",
+                            "styles": ["callout"],
+                            "children": [
+                              {
+                                "type": "Text",
+                                "styles": ["h3"],
+                                "children": ["This is your callout"]
+                              },
+                              {
+                                "type": "Text",
+                                "styles": ["paragraph"],
+                                "children": [
+                                  "This is your ",
+                                  {
+                                    "type": "Text",
+                                    "styles": ["emphasis"],
+                                    "children": [
+                                      {
+                                        "type": "Text",
+                                        "styles": ["strong"],
+                                        "children": ["body"]
+                                      }
+                                    ]
+                                  },
+                                  ":"
+                                ]
+                              },
+                              {
+                                "type": "Styled",
+                                "styles": ["unorderedList"],
+                                "children": [
+                                  {
+                                    "type": "Text",
+                                    "styles": [],
+                                    "children": [
+                                      "• ",
+                                      {
+                                        "type": "Text",
+                                        "styles": ["paragraph"],
+                                        "children": ["With list items"]
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "Text",
+                                    "styles": [],
+                                    "children": [
+                                      "• ",
+                                      {
+                                        "type": "Text",
+                                        "styles": ["paragraph"],
+                                        "children": ["inside of it"]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

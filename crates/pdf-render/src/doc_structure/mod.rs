@@ -31,8 +31,6 @@ pub struct DocStructure {
     pub document_title: String,
     pub page_size: String,
     #[serde(default)]
-    // TODO: Fix this type so we don't need to re-export
-    #[ts(type = "EdgeStyle")]
     pub page_margins: EdgeStyle,
     pub fonts: Vec<FontFamilyInfo>,
     pub stylesheet: Stylesheet,

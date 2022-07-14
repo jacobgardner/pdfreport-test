@@ -189,58 +189,52 @@ impl<'a> PrintPdfWriter<'a> {
         (x_position, y_position)
     }
 
-    // TODO: Remove this if we ever add another variant to the Image enum
-    #[allow(irrefutable_let_patterns)]
     fn draw_image(
         &mut self,
         paginated_node: &PaginatedNode,
         image_node: &DrawableImageNode,
-        // image_node: &DrawableImageNode,
     ) -> Result<&mut Self, DocumentGenerationError> {
         let layer = self.get_base_layer(paginated_node.page_index);
 
-        if let Image::Svg(ref svg) = image_node.image {
-            let parsed_svg = Svg::parse(&svg.content).unwrap();
+        let Image::Svg(ref svg) = image_node.image;
+        let parsed_svg = Svg::parse(&svg.content).unwrap();
 
-            let svg_xobject = parsed_svg.into_xobject(&layer);
+        let svg_xobject = parsed_svg.into_xobject(&layer);
 
-            let NodeLayout { width, height, .. } = paginated_node.page_layout;
+        let NodeLayout { width, height, .. } = paginated_node.page_layout;
 
-            let (x_position, y_position) = self.get_placement_coords(&paginated_node.page_layout);
-            let (x_scale, y_scale) = svg.computed_scale(
-                paginated_node.page_layout.width,
-                paginated_node.page_layout.height,
-            );
+        let (x_position, y_position) = self.get_placement_coords(&paginated_node.page_layout);
+        let (x_scale, y_scale) = svg.computed_scale(
+            paginated_node.page_layout.width,
+            paginated_node.page_layout.height,
+        );
 
-            svg_xobject.add_to_layer(
-                &layer,
-                SvgTransform {
-                    translate_x: Some(x_position.into()),
-                    translate_y: Some(y_position.into()),
-                    scale_x: Some(x_scale),
-                    scale_y: Some(y_scale),
-                    ..Default::default()
-                },
-            );
+        svg_xobject.add_to_layer(
+            &layer,
+            SvgTransform {
+                translate_x: Some(x_position.into()),
+                translate_y: Some(y_position.into()),
+                scale_x: Some(x_scale),
+                scale_y: Some(y_scale),
+                ..Default::default()
+            },
+        );
 
-            for (point, text_block) in svg.text_from_dims(width, height) {
-                self.draw_text_block(
-                    &PaginatedNode {
-                        page_layout: NodeLayout {
-                            left: paginated_node.page_layout.left + point.0,
-                            right: paginated_node.page_layout.right + point.0,
-                            top: paginated_node.page_layout.top + point.1,
-                            ..paginated_node.page_layout.clone()
-                        },
-                        ..paginated_node.clone()
+        for (point, text_block) in svg.text_from_dims(width, height) {
+            self.draw_text_block(
+                &PaginatedNode {
+                    page_layout: NodeLayout {
+                        left: paginated_node.page_layout.left + point.0,
+                        right: paginated_node.page_layout.right + point.0,
+                        top: paginated_node.page_layout.top + point.1,
+                        ..paginated_node.page_layout.clone()
                     },
-                    &Style::default(),
-                    &text_block,
-                )
-                .unwrap();
-            }
-        } else {
-            unimplemented!("Only SVGs are currently supported");
+                    ..paginated_node.clone()
+                },
+                &Style::default(),
+                &text_block,
+            )
+            .unwrap();
         }
 
         Ok(self)

@@ -3,3 +3,4 @@
 trace-*.json
 .vscode
 cache
+logs

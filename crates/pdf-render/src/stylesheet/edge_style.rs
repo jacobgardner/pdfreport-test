@@ -20,7 +20,8 @@ mergeable_fn! {
         pub struct MergeableEdgeStyle;
     },
     unmergeable => {
-        #[derive(Deserialize)]
+        #[derive(Deserialize, TS)]
+        #[ts(export, rename = "RequiredEdgeStyle")]
         pub struct EdgeStyle;
     }
 }
