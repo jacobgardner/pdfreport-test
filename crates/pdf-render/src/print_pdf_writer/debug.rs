@@ -3,7 +3,7 @@ use printpdf::{Line, Point, Rgb};
 use crate::{
     block_layout::paginated_layout::PaginatedNode,
     fonts::FontAttributes,
-    stylesheet::{BorderRadiusStyle, EdgeStyle, Style},
+    stylesheet::{EdgeStyle, Style},
     utils::debug_cursor::DebugCursor,
     values::{Color, Mm, Pt, Rect},
 };
@@ -42,16 +42,6 @@ impl<'a> PrintPdfWriter<'a> {
             width: border_rect.width - style.padding.horizontal() - style.border.width.horizontal(),
             height: border_rect.height - style.padding.vertical() - style.border.width.vertical(),
         };
-
-        println!("{margin_rect:?}");
-        println!("{border_rect:?}");
-        println!("{content_rect:?}");
-
-        println!(
-            "Final Width: {}; Delta: {}",
-            content_rect.width,
-            content_rect.width - Pt(28.57)
-        );
 
         self.draw_rect(
             page_index,

@@ -216,8 +216,6 @@ impl Svg {
                 };
             });
 
-            // println!()
-
             text_blocks.push(((x, y), text_block));
         }
 

@@ -66,10 +66,6 @@ extern "C" fn measure_func(
             let height = text_block.height().0 as f32 * EPSILON;
             let width = text_block.width().0 as f32 * EPSILON;
 
-            if text_block.lines[0].rich_text.0[0].text == "apples" {
-                println!("Calc: {} x {}", width, height);
-            }
-
             context.text_block = Some(text_block);
 
             Size { width, height }
@@ -123,8 +119,6 @@ impl<'a> LayoutEngine for YogaLayout<'a> {
         stylesheet: &Stylesheet,
         paragraph_layout: Rc<ParagraphLayout>,
     ) -> Result<(), DocumentGenerationError> {
-        let mut apples_node = None;
-
         for (node, parent) in root_node.block_iter() {
             let node_style = stylesheet.get_style(Default::default(), node.styles())?;
 
@@ -133,12 +127,6 @@ impl<'a> LayoutEngine for YogaLayout<'a> {
             match node {
                 DomNode::Text(text_node) => {
                     let rich_text = dom_node_to_rich_text(text_node, self.node_lookup, stylesheet)?;
-
-                    if rich_text.0[0].text == "apples" {
-                        apples_node = Some(node.node_id());
-                        // println!("{layout_node:?}");
-                        // apples_node = Some(layout_node.);
-                    }
 
                     let context = yoga::Context::new(TextNodeContext {
                         rich_text,
@@ -172,11 +160,6 @@ impl<'a> LayoutEngine for YogaLayout<'a> {
         let root_yoga_node = self.yoga_nodes_by_id.get_mut(&root_node.node_id()).unwrap();
 
         root_yoga_node.calculate_layout(page_width.0 as f32 * EPSILON, yoga::Undefined, yoga::Direction::LTR);
-
-        if let Some(apples_node) = apples_node {
-            let node = self.yoga_nodes_by_id.get(&apples_node).unwrap();
-            println!("Layout: {:?}", node.get_layout());
-        }
 
         // We stored any errors during calculation in the context so now we have
         // to check them now that we're back in our own code.

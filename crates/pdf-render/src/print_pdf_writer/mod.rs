@@ -141,10 +141,6 @@ impl<'a> UnstructuredDocumentWriter for PrintPdfWriter<'a> {
         );
 
         for line in text_block.lines.iter() {
-            if line.rich_text.0[0].text == "apples" {
-                println!("{}", line.line_metrics);
-            }
-
             layer.set_text_matrix(TextMatrix::Translate(
                 x + line.line_metrics.left.into(),
                 y - (line.line_metrics.baseline).into(),
@@ -220,9 +216,6 @@ impl<'a> PrintPdfWriter<'a> {
                 ..Default::default()
             },
         );
-
-        println!("{width}-{height}");
-        println!("{}x{}", x_scale, y_scale);
 
         for (point, text_block) in svg.text_from_dims(width, height) {
             self.draw_text_block(

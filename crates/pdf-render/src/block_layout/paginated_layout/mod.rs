@@ -246,10 +246,6 @@ impl<'a> PaginatedLayoutEngine<'a> {
                         layout.width - style.padding.horizontal() - style.border.width.horizontal() + Pt(2.),
                     )?;
                 
-                if rich_text.0[0].text == "apples" {
-                    println!("Paginated? {}", text_block.width());
-                }
-
                 DrawableNode::Text(DrawableTextNode {
                     text_block,
                     style: adjusted_style,
