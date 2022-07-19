@@ -64,10 +64,10 @@ impl Svg {
             .map(Pt::try_from)
             .transpose()?;
 
-        let viewbox = svg_node
+        let view_box = svg_node
             .lc_attribute("viewbox")
-            .map(|viewbox| -> Result<_, DocumentGenerationError> {
-                let p: Vec<_> = viewbox
+            .map(|view_box| -> Result<_, DocumentGenerationError> {
+                let p: Vec<_> = view_box
                     .split(' ')
                     .map(Pt::try_from)
                     .collect::<Result<Vec<_>, _>>()?;
@@ -85,7 +85,7 @@ impl Svg {
 
         let (width, height) = if let (Some(width), Some(height)) = (svg_width, svg_height) {
             (width, height)
-        } else if let Some((_, _, viewbox_width, viewbox_height)) = viewbox {
+        } else if let Some((_, _, viewbox_width, viewbox_height)) = view_box {
             if let Some(width) = svg_width {
                 let scale = width / viewbox_width;
 

@@ -60,13 +60,14 @@ extern "C" fn measure_func(
         &context.rich_text,
         content_width,
     );
+    
 
     match text_block {
         Ok(text_block) => {
             let height = text_block.height().0 as f32 * EPSILON;
             let width = text_block.width().0 as f32 * EPSILON;
 
-            context.text_block = Some(text_block);
+            context.text_block_by_width.insert(content_width, text_block);
 
             Size { width, height }
         }
@@ -131,7 +132,7 @@ impl<'a> LayoutEngine for YogaLayout<'a> {
                     let context = yoga::Context::new(TextNodeContext {
                         rich_text,
                         paragraph_layout: paragraph_layout.clone(),
-                        text_block: None,
+                        text_block_by_width: Default::default(),
                         calculate_error: None,
                     });
 
@@ -164,6 +165,12 @@ impl<'a> LayoutEngine for YogaLayout<'a> {
         // We stored any errors during calculation in the context so now we have
         // to check them now that we're back in our own code.
         for (_, node) in self.yoga_nodes_by_id.iter() {
+            // JAKE:
+            // FIXME:
+            // NOTE:
+            // TODO: Find the rendered text block that is associated with the
+            // content width closest to the one returned by the node width
+            // (using take_closest_by_width) 
             check_node_for_error(node)?;
         }
 

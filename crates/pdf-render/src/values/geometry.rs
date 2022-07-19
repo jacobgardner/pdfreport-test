@@ -1,6 +1,7 @@
 use std::{
     fmt::Display,
-    ops::{Add, AddAssign, Div, Sub, SubAssign, Mul, MulAssign},
+    hash::Hash,
+    ops::{Add, AddAssign, Div, Mul, MulAssign, Sub, SubAssign},
 };
 
 use regex::Regex;
@@ -55,6 +56,10 @@ pub struct Mm(pub f64);
 
 #[derive(Default, Copy, Clone, Debug, PartialEq, PartialOrd)]
 pub struct Pt(pub f64);
+
+impl Pt {
+    pub const MAX: Pt = Pt(f64::MAX);
+}
 
 impl TS for Pt {
     const EXPORT_TO: Option<&'static str> = None;
@@ -176,8 +181,8 @@ impl Div for Pt {
 }
 
 impl Div<f64> for Pt {
-    type Output = Pt; 
-    
+    type Output = Pt;
+
     fn div(self, rhs: f64) -> Self::Output {
         Pt(self.0 / rhs)
     }
