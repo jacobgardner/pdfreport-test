@@ -157,9 +157,12 @@ impl Svg {
                 panic!("For <text>, we only support all text child nodes for now");
             }
 
-            // TODO: Is this potentially fallible for a text node???
-            // FIXME: Verify and use expect or return Err()
-            let node_text = node.text().unwrap().trim();
+            let node_text = if let Some(node_text) = node.text() {
+                node_text.trim()
+            } else {
+                continue;
+            };
+            
 
             let rich_text = RichText(vec![RichTextSpan {
                 text: node_text.to_string(),
@@ -181,29 +184,34 @@ impl Svg {
                 Pt(f64::MAX),
             )?;
 
-            // FIXME:
-            // TODO: Possible to have empty text block with no lines. DO NOT UNWRAP
-            let line_metric = text_block.lines.first().unwrap().line_metrics.clone();
+            // It's possible for there to be no lines of text in which case we
+            // just continue.
+            let line_metric = if let Some(line) = text_block.lines.first() {
+                line.line_metrics.clone()
+            } else {
+                continue;
+            };
 
-            println!("{line_metric}");
+            y -= line_metric.baseline;
 
-            // // I have no maths proving these. Mostly these are the values that
-            // // ended up working
+            // FIXME: https://www.w3.org/TR/css-inline-3/#baseline-intro
+            // TODO: These are definitely off based on the CSS spec on dominant
+            // baselines. (probably good enough for now though)
             y = match dominant_baseline {
-                DominantBaseline::Auto => y - line_metric.baseline,
-                DominantBaseline::Central => {
-                    y - line_metric.baseline + (line_metric.ascent - line_metric.descent) / 2.0
-                }
-                DominantBaseline::Middle => y - line_metric.baseline + line_metric.descent,
+                DominantBaseline::Auto => y,
+                // Halfway to hanging from Auto
+                DominantBaseline::Central => y + (line_metric.ascent - line_metric.descent) / 2.0,
+                DominantBaseline::Middle => y + line_metric.height / 2.0,
                 DominantBaseline::Hanging => {
-                    y - line_metric.baseline + (line_metric.ascent - line_metric.descent)
+                    // Move it up to the line and then down to the ascent
+                    y + (line_metric.ascent - line_metric.descent)
                 }
             };
 
             text_block.lines.iter_mut().for_each(|line| {
                 line.line_metrics.left -= match anchor {
                     TextAlign::Left => Pt(0.),
-                    TextAlign::Right => line.line_metrics.width, // Pt(0.), //line.line_metrics.width,
+                    TextAlign::Right => line.line_metrics.width,
                     TextAlign::Center => line.line_metrics.width / 2.,
                 };
             });

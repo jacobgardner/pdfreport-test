@@ -145,10 +145,9 @@ impl<'a> UnstructuredDocumentWriter for PrintPdfWriter<'a> {
                 println!("{}", line.line_metrics);
             }
 
-            // line.line_metrics.height
             layer.set_text_matrix(TextMatrix::Translate(
                 x + line.line_metrics.left.into(),
-                y - (line.line_metrics.baseline).into(), // + (line.line_metrics.height - line.line_metrics.ascent).into() // + ((line.line_metrics.ascent + line.line_metrics.descent) / 2.).into(),
+                y - (line.line_metrics.baseline).into(),
             ));
 
             for span in line.rich_text.0.iter() {
@@ -156,8 +155,6 @@ impl<'a> UnstructuredDocumentWriter for PrintPdfWriter<'a> {
 
                 layer.write_text(span.text.clone(), font.as_ref());
             }
-
-            // current_y -= line.line_metrics.height.into();
         }
 
         layer.end_text_section();
@@ -223,7 +220,7 @@ impl<'a> PrintPdfWriter<'a> {
                 ..Default::default()
             },
         );
-        
+
         println!("{width}-{height}");
         println!("{}x{}", x_scale, y_scale);
 
