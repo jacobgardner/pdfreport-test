@@ -61,9 +61,9 @@ impl Parse for Mergeable {
         }
 
         Ok(Mergeable {
-            source_struct: associated_keys.remove("source").unwrap(),
-            mergeable_struct: associated_keys.remove("mergeable").unwrap(),
-            unmergeable_struct: associated_keys.remove("unmergeable").unwrap(),
+            source_struct: associated_keys.remove("source").expect("We already have verified that this exists in the map."),
+            mergeable_struct: associated_keys.remove("mergeable").expect("We already have verified that this exists in the map."),
+            unmergeable_struct: associated_keys.remove("unmergeable").expect("We already have verified that this exists in the map."),
         })
     }
 }

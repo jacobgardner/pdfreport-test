@@ -30,6 +30,8 @@ fn convert_fields_to_optional(
                 field.ty.clone()
             };
 
+            // TODO: Don't override the existing type. The span information is
+            // useful to the end user (or at least copy over the span data)
             field.ty = parse_quote! { Option< #mergeable_type > };
         });
     } else {

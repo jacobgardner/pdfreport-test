@@ -96,7 +96,7 @@ impl<'de> Deserialize<'de> for Pt {
 
 impl Display for Pt {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{} pt.", self.0)
+        write!(f, "{:.2} pt.", self.0)
     }
 }
 

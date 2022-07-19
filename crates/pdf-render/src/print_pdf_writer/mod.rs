@@ -112,6 +112,7 @@ impl<'a> PrintPdfWriter<'a> {
     ) -> Result<W, crate::error::DocumentGenerationError> {
         let mut buf_writer = BufWriter::new(pdf_doc_writer);
 
+        // TODO: Do NOT unwrap
         self.raw_pdf_doc.save(&mut buf_writer).unwrap();
 
         let write_result = buf_writer
@@ -133,18 +134,21 @@ impl<'a> UnstructuredDocumentWriter for PrintPdfWriter<'a> {
 
         layer.begin_text_section();
 
-        let x =
-            printpdf::Pt::from(style.padding.left + node.page_layout.left + self.page_margins.left);
+        let coords = self.get_placement_coords(&node.page_layout);
+        let x = printpdf::Pt::from(coords.0 + style.padding.left + style.border.width.left);
         let y = printpdf::Pt::from(
-            self.page_size.height
-                - (node.page_layout.top + style.padding.top + self.page_margins.top),
+            coords.1 + style.padding.bottom + style.border.width.bottom + text_block.height(),
         );
 
-        let mut current_y = y;
         for line in text_block.lines.iter() {
+            if line.rich_text.0[0].text == "apples" {
+                println!("{}", line.line_metrics);
+            }
+
+            // line.line_metrics.height
             layer.set_text_matrix(TextMatrix::Translate(
                 x + line.line_metrics.left.into(),
-                current_y - line.line_metrics.ascent.into(),
+                y - (line.line_metrics.baseline).into(), // + (line.line_metrics.height - line.line_metrics.ascent).into() // + ((line.line_metrics.ascent + line.line_metrics.descent) / 2.).into(),
             ));
 
             for span in line.rich_text.0.iter() {
@@ -153,7 +157,7 @@ impl<'a> UnstructuredDocumentWriter for PrintPdfWriter<'a> {
                 layer.write_text(span.text.clone(), font.as_ref());
             }
 
-            current_y -= line.line_metrics.height.into();
+            // current_y -= line.line_metrics.height.into();
         }
 
         layer.end_text_section();
@@ -219,15 +223,19 @@ impl<'a> PrintPdfWriter<'a> {
                 ..Default::default()
             },
         );
+        
+        println!("{width}-{height}");
+        println!("{}x{}", x_scale, y_scale);
 
         for (point, text_block) in svg.text_from_dims(width, height) {
             self.draw_text_block(
                 &PaginatedNode {
                     page_layout: NodeLayout {
                         left: paginated_node.page_layout.left + point.0,
-                        right: paginated_node.page_layout.right + point.0,
+                        right: paginated_node.page_layout.right - point.0,
                         top: paginated_node.page_layout.top + point.1,
-                        ..paginated_node.page_layout.clone()
+                        height: text_block.height(),
+                        width: text_block.width(),
                     },
                     ..paginated_node.clone()
                 },

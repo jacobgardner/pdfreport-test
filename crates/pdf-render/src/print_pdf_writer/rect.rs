@@ -157,7 +157,7 @@ impl<'a> PrintPdfWriter<'a> {
                 border_width.top,
                 Point {
                     x: printpdf::Pt(0.),
-                    y: printpdf::Pt(border_width.top.0 / -2.),
+                    y: printpdf::Pt(0.),
                 },
             );
             draw_border_edge(
@@ -165,7 +165,7 @@ impl<'a> PrintPdfWriter<'a> {
                 points[edge_ranges[1].start..edge_ranges[2].end].iter(),
                 border_width.right,
                 Point {
-                    x: printpdf::Pt(border_width.right.0 / -2.),
+                    x: printpdf::Pt(0.),
                     y: printpdf::Pt(0.),
                 },
             );
@@ -175,7 +175,7 @@ impl<'a> PrintPdfWriter<'a> {
                 border_width.bottom,
                 Point {
                     x: printpdf::Pt(0.),
-                    y: printpdf::Pt(border_width.bottom.0 / 2.),
+                    y: printpdf::Pt(0.),
                 },
             );
             draw_border_edge(
@@ -185,7 +185,7 @@ impl<'a> PrintPdfWriter<'a> {
                     .chain(points[..edge_ranges[0].end].iter()),
                 border_width.left,
                 Point {
-                    x: printpdf::Pt(border_width.left.0 / 2.),
+                    x: printpdf::Pt(0.),
                     y: printpdf::Pt(0.),
                 },
             );

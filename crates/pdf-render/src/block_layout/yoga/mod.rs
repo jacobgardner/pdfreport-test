@@ -22,6 +22,8 @@ use polyhorn_yoga as yoga;
 
 use yoga::{MeasureMode, NodeRef, Size};
 
+pub(self) const EPSILON: f32 = 1000.0;
+
 pub struct YogaLayout<'a> {
     node_lookup: &'a NodeLookup<'a>,
     yoga_nodes_by_id: HashMap<NodeId, yoga::Node>,
@@ -45,13 +47,13 @@ extern "C" fn measure_func(
     _height_measure_mode: MeasureMode,
 ) -> Size {
     let context = yoga::Node::get_context_mut(&node_ref)
-        .unwrap()
+        .expect("A context should have been set on this node before setting the measure func")
         .downcast_mut::<TextNodeContext>()
-        .unwrap();
+        .expect("The only context node this should be is TextNodeContext in all cases");
 
     // This width excludes the margin & padding so it should be exclusively the
     // content width
-    let content_width = Pt(width as f64);
+    let content_width = Pt((width / EPSILON) as f64);
 
     let text_block = context.paragraph_layout.calculate_layout(
         ParagraphStyle::default(),
@@ -61,8 +63,12 @@ extern "C" fn measure_func(
 
     match text_block {
         Ok(text_block) => {
-            let height = text_block.height().0 as f32;
-            let width = text_block.width().0 as f32;
+            let height = text_block.height().0 as f32 * EPSILON;
+            let width = text_block.width().0 as f32 * EPSILON;
+
+            if text_block.lines[0].rich_text.0[0].text == "apples" {
+                println!("Calc: {} x {}", width, height);
+            }
 
             context.text_block = Some(text_block);
 
@@ -89,19 +95,19 @@ impl<'a> LayoutEngine for YogaLayout<'a> {
         //  relative to the parent node so we have to build it up from ancestors
         ancestors.iter().fold(
             NodeLayout {
-                left: Pt(layout.left() as f64),
-                top: Pt(layout.top() as f64),
-                right: Pt(layout.right() as f64),
-                width: Pt(layout.width() as f64),
-                height: Pt(layout.height() as f64),
+                left: Pt((layout.left() / EPSILON) as f64 ),
+                top: Pt((layout.top() / EPSILON) as f64),
+                right: Pt((layout.right() / EPSILON) as f64),
+                width: Pt((layout.width() / EPSILON) as f64),
+                height: Pt((layout.height() / EPSILON) as f64),
             },
             |acc, node_id| {
                 let parent = self.yoga_nodes_by_id.get(node_id).unwrap().get_layout();
 
                 NodeLayout {
-                    left: acc.left + Pt(parent.left() as f64),
-                    right: acc.right + Pt(parent.right() as f64),
-                    top: acc.top + Pt(parent.top() as f64),
+                    left: acc.left + Pt((parent.left() / EPSILON) as f64),
+                    right: acc.right + Pt((parent.right() / EPSILON) as f64),
+                    top: acc.top + Pt((parent.top() / EPSILON) as f64),
                     // We don't modify the width or height of the target node,
                     // just the offsets
                     ..acc
@@ -117,6 +123,8 @@ impl<'a> LayoutEngine for YogaLayout<'a> {
         stylesheet: &Stylesheet,
         paragraph_layout: Rc<ParagraphLayout>,
     ) -> Result<(), DocumentGenerationError> {
+        let mut apples_node = None;
+
         for (node, parent) in root_node.block_iter() {
             let node_style = stylesheet.get_style(Default::default(), node.styles())?;
 
@@ -125,6 +133,12 @@ impl<'a> LayoutEngine for YogaLayout<'a> {
             match node {
                 DomNode::Text(text_node) => {
                     let rich_text = dom_node_to_rich_text(text_node, self.node_lookup, stylesheet)?;
+
+                    if rich_text.0[0].text == "apples" {
+                        apples_node = Some(node.node_id());
+                        // println!("{layout_node:?}");
+                        // apples_node = Some(layout_node.);
+                    }
 
                     let context = yoga::Context::new(TextNodeContext {
                         rich_text,
@@ -139,7 +153,6 @@ impl<'a> LayoutEngine for YogaLayout<'a> {
                 DomNode::Image(image_node) => {
                     layout_node.set_width(image_node.width.into());
                     layout_node.set_height(image_node.height.into());
-
                 }
                 _ => {}
             }
@@ -158,7 +171,12 @@ impl<'a> LayoutEngine for YogaLayout<'a> {
 
         let root_yoga_node = self.yoga_nodes_by_id.get_mut(&root_node.node_id()).unwrap();
 
-        root_yoga_node.calculate_layout(page_width.0 as f32, yoga::Undefined, yoga::Direction::LTR);
+        root_yoga_node.calculate_layout(page_width.0 as f32 * EPSILON, yoga::Undefined, yoga::Direction::LTR);
+
+        if let Some(apples_node) = apples_node {
+            let node = self.yoga_nodes_by_id.get(&apples_node).unwrap();
+            println!("Layout: {:?}", node.get_layout());
+        }
 
         // We stored any errors during calculation in the context so now we have
         // to check them now that we're back in our own code.
@@ -172,7 +190,9 @@ impl<'a> LayoutEngine for YogaLayout<'a> {
 
 fn check_node_for_error(node: &yoga::Node) -> Result<(), DocumentGenerationError> {
     if let Some(context) = node.get_own_context_mut() {
-        let context = context.downcast_mut::<TextNodeContext>().unwrap();
+        let context = context
+            .downcast_mut::<TextNodeContext>()
+            .expect("If there is a context, the only one currently is TextNodeContext");
 
         let err = context.calculate_error.take();
 

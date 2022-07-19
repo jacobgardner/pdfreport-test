@@ -45,6 +45,8 @@ impl Svg {
         content: String,
         paragraph_layout: &ParagraphLayout,
     ) -> Result<Self, DocumentGenerationError> {
+        // FIXME:
+        // TODO: This is fallible based on user input. This should NOT be unwrapped
         let doc = roxmltree::Document::parse(&content).unwrap();
 
         let svg_node = doc
@@ -54,10 +56,12 @@ impl Svg {
 
         let svg_width = svg_node
             .lc_attribute("width")
-            .map(|width| Pt::try_from(width).unwrap());
+            .map(|width| Pt::try_from(width))
+            .transpose()?;
         let svg_height = svg_node
             .lc_attribute("height")
-            .map(|height| Pt::try_from(height).unwrap());
+            .map(|height| Pt::try_from(height))
+            .transpose()?;
 
         let viewbox = svg_node
             .lc_attribute("viewbox")
@@ -153,6 +157,8 @@ impl Svg {
                 panic!("For <text>, we only support all text child nodes for now");
             }
 
+            // TODO: Is this potentially fallible for a text node???
+            // FIXME: Verify and use expect or return Err()
             let node_text = node.text().unwrap().trim();
 
             let rich_text = RichText(vec![RichTextSpan {
@@ -175,15 +181,23 @@ impl Svg {
                 Pt(f64::MAX),
             )?;
 
+            // FIXME:
+            // TODO: Possible to have empty text block with no lines. DO NOT UNWRAP
             let line_metric = text_block.lines.first().unwrap().line_metrics.clone();
 
-            // I have no maths proving these. Mostly these are the values that
-            // ended up working
+            println!("{line_metric}");
+
+            // // I have no maths proving these. Mostly these are the values that
+            // // ended up working
             y = match dominant_baseline {
-                DominantBaseline::Auto => y - line_metric.ascent,
-                DominantBaseline::Central => y - (line_metric.ascent + line_metric.descent) / 2.,
-                DominantBaseline::Middle => y - line_metric.ascent + line_metric.descent,
-                DominantBaseline::Hanging => y - line_metric.descent,
+                DominantBaseline::Auto => y - line_metric.baseline,
+                DominantBaseline::Central => {
+                    y - line_metric.baseline + (line_metric.ascent - line_metric.descent) / 2.0
+                }
+                DominantBaseline::Middle => y - line_metric.baseline + line_metric.descent,
+                DominantBaseline::Hanging => {
+                    y - line_metric.baseline + (line_metric.ascent - line_metric.descent)
+                }
             };
 
             text_block.lines.iter_mut().for_each(|line| {

@@ -127,8 +127,7 @@ impl<'a> PaginatedLayoutEngine<'a> {
         // the current node.
 
         let drawable_node = self
-            .convert_dom_node_to_drawable(node, &adjusted_layout, &style)
-            .unwrap();
+            .convert_dom_node_to_drawable(node, &adjusted_layout, &style)?;
 
         let paginated_node = PaginatedNode {
             page_layout: adjusted_layout,
@@ -231,10 +230,12 @@ impl<'a> PaginatedLayoutEngine<'a> {
 
         let drawable_node = match dom_node {
             DomNode::Text(text_node) => {
+                // TODO:
                 // FIXME: This should also have already been computed by now
                 let rich_text =
                     dom_node_to_rich_text(text_node, self.node_lookup, self.stylesheet)?;
 
+                // TODO:
                 // FIXME: We already calculated the text block in the yoga layout
                 // engine. Either re-use that or pass it into the layout engine?
                 let text_block = self
@@ -242,9 +243,12 @@ impl<'a> PaginatedLayoutEngine<'a> {
                     .calculate_layout(
                         ParagraphStyle::left(),
                         &rich_text,
-                        layout.width - style.padding.horizontal(),
-                    )
-                    .unwrap();
+                        layout.width - style.padding.horizontal() - style.border.width.horizontal() + Pt(2.),
+                    )?;
+                
+                if rich_text.0[0].text == "apples" {
+                    println!("Paginated? {}", text_block.width());
+                }
 
                 DrawableNode::Text(DrawableTextNode {
                     text_block,
