@@ -253,7 +253,7 @@ impl<'a> PaginatedLayoutEngine<'a> {
             }
             DomNode::Image(image_node) => DrawableNode::Image(DrawableImageNode {
                 style: adjusted_style,
-                image: Image::Svg(Svg::new(image_node.content.clone(), &self.paragraph_layout)?),
+                image: Image::Svg(Svg::new(image_node.content.clone(), self.paragraph_layout)?),
             }),
             _ => DrawableNode::Container(DrawableContainerNode {
                 style: adjusted_style,

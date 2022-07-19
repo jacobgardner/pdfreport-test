@@ -7,6 +7,7 @@ use super::{FontAttributes, FontData, FontFamilyCollection, FontId};
 #[derive(Default)]
 pub struct FontCollection {
     families: HashMap<String, FontFamilyCollection>,
+    default_font: Option<FontId>,
 }
 
 impl AsRef<HashMap<String, FontFamilyCollection>> for FontCollection {
@@ -19,15 +20,25 @@ impl FontCollection {
     pub fn new() -> Self {
         Self {
             families: HashMap::new(),
+            default_font: None,
         }
     }
 
-    pub fn get_font(&self, font_id: FontId) -> Option<&FontData> {
+    pub fn default_font(&self) -> Option<&FontData> {
+        self.default_font.map(|font_id| self.get_font(font_id))
+    }
+
+    pub fn set_default_font(&mut self, default_font_id: FontId) {
+        self.default_font = Some(default_font_id);
+    }
+
+    pub fn get_font(&self, font_id: FontId) -> &FontData {
         self.families
             .iter()
             .flat_map(|(_, font_family)| font_family.as_ref().iter())
             .find(|&(_, font)| font.font_id() == font_id)
             .map(|(_, data)| data)
+            .expect("If we have a font_id it should be guaranteed to exist")
     }
 
     pub fn add_family(
@@ -35,6 +46,11 @@ impl FontCollection {
         family_collection: FontFamilyCollection,
     ) -> Result<&mut Self, DocumentGenerationError> {
         let family_name = family_collection.family_name().clone();
+
+        if self.default_font.is_none() {
+            let font_data = family_collection.get_font_by_attribute(&FontAttributes::default())?;
+            self.set_default_font(font_data.font_id());
+        }
 
         if self
             .families
@@ -134,8 +150,8 @@ mod tests {
 
         font_collection.add_family(family1).unwrap();
 
-        assert_eq!(font_collection.get_font(fid2).unwrap().as_bytes(), b"2");
-        assert_eq!(font_collection.get_font(fid1).unwrap().as_bytes(), b"1");
+        assert_eq!(font_collection.get_font(fid2).as_bytes(), b"2");
+        assert_eq!(font_collection.get_font(fid1).as_bytes(), b"1");
     }
 
     #[test]

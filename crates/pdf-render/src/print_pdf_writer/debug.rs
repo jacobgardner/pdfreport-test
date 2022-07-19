@@ -2,7 +2,6 @@ use printpdf::{Line, Point, Rgb};
 
 use crate::{
     block_layout::paginated_layout::PaginatedNode,
-    fonts::FontAttributes,
     stylesheet::{EdgeStyle, Style},
     utils::debug_cursor::DebugCursor,
     values::{Color, Mm, Pt, Rect},
@@ -72,12 +71,10 @@ impl<'a> PrintPdfWriter<'a> {
     }
 
     pub fn draw_debug_cursors(&mut self, debug_cursors: &[DebugCursor]) {
-        // TODO: THIS WILL NOT WORK WHEN INTER IS NOT INCLUDED WITH THE BINARY
-        // FIXME: Use first font found, probably?
         let font = self
             .font_collection
-            .lookup_font("Inter", &FontAttributes::bold())
-            .unwrap();
+            .default_font()
+            .expect("If you are debugging, you must provide at least one font.");
 
         let font = self.get_font(font.font_id()).unwrap();
 

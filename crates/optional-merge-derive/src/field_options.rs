@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use darling::{FromField, FromMeta};
-use syn::{Data, DeriveInput, Field, Fields, ItemStruct, Type};
+use syn::{Field, Fields, ItemStruct, Type};
 
 use crate::config::FIELD_ATTR;
 

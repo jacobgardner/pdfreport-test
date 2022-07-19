@@ -90,8 +90,7 @@ impl<'a> PrintPdfWriter<'a> {
         } else {
             let font_data = self
                 .font_collection
-                .get_font(font_id)
-                .ok_or(InternalServerError::FontIdNotLoaded)?;
+                .get_font(font_id);
 
             let font_ref = self
                 .raw_pdf_doc
@@ -112,12 +111,13 @@ impl<'a> PrintPdfWriter<'a> {
     ) -> Result<W, crate::error::DocumentGenerationError> {
         let mut buf_writer = BufWriter::new(pdf_doc_writer);
 
-        // TODO: Do NOT unwrap
-        self.raw_pdf_doc.save(&mut buf_writer).unwrap();
+        self.raw_pdf_doc
+            .save(&mut buf_writer)
+            .map_err(|err| InternalServerError::WritePdfError(err.into()))?;
 
         let write_result = buf_writer
             .into_inner()
-            .map_err(|e| InternalServerError::WritePdfError(e.into()));
+            .map_err(|e| InternalServerError::WritePdfError(e.into_error().into()));
 
         Ok(write_result?)
     }

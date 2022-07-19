@@ -1,6 +1,6 @@
-use std::collections::HashMap;
+use std::collections::{hash_map, HashMap};
 
-use syn::{parse::Parse, Ident, ItemStruct, Token, braced};
+use syn::{braced, parse::Parse, Ident, ItemStruct, Token};
 
 pub(crate) struct AssociatedStruct {
     pub(crate) key_ident: Ident,
@@ -39,8 +39,8 @@ impl Parse for Mergeable {
             let s: AssociatedStruct = input.parse()?;
             let associated_key = s.key_ident.to_string();
 
-            if !associated_keys.contains_key(&associated_key) {
-                associated_keys.insert(associated_key, s.source_struct);
+            if let hash_map::Entry::Vacant(entry) = associated_keys.entry(associated_key.clone()) {
+                entry.insert(s.source_struct);
             } else {
                 return Err(syn::Error::new_spanned(
                     s.key_ident,
@@ -61,9 +61,15 @@ impl Parse for Mergeable {
         }
 
         Ok(Mergeable {
-            source_struct: associated_keys.remove("source").expect("We already have verified that this exists in the map."),
-            mergeable_struct: associated_keys.remove("mergeable").expect("We already have verified that this exists in the map."),
-            unmergeable_struct: associated_keys.remove("unmergeable").expect("We already have verified that this exists in the map."),
+            source_struct: associated_keys
+                .remove("source")
+                .expect("We already have verified that this exists in the map."),
+            mergeable_struct: associated_keys
+                .remove("mergeable")
+                .expect("We already have verified that this exists in the map."),
+            unmergeable_struct: associated_keys
+                .remove("unmergeable")
+                .expect("We already have verified that this exists in the map."),
         })
     }
 }

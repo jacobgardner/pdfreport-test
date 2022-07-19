@@ -6,8 +6,9 @@ use crate::fonts::FontAttributes;
 
 #[derive(Error, Debug)]
 pub enum InternalServerError {
+
     #[error("Write PDF Error")]
-    WritePdfError(#[from] std::io::Error),
+    WritePdfError(#[from] Box<dyn std::error::Error>),
 
     #[error("Error loading font: {family_name} w/ attributes: {attributes:?}")]
     LoadFontError {

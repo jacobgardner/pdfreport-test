@@ -45,9 +45,10 @@ impl Svg {
         content: String,
         paragraph_layout: &ParagraphLayout,
     ) -> Result<Self, DocumentGenerationError> {
-        // FIXME:
-        // TODO: This is fallible based on user input. This should NOT be unwrapped
-        let doc = roxmltree::Document::parse(&content).unwrap();
+        let doc =
+            roxmltree::Document::parse(&content).map_err(|_| UserInputError::SvgParseError {
+                message: "Malformed SVG attached to document".to_string(),
+            })?;
 
         let svg_node = doc
             .descendants()
@@ -56,19 +57,19 @@ impl Svg {
 
         let svg_width = svg_node
             .lc_attribute("width")
-            .map(|width| Pt::try_from(width))
+            .map(Pt::try_from)
             .transpose()?;
         let svg_height = svg_node
             .lc_attribute("height")
-            .map(|height| Pt::try_from(height))
+            .map(Pt::try_from)
             .transpose()?;
 
         let viewbox = svg_node
             .lc_attribute("viewbox")
             .map(|viewbox| -> Result<_, DocumentGenerationError> {
                 let p: Vec<_> = viewbox
-                    .split(" ")
-                    .map(|unit| Pt::try_from(unit))
+                    .split(' ')
+                    .map(Pt::try_from)
                     .collect::<Result<Vec<_>, _>>()?;
 
                 if let [x_offset, y_offset, width, height] = p[..] {
@@ -147,7 +148,7 @@ impl Svg {
 
             let found_font = paragraph_layout.find_best_font_from_stack(
                 font_stack
-                    .split(",")
+                    .split(',')
                     .map(str::trim)
                     .map(|font| font.trim_matches('"').to_string())
                     .collect(),
@@ -162,7 +163,6 @@ impl Svg {
             } else {
                 continue;
             };
-            
 
             let rich_text = RichText(vec![RichTextSpan {
                 text: node_text.to_string(),

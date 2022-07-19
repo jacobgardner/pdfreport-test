@@ -9,12 +9,14 @@ use associated_struct::Mergeable;
 use field_options::{extract_field_attrs, FieldOptions, FieldsOptions};
 use quote::{quote, ToTokens};
 use std::str::FromStr;
-use syn::{self, parse_macro_input, parse_quote, Attribute, Fields, ItemStruct, Type};
+use syn::{
+    self, parse_macro_input, parse_quote_spanned, spanned::Spanned, Fields, ItemStruct, Type,
+};
 
 fn convert_fields_to_optional(
     mergeable_struct: &mut ItemStruct,
     fields_options: &FieldsOptions,
-    global_options: &FieldOptions,
+    _global_options: &FieldOptions,
 ) {
     if let Fields::Named(named_fields) = &mut mergeable_struct.fields {
         named_fields.named.iter_mut().for_each(|field| {
@@ -30,9 +32,8 @@ fn convert_fields_to_optional(
                 field.ty.clone()
             };
 
-            // TODO: Don't override the existing type. The span information is
-            // useful to the end user (or at least copy over the span data)
-            field.ty = parse_quote! { Option< #mergeable_type > };
+            let ty = parse_quote_spanned! { field.ty.span() => Option< #mergeable_type > };
+            field.ty = ty;
         });
     } else {
         unimplemented!();
