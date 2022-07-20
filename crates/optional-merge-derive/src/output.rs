@@ -1,12 +1,10 @@
-
 // struct BorderStyle {
-  
+
 // }
 
 // struct MergeableBorderStyle {
 //   unique: usize
 // }
-
 
 // pub trait Mergeable {
 //   type MergeType;
@@ -24,11 +22,9 @@
 //   type UnmergeableType = BorderStyle;
 // }
 
-
 // struct Style {
 //     pub border: <BorderStyle as Mergeable>::MergeType,
 // }
-
 
 // pub fn output() {
 //   let s = Style {

@@ -16,15 +16,19 @@ impl TryFrom<&str> for DominantBaseline {
             "central" => Self::Central,
             "middle" => Self::Middle,
             "hanging" => Self::Hanging,
-            baseline => return Err(UserInputError::SvgParseError {
-                message: format!("Dominant Baseline Value of {baseline} is not valid or yet supported.")
-            }.into()),
+            baseline => {
+                return Err(UserInputError::SvgParseError {
+                    message: format!(
+                        "Dominant Baseline Value of {baseline} is not valid or yet supported."
+                    ),
+                }
+                .into())
+            }
         };
 
         Ok(baseline)
     }
 }
-
 
 pub trait LowerCaseAttribute {
     fn lc_has_attribute(&self, attribute: &str) -> bool;

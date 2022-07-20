@@ -149,9 +149,11 @@ impl RichText {
                 .extend(self.0[start_span_index + 1..end_span_index].iter().cloned());
 
             let (end_span, start, _) = span_data[end_span_index];
-            
-            let byte_end_index = end_span.text.get_byte_index_from_char(char_end_index - start);
-            
+
+            let byte_end_index = end_span
+                .text
+                .get_byte_index_from_char(char_end_index - start);
+
             rich_text.0.push(RichTextSpan {
                 text: end_span.text[0..byte_end_index].to_owned(),
                 ..end_span.clone()
@@ -202,7 +204,7 @@ mod tests {
                 }
             ])
         );
-        
+
         assert_eq!(
             line.substr(76, 88).unwrap(),
             RichText(vec![
@@ -224,7 +226,7 @@ mod tests {
                 }
             ])
         );
-        
+
         assert_eq!(
             line.substr(76, 89).unwrap(),
             RichText(vec![
@@ -235,7 +237,6 @@ mod tests {
                 }
             ])
         );
-        
     }
 
     #[test]

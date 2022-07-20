@@ -1,8 +1,7 @@
 use crate::values::Pt;
 use optional_merge_derive::mergeable_fn;
-use ts_rs::TS;
 use serde::Deserialize;
-
+use ts_rs::TS;
 
 mergeable_fn! {
     source => {
@@ -12,7 +11,7 @@ mergeable_fn! {
             pub right: Pt,
             pub bottom: Pt,
             pub left: Pt,
-        }       
+        }
     }
     mergeable => {
         #[derive(Deserialize, TS)]

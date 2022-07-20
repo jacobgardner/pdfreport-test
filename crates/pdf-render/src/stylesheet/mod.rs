@@ -23,12 +23,11 @@ pub use flex_style::FlexStyle;
 pub use flex_values::*;
 pub use font_styles::FontStyles;
 pub use page_break_rule::PageBreakRule;
-pub use style::{Style, MergeableStyle};
+pub use style::{MergeableStyle, Style};
 pub use text_transformation::TextTransformation;
-use ts_rs::{TS, Dependency};
+use ts_rs::{Dependency, TS};
 
 use crate::error::{DocumentGenerationError, UserInputError};
-
 
 #[derive(Deserialize, Debug, Default)]
 pub struct Stylesheet {

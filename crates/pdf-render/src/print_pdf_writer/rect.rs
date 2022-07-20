@@ -38,11 +38,11 @@ impl<'a> PrintPdfWriter<'a> {
                 x: start.x,
                 y: end.y,
             },
+            Point { x: end.x, y: end.y },
             Point {
                 x: end.x,
-                y: end.y,
+                y: start.y,
             },
-            Point { x: end.x, y: start.y },
             Point {
                 x: start.x,
                 y: start.y,
@@ -59,14 +59,14 @@ impl<'a> PrintPdfWriter<'a> {
                 },
                 false,
             ),
+            (Point { x: end.x, y: end.y }, false),
             (
                 Point {
                     x: end.x,
-                    y: end.y,
+                    y: start.y,
                 },
                 false,
             ),
-            (Point { x: end.x, y: start.y }, false),
             (
                 Point {
                     x: start.x,

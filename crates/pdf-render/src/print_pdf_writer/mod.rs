@@ -88,9 +88,7 @@ impl<'a> PrintPdfWriter<'a> {
         if let Some(font) = self.fonts.get(font_id) {
             Ok(font)
         } else {
-            let font_data = self
-                .font_collection
-                .get_font(font_id);
+            let font_data = self.font_collection.get_font(font_id);
 
             let font_ref = self
                 .raw_pdf_doc

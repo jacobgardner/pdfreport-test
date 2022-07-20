@@ -4,7 +4,7 @@ use std::collections::HashMap;
 use crate::{
     doc_structure::{DomNode, NodeId},
     error::DocumentGenerationError,
-    stylesheet::{Style, MergeableStyle, Stylesheet},
+    stylesheet::{MergeableStyle, Style, Stylesheet},
 };
 
 use super::parent_lookup::ParentLookup;
@@ -39,10 +39,7 @@ impl<'a> NodeLookup<'a> {
 
             let node_style = stylesheet.compute_mergeable_style(&parent_style, node.styles())?;
 
-            style_lookup.insert(
-                node.node_id(),
-                Style::default().merge_style(&node_style),
-            );
+            style_lookup.insert(node.node_id(), Style::default().merge_style(&node_style));
             partially_computed_style.insert(node.node_id(), node_style);
 
             if let Some(parent) = parent {

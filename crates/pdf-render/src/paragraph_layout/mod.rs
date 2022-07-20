@@ -44,10 +44,7 @@ impl ParagraphLayout {
         }
     }
 
-    pub fn find_best_font_from_stack(
-        &self,
-        stack: Vec<String>,
-    ) -> Result<String, UserInputError> {
+    pub fn find_best_font_from_stack(&self, stack: Vec<String>) -> Result<String, UserInputError> {
         let found_font = stack
             .iter()
             .find(|&font| self.font_families.get(font).is_some());

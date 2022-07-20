@@ -22,7 +22,6 @@ mergeable_fn! {
     },
 }
 
-
 mergeable_fn! {
     source => {
         struct Style {

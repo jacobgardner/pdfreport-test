@@ -7,7 +7,6 @@ use crate::values::Color;
 
 use super::BorderRadiusStyle;
 
-
 mergeable_fn! {
     source => {
         #[derive(Clone, Debug, PartialEq)]
@@ -29,7 +28,6 @@ mergeable_fn! {
         pub struct BorderStyle;
     }
 }
-
 
 #[allow(clippy::derivable_impls)]
 impl Default for BorderStyle {

@@ -1,5 +1,6 @@
 use crate::{
-    block_layout::layout_engine::NodeLayout, paragraph_layout::RenderedTextBlock, stylesheet::Style, image::Svg,
+    block_layout::layout_engine::NodeLayout, image::Svg, paragraph_layout::RenderedTextBlock,
+    stylesheet::Style,
 };
 
 #[derive(Clone, Debug)]
@@ -51,4 +52,3 @@ impl DrawableNode {
         !matches!(self, Self::Container(_))
     }
 }
-

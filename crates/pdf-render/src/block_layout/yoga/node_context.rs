@@ -12,9 +12,11 @@ pub(super) struct TextBlockWithWidth(pub Vec<(Pt, RenderedTextBlock)>);
 
 impl TextBlockWithWidth {
     pub fn take_closest_by_width(mut self, width: Pt) -> RenderedTextBlock {
-        self.0.drain(..).min_by_key(|(content_width, _)| {
-            ((width.0 - content_width.0).abs() * 10000.) as usize
-        }).unwrap().1
+        self.0
+            .drain(..)
+            .min_by_key(|(content_width, _)| ((width.0 - content_width.0).abs() * 10000.) as usize)
+            .unwrap()
+            .1
     }
 }
 

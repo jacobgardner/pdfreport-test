@@ -14,7 +14,7 @@ mergeable_fn! {
             pub style: FontSlant,
             pub weight: FontWeight,
             pub letter_spacing: Pt,
-        }       
+        }
     }
     mergeable => {
         #[derive(Deserialize, TS)]
