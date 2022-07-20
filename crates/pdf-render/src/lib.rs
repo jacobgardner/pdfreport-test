@@ -21,6 +21,7 @@ pub mod doc_structure;
 pub mod document_builder;
 pub mod error;
 pub mod fonts;
+pub mod image;
 pub mod page_sizes;
 pub mod paragraph_layout;
 pub mod print_pdf_writer;
@@ -28,7 +29,6 @@ pub mod rich_text;
 pub mod stylesheet;
 pub mod utils;
 pub mod values;
-pub mod image;
 
 use error::DocumentGenerationError;
 
@@ -94,7 +94,6 @@ pub fn build_pdf_from_dom<W: Write>(
         &layout_engine,
         &node_lookup,
         &paragraph_layout,
-        stylesheet,
         Pt::from(page_size.height) - doc_structure.page_margins.vertical(),
     )?;
 

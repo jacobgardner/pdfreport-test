@@ -100,7 +100,6 @@ impl ParagraphLayout {
         let mut paragraph_style = skia_layout::ParagraphStyle::new();
 
         paragraph_style.set_text_align(layout_style.align.into());
-        // paragraph_style.set_text_height_behavior(skia_layout::TextHeightBehavior::DisableAll);
 
         let mut paragraph_builder =
             ParagraphBuilder::new(&paragraph_style, self.skia_font_collection.clone());

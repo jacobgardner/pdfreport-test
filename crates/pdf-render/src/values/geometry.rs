@@ -1,6 +1,5 @@
 use std::{
     fmt::Display,
-    hash::Hash,
     ops::{Add, AddAssign, Div, Mul, MulAssign, Sub, SubAssign},
 };
 

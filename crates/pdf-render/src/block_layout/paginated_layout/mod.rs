@@ -13,9 +13,8 @@ use crate::{
     doc_structure::{DomNode, HasNodeId, NodeId},
     error::DocumentGenerationError,
     image::Svg,
-    paragraph_layout::{ParagraphLayout, ParagraphStyle, RenderedTextBlock},
-    rich_text::dom_node_conversion::dom_node_to_rich_text,
-    stylesheet::{Direction, FlexWrap, PageBreakRule, Style, Stylesheet},
+    paragraph_layout::{ParagraphLayout, RenderedTextBlock},
+    stylesheet::{Direction, FlexWrap, PageBreakRule, Style},
     utils::{debug_cursor::DebugCursor, node_lookup::NodeLookup, tree_iter::TreeNode},
     values::{Point, Pt},
 };
@@ -30,7 +29,6 @@ pub struct PaginatedLayoutEngine<'a> {
     paginated_nodes: Vec<PaginatedNode>,
     paragraph_layout: &'a ParagraphLayout,
     layout_engine: &'a dyn LayoutEngine,
-    stylesheet: &'a Stylesheet,
     page_height: Pt,
     pub debug_cursors: Vec<DebugCursor>,
 }
@@ -41,7 +39,6 @@ impl<'a> PaginatedLayoutEngine<'a> {
         layout_engine: &'a dyn LayoutEngine,
         node_lookup: &'a NodeLookup,
         paragraph_layout: &'a ParagraphLayout,
-        stylesheet: &'a Stylesheet,
         page_height: Pt,
     ) -> Result<Self, DocumentGenerationError> {
         let mut paginated_layout_engine = Self {
@@ -49,7 +46,6 @@ impl<'a> PaginatedLayoutEngine<'a> {
             node_lookup,
             paragraph_layout,
             paginated_nodes: vec![],
-            stylesheet,
             page_height,
             layout_engine,
             debug_cursors: vec![],
@@ -126,8 +122,7 @@ impl<'a> PaginatedLayoutEngine<'a> {
         // By this point, the draw cursor is in the correct place to start
         // the current node.
 
-        let drawable_node = self
-            .convert_dom_node_to_drawable(node, &adjusted_layout, &style)?;
+        let drawable_node = self.convert_dom_node_to_drawable(node, &style)?;
 
         let paginated_node = PaginatedNode {
             page_layout: adjusted_layout,
@@ -223,29 +218,14 @@ impl<'a> PaginatedLayoutEngine<'a> {
     fn convert_dom_node_to_drawable(
         &self,
         dom_node: &DomNode,
-        layout: &NodeLayout,
         style: &Style,
     ) -> Result<DrawableNode, DocumentGenerationError> {
         let adjusted_style = style.clone();
 
         let drawable_node = match dom_node {
             DomNode::Text(text_node) => {
-                // TODO:
-                // FIXME: This should also have already been computed by now
-                let rich_text =
-                    dom_node_to_rich_text(text_node, self.node_lookup, self.stylesheet)?;
+                let text_block = self.layout_engine.get_text_layout(text_node.node_id());
 
-                // TODO:
-                // FIXME: We already calculated the text block in the yoga layout
-                // engine. Either re-use that or pass it into the layout engine?
-                let text_block = self
-                    .paragraph_layout
-                    .calculate_layout(
-                        ParagraphStyle::left(),
-                        &rich_text,
-                        layout.width - style.padding.horizontal() - style.border.width.horizontal() + Pt(2.),
-                    )?;
-                
                 DrawableNode::Text(DrawableTextNode {
                     text_block,
                     style: adjusted_style,

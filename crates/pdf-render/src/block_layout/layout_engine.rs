@@ -3,7 +3,7 @@ use std::{fmt::Display, rc::Rc};
 use crate::{
     doc_structure::{DomNode, NodeId},
     error::DocumentGenerationError,
-    paragraph_layout::ParagraphLayout,
+    paragraph_layout::{ParagraphLayout, RenderedTextBlock},
     stylesheet::Stylesheet,
     values::Pt,
 };
@@ -45,4 +45,5 @@ pub trait LayoutEngine {
     ) -> Result<(), DocumentGenerationError>;
 
     fn get_node_layout(&self, node_id: NodeId) -> NodeLayout;
+    fn get_text_layout(&self, node_id: NodeId) -> RenderedTextBlock;
 }

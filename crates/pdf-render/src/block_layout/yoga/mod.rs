@@ -1,7 +1,7 @@
 mod node_context;
 mod style_conversions;
 
-use crate::doc_structure::HasNodeId;
+use crate::{doc_structure::HasNodeId, paragraph_layout::RenderedTextBlock};
 use std::{collections::HashMap, rc::Rc};
 
 use crate::{
@@ -27,6 +27,7 @@ pub(self) const EPSILON: f32 = 1000.0;
 pub struct YogaLayout<'a> {
     node_lookup: &'a NodeLookup<'a>,
     yoga_nodes_by_id: HashMap<NodeId, yoga::Node>,
+    text_block_by_id: HashMap<NodeId, RenderedTextBlock>,
 }
 
 impl<'a> YogaLayout<'a> {
@@ -34,6 +35,7 @@ impl<'a> YogaLayout<'a> {
         Self {
             node_lookup,
             yoga_nodes_by_id: HashMap::new(),
+            text_block_by_id: HashMap::new(),
         }
     }
 }
@@ -60,14 +62,16 @@ extern "C" fn measure_func(
         &context.rich_text,
         content_width,
     );
-    
 
     match text_block {
         Ok(text_block) => {
             let height = text_block.height().0 as f32 * EPSILON;
             let width = text_block.width().0 as f32 * EPSILON;
 
-            context.text_block_by_width.insert(content_width, text_block);
+            context
+                .text_block_by_width
+                .0
+                .push((content_width, text_block));
 
             Size { width, height }
         }
@@ -83,16 +87,29 @@ extern "C" fn measure_func(
 }
 
 impl<'a> LayoutEngine for YogaLayout<'a> {
+    fn get_text_layout(&self, node_id: NodeId) -> RenderedTextBlock {
+        let text_block = self
+            .text_block_by_id
+            .get(&node_id)
+            .expect("A text block must exist for all text nodes");
+
+        text_block.clone()
+    }
+
     fn get_node_layout(&self, node_id: NodeId) -> NodeLayout {
         let ancestors = self.node_lookup.get_ancestor_ids(node_id);
 
-        let layout = self.yoga_nodes_by_id.get(&node_id).unwrap().get_layout();
+        let layout = self
+            .yoga_nodes_by_id
+            .get(&node_id)
+            .expect("A yoga layout node must exist for each drawable node")
+            .get_layout();
 
         // Yoga doesn't give us absolute positions. All the positions are
         //  relative to the parent node so we have to build it up from ancestors
         ancestors.iter().fold(
             NodeLayout {
-                left: Pt((layout.left() / EPSILON) as f64 ),
+                left: Pt((layout.left() / EPSILON) as f64),
                 top: Pt((layout.top() / EPSILON) as f64),
                 right: Pt((layout.right() / EPSILON) as f64),
                 width: Pt((layout.width() / EPSILON) as f64),
@@ -160,18 +177,43 @@ impl<'a> LayoutEngine for YogaLayout<'a> {
 
         let root_yoga_node = self.yoga_nodes_by_id.get_mut(&root_node.node_id()).unwrap();
 
-        root_yoga_node.calculate_layout(page_width.0 as f32 * EPSILON, yoga::Undefined, yoga::Direction::LTR);
+        root_yoga_node.calculate_layout(
+            page_width.0 as f32 * EPSILON,
+            yoga::Undefined,
+            yoga::Direction::LTR,
+        );
 
         // We stored any errors during calculation in the context so now we have
         // to check them now that we're back in our own code.
-        for (_, node) in self.yoga_nodes_by_id.iter() {
+        for (node_id, node) in self.yoga_nodes_by_id.iter() {
             // JAKE:
             // FIXME:
             // NOTE:
             // TODO: Find the rendered text block that is associated with the
             // content width closest to the one returned by the node width
-            // (using take_closest_by_width) 
+            // (using take_closest_by_width)
+
             check_node_for_error(node)?;
+
+            if let Some(context) = node.get_own_context_mut() {
+                let context: &mut TextNodeContext = context
+                    .downcast_mut()
+                    .expect("If there is a context, the only one currently is TextNodeContext");
+
+                let text_block_by_width = std::mem::take(&mut context.text_block_by_width);
+
+                // TODO: Check if this is right.
+                let content_width = node.get_layout_width()
+                    - node.get_layout_border_left()
+                    - node.get_layout_border_right()
+                    - node.get_layout_padding_left()
+                    - node.get_layout_padding_right();
+
+                let text_block =
+                    text_block_by_width.take_closest_by_width(Pt((content_width / EPSILON) as f64));
+
+                self.text_block_by_id.insert(*node_id, text_block);
+            }
         }
 
         Ok(())
@@ -180,8 +222,8 @@ impl<'a> LayoutEngine for YogaLayout<'a> {
 
 fn check_node_for_error(node: &yoga::Node) -> Result<(), DocumentGenerationError> {
     if let Some(context) = node.get_own_context_mut() {
-        let context = context
-            .downcast_mut::<TextNodeContext>()
+        let context: &mut TextNodeContext = context
+            .downcast_mut()
             .expect("If there is a context, the only one currently is TextNodeContext");
 
         let err = context.calculate_error.take();
