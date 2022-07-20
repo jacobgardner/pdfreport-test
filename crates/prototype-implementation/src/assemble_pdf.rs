@@ -10,7 +10,6 @@ use stretch::{node::MeasureFunc, prelude::*};
 
 use crate::dom::DomNode;
 use crate::page_sizes::A4;
-use crate::page_sizes::LETTER;
 use crate::{
     block_layout::{BlockLayout, ImageComputeFn, TextComputeFn},
     dom::{nodes::TextNodeIterItem, FontFamilyInfo, PdfDom},
@@ -181,8 +180,6 @@ pub async fn assemble_pdf(pdf_layout: &PdfDom) -> Result<(), BadPdfLayout> {
                 LETTER.width.into_pt().0
             };
 
-            println!("{paragraph_width:?}, {node:?}");
-
             let paragraph_metrics =
                 text_layout.compute_paragraph_layout(&rich_text, Pt(paragraph_width));
 
@@ -257,9 +254,6 @@ pub async fn assemble_pdf(pdf_layout: &PdfDom) -> Result<(), BadPdfLayout> {
             let dom_node = layout.get_dom_node(node);
 
             let layout_info = layout.get_layout(node)?;
-
-            println!("{layout_info:?}");
-            // dbg!(layout_info);
 
             let start = Point {
                 x: Pt(layout_info.location.x as f64),

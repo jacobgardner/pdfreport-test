@@ -1,111 +1,117 @@
 {
+  "filename": "example.pdf",
+  "documentTitle": "Example PDF",
+  "pageSize": "letter",
+  "pageMargins": {
+    "top": 20,
+    "right": 20,
+    "bottom": 20,
+    "left": 20
+  },
   "fonts": [
     {
-      "family_name": "Inter",
+      "familyName": "Inter",
       "fonts": [
         {
-          "source": "https://github.com/jacobgardner/pdfreport-test/blob/main/assets/fonts/inter-static/Inter-Bold.ttf?raw=true",
+          "source": "./assets/fonts/inter-static/Inter-Bold.ttf",
           "weight": "Bold",
           "style": "Normal"
         },
         {
-          "source": "https://github.com/jacobgardner/pdfreport-test/blob/main/assets/fonts/inter-static/Inter-Thin-BETA.ttf?raw=true",
+          "source": "./assets/fonts/inter-static/Inter-Thin-BETA.ttf",
           "weight": "Thin",
           "style": "Normal"
         },
         {
-          "source": "https://github.com/jacobgardner/pdfreport-test/blob/main/assets/fonts/inter-static/Inter-SemiBold.ttf?raw=true",
+          "source": "./assets/fonts/inter-static/Inter-SemiBold.ttf",
           "weight": "SemiBold",
           "style": "Normal"
         },
         {
-          "source": "https://github.com/jacobgardner/pdfreport-test/blob/main/assets/fonts/inter-static/Inter-ThinItalic-BETA.ttf?raw=true",
+          "source": "./assets/fonts/inter-static/Inter-ThinItalic-BETA.ttf",
           "weight": "Thin",
           "style": "Italic"
         },
         {
-          "source": "https://github.com/jacobgardner/pdfreport-test/blob/main/assets/fonts/inter-static/Inter-SemiBoldItalic.ttf?raw=true",
+          "source": "./assets/fonts/inter-static/Inter-SemiBoldItalic.ttf",
           "weight": "SemiBold",
           "style": "Italic"
         },
         {
-          "source": "https://github.com/jacobgardner/pdfreport-test/blob/main/assets/fonts/inter-static/Inter-ExtraLight-BETA.ttf?raw=true",
+          "source": "./assets/fonts/inter-static/Inter-ExtraLight-BETA.ttf",
           "weight": "ExtraLight",
           "style": "Normal"
         },
         {
-          "source": "https://github.com/jacobgardner/pdfreport-test/blob/main/assets/fonts/inter-static/Inter-ExtraBoldItalic.ttf?raw=true",
+          "source": "./assets/fonts/inter-static/Inter-ExtraBoldItalic.ttf",
           "weight": "ExtraBold",
           "style": "Italic"
         },
         {
-          "source": "https://github.com/jacobgardner/pdfreport-test/blob/main/assets/fonts/inter-static/Inter-Light-BETA.ttf?raw=true",
+          "source": "./assets/fonts/inter-static/Inter-Light-BETA.ttf",
           "weight": "Light",
           "style": "Normal"
         },
         {
-          "source": "https://github.com/jacobgardner/pdfreport-test/blob/main/assets/fonts/inter-static/Inter-UI-BlackItalic.ttf?raw=true",
+          "source": "./assets/fonts/inter-static/Inter-UI-BlackItalic.ttf",
           "weight": "Black",
           "style": "Italic"
         },
         {
-          "source": "https://github.com/jacobgardner/pdfreport-test/blob/main/assets/fonts/inter-static/Inter-BoldItalic.ttf?raw=true",
+          "source": "./assets/fonts/inter-static/Inter-BoldItalic.ttf",
           "weight": "Bold",
           "style": "Italic"
         },
         {
-          "source": "https://github.com/jacobgardner/pdfreport-test/blob/main/assets/fonts/inter-static/Inter-Regular.ttf?raw=true",
+          "source": "./assets/fonts/inter-static/Inter-Regular.ttf",
           "weight": "Regular",
           "style": "Normal"
         },
         {
-          "source": "https://github.com/jacobgardner/pdfreport-test/blob/main/assets/fonts/inter-static/Inter-Italic.ttf?raw=true",
+          "source": "./assets/fonts/inter-static/Inter-Italic.ttf",
           "weight": "Regular",
           "style": "Italic"
         },
         {
-          "source": "https://github.com/jacobgardner/pdfreport-test/blob/main/assets/fonts/inter-static/Inter-ExtraLightItalic-BETA.ttf?raw=true",
+          "source": "./assets/fonts/inter-static/Inter-ExtraLightItalic-BETA.ttf",
           "weight": "ExtraLight",
           "style": "Italic"
         },
         {
-          "source": "https://github.com/jacobgardner/pdfreport-test/blob/main/assets/fonts/inter-static/Inter-LightItalic-BETA.ttf?raw=true",
+          "source": "./assets/fonts/inter-static/Inter-LightItalic-BETA.ttf",
           "weight": "Light",
           "style": "Italic"
         },
         {
-          "source": "https://github.com/jacobgardner/pdfreport-test/blob/main/assets/fonts/inter-static/Inter-ExtraBold.ttf?raw=true",
+          "source": "./assets/fonts/inter-static/Inter-ExtraBold.ttf",
           "weight": "ExtraBold",
           "style": "Normal"
         },
         {
-          "source": "https://github.com/jacobgardner/pdfreport-test/blob/main/assets/fonts/inter-static/Inter-Medium.ttf?raw=true",
+          "source": "./assets/fonts/inter-static/Inter-Medium.ttf",
           "weight": "Medium",
           "style": "Normal"
         },
         {
-          "source": "https://github.com/jacobgardner/pdfreport-test/blob/main/assets/fonts/inter-static/Inter-Black.ttf?raw=true",
+          "source": "./assets/fonts/inter-static/Inter-Black.ttf",
           "weight": "Black",
           "style": "Normal"
         },
         {
-          "source": "https://github.com/jacobgardner/pdfreport-test/blob/main/assets/fonts/inter-static/Inter-MediumItalic.ttf?raw=true",
+          "source": "./assets/fonts/inter-static/Inter-MediumItalic.ttf",
           "weight": "Medium",
           "style": "Italic"
         }
       ]
     }
   ],
-  "styles": {
+  "stylesheet": {
     "root": {
+      "color": "#444A5A",
       "font": {
+        "size": "16pt",
+        "weight": "Regular",
         "family": "Inter"
-      },
-      "padding": {
-        "left": 20,
-        "right": 20,
-        "top": 20,
-        "bottom": 20
       }
     },
     "container": {
@@ -113,105 +119,172 @@
         "direction": "Row"
       }
     },
-    "c1": {
-      "flex": {
-        "shrink": 1,
-        "grow": 1
-      }
-    },
-    "c2": {
-      "flex": {
-        "shrink": 1,
-        "grow": 2
-      }
-    },
-    "h1": {
-      "color": "#A98765",
-      "font": {
-        "size": 20
+    "flagpole": {
+      "backgroundColor": "#EDF6F9",
+      "margin": {
+        "right": "10pt",
+        "bottom": "1pt"
       },
-      "flex": {
-        "direction": "Column"
+      "padding": {
+        "top": "24pt",
+        "right": "24pt",
+        "left": "24pt",
+        "bottom": "24pt"
       },
-      "padding": {},
       "border": {
-        "width": 1,
-        "color": "#ABCDEF",
+        "width": {
+          "left": "2pt"
+        },
+        "color": "#0080AD",
         "radius": {
-          "topRight": 5,
-          "bottomRight": 5
+          "topRight": "12pt",
+          "bottomRight": "12pt"
         }
       }
     },
-    "italic": {
-      "color": "pink",
-      "font": {
-        "size": 12,
-        "style": "Italic"
+    "flagpole-yellow": {
+      "backgroundColor": "#FFFCF4",
+      "border": {
+        "color": "#FFD166"
       }
-    }
+    },
+    "h3": {
+      "font": {
+        "size": "12pt",
+        "weight": "ExtraBold"
+      },
+      "margin": {
+        "bottom": "16pt"
+      }
+    },
+    "break": {
+    },
+    "p": {}
   },
   "root": {
     "type": "Styled",
-    "styles": [
-      "root"
-    ],
+    "styles": ["root"],
     "children": [
       {
-        "type": "Text",
-        "styles": [
-          "h1"
-        ],
+        "type": "Styled",
+        "styles": ["container"],
         "children": [
-          "This is some osadijfoasdifjosaidfjo text ",
           {
-            "styles": [
-              "italic"
-            ],
+            "type": "Styled",
+            "styles": ["flagpole"],
             "children": [
-              "italic text that continues on to the next line if there is enough text to wrap??"
+              {
+                "type": "Text",
+                "styles": ["h3"],
+                "children": ["HOW OTHERS MIGHT VIEW YOU"]
+              },
+              {
+                "type": "Text",
+                "styles": ["p"],
+                "children": [
+                  "Others are likely to view you as someone able to make decisions when required. While you might spend more time than others evaluating your options before committing, you are likely able to arrive at a decision in most instances."
+                ]
+              }
+            ]
+          },
+          {
+            "type": "Styled",
+            "styles": ["flagpole", "flagpole-yellow"],
+            "children": [
+              {
+                "type": "Text",
+                "styles": ["h3"],
+                "children": ["HOW OTHERS MIGHT VIEW YOU"]
+              },
+              {
+                "type": "Text",
+                "styles": ["p"],
+                "children": [
+                  "Others are likely to view you as someone able to make decisions when required. While you might spend more time than others evaluating your options before committing, you are likely able to arrive at a decision in most instances."
+                ]
+              }
             ]
           }
         ]
       },
       {
         "type": "Styled",
-        "styles": [
-          "container"
-        ],
+        "styles": ["container", "break"],
         "children": [
           {
-            "type": "Text",
-            "styles": [
-              "h1",
-              "c1"
-            ],
+            "type": "Styled",
+            "styles": ["flagpole"],
             "children": [
-              "This is some header text ",
               {
-                "styles": [
-                  "italic"
-                ],
+                "type": "Text",
+                "styles": ["h3"],
+                "children": ["HOW OTHERS MIGHT VIEW YOU"]
+              },
+              {
+                "type": "Text",
+                "styles": ["p"],
                 "children": [
-                  "italic text that continues on to the next line if there is enough text to wrap??"
+                  "Others are likely to view you as someone able to make decisions when required. While you might spend more time than others evaluating your options before committing, you are likely able to arrive at a decision in most instances."
                 ]
               }
             ]
           },
           {
-            "type": "Text",
-            "styles": [
-              "h1",
-              "c2"
-            ],
+            "type": "Styled",
+            "styles": ["flagpole"],
             "children": [
-              "This is some header text ",
               {
-                "styles": [
-                  "italic"
-                ],
+                "type": "Text",
+                "styles": ["h3"],
+                "children": ["HOW OTHERS MIGHT VIEW YOU"]
+              },
+              {
+                "type": "Text",
+                "styles": ["p"],
                 "children": [
-                  "italic text that continues on to the next line if there is enough text to wrap??"
+                  "Others are likely to view you as someone able to make decisions when required. While you might spend more time than others evaluating your options before committing, you are likely able to arrive at a decision in most instances."
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "Styled",
+        "styles": ["container"],
+        "children": [
+          {
+            "type": "Styled",
+            "styles": ["flagpole"],
+            "children": [
+              {
+                "type": "Text",
+                "styles": ["h3"],
+                "children": ["HOW OTHERS MIGHT VIEW YOU"]
+              },
+              {
+                "type": "Text",
+                "styles": ["p"],
+                "children": [
+                  "Others are likely to view you as someone able to make decisions when required. While you might spend more time than others evaluating your options before committing, you are likely able to arrive at a decision in most instances."
+                ]
+              }
+            ]
+          },
+          {
+            "type": "Styled",
+            "styles": ["flagpole"],
+            "children": [
+              {
+                "type": "Text",
+                "styles": ["h3"],
+                "children": ["HOW OTHERS MIGHT VIEW YOU"]
+              },
+              {
+                "type": "Text",
+                "styles": ["p"],
+                "children": [
+                  "Others are likely to view you as someone able to make decisions when required. While you might spend more time than others evaluating your options before committing, you are likely able to arrive at a decision in most instances."
                 ]
               }
             ]

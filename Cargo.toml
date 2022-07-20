@@ -16,15 +16,38 @@ path = "src/server.rs"
 name = "cli"
 path = "src/cli.rs"
 
+[features]
+default = ["develop"]
+# Enables things that should NOT go to production, enabled by default, disable
+# in prod builds 
+develop = []
+
 [workspace]
 members = ["crates/*"]
 
+# This was the original prototype that we're keeping around just until we've
+# implemented everything from it. 
+exclude = ["crates/prototype-implementation"]
+
 [dependencies]
-printpdf = { version = "*", features = ["svg"] }
 actix-web = "*"
 serde = { version = "*", features = ["derive"] }
 serde_json = "*"
+clap = { version = "3.1.18", features = ["derive"] }
+rollbar = { version = "*" }
+backtrace = { version = "*" }
+env_logger = { version = "*" }
+log = { version = "*" }
+logzio = { path = "crates/logzio" }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+tracing-futures = "*"
 
 pdf-render = { path = "crates/pdf-render" }
 
 optional-merge-derive = { path = "crates/optional-merge-derive" }
+
+# All dependencies are built with optimizations allowing for 
+# faster pdf authoring in develop builds
+[profile.dev.package."*"]
+opt-level = 3

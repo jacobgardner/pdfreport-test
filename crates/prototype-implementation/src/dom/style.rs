@@ -3,7 +3,6 @@ use serde::Deserialize;
 
 use crate::rich_text::{FontStyle, FontWeight};
 
-type Color = String;
 
 macro_rules! primitive_merge  {
     ($name : ident) => {
@@ -172,6 +171,7 @@ impl Default for FontStyles {
 }
 
 #[derive(MergeOptional, Clone, Debug, PartialEq)]
+#[serde(rename_all = "camelCase")]
 pub struct Style {
     #[nested]
     pub border: BorderStyle,

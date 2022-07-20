@@ -5,6 +5,24 @@ edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+
 [dependencies]
 serde = { version = "*", features = ["derive"] }
 thiserror = "*"
+printpdf = "*"
+num = "*"
+num-traits = "*"
+num-derive = "*"
+bytes = "*"
+skia-safe = { version = "*", features = ["textlayout"] }
+ts-rs = { version = "*" }
+lazy_static = "*"
+regex = "*"
+tracing = "0.1"
+
+
+color_processing = "*"
+polyhorn-yoga = "*"
+
+optional-merge-derive = { path = "../optional-merge-derive" }
+merges = { path = "../merges" }

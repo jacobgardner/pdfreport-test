@@ -1,50 +1,78 @@
+//! User facing error type that should hopefully explain anything
+//! that has gone wrong
 use thiserror::Error;
 
-// use crate::{
-//     rich_text::{FontStyle, FontWeight},
-//     units::MeasurementParseError,
-// };
+use crate::fonts::FontAttributes;
 
 #[derive(Error, Debug)]
-pub enum BadPdfLayout {
-    // TODO: Remove this once we know everything
-    #[error("Unknown error")]
-    UnknownError
-  
-    // #[error("Could not find style, {style_name}, in stylesheet. Style names are case-sensitive.")]
-    // UnmatchedStyle { style_name: String },
+pub enum InternalServerError {
+    #[error("Write PDF Error")]
+    WritePdfError(#[from] std::io::Error),
 
-    // #[error("Unable to parse underlying pdf: {source}")]
-    // MeasurementParseError {
-    //     #[from]
-    //     source: MeasurementParseError,
-    // },
+    #[error("Error loading font: {family_name} w/ attributes: {attributes:?}")]
+    LoadFontError {
+        source: Box<dyn std::error::Error>,
+        family_name: String,
+        attributes: FontAttributes,
+    },
 
-    // #[error("Error computing the flex layout: {source}")]
-    // LayoutComputationError {
-    //     #[from]
-    //     source: stretch2::Error,
-    // },
+    #[error("FontId does not match any loaded font.")]
+    FontIdNotLoaded,
 
-    // #[error("Unable to fetch resource: {source}")]
-    // ResourceNotFound {
-    //     #[from]
-    //     source: reqwest::Error,
-    // },
+    #[error("Unable to associate font data with skia typeface for family, {family_name} w/ attributes: {attributes:?}")]
+    SkiaTypefaceFailure {
+        family_name: String,
+        attributes: FontAttributes,
+    },
 
-    // #[error("Referenced unloaded font-family, {font_family}.")]
-    // FontFamilyNotFound { font_family: String },
+    #[error("Font face not loaded into text layout engine: {family_name}")]
+    FontFamilyNotRegisteredForLayoutEngine { family_name: String },
+}
 
-    // #[error("Referenced unloaded font-style, weight: {font_weight:?} & style: {font_style:?}, for supported font-family, {font_family}.")]
-    // FontStyleNotFoundForFamily {
-    //     font_family: String,
-    //     font_weight: FontWeight,
-    //     font_style: FontStyle,
-    // },
+#[derive(Error, Debug)]
+pub enum UserInputError {
+    #[error("Font family has not been loaded: {family_name}")]
+    FontFamilyNotLoaded { family_name: String },
 
-    // #[error("Cannot parse font-color: {source}")]
-    // ColorParseError {
-    //     #[from]
-    //     source: color_processing::ParseError,
-    // },
+    #[error("Font family, {family_name}, does not have attributes: {attributes:?}")]
+    FontAttributesNotOnFamily {
+        family_name: String,
+        attributes: FontAttributes,
+    },
+
+    #[error("Font family, {family_name}, was registered with the same attribute multiple times: {attributes:?}")]
+    NonUniqueFontAttribute {
+        family_name: String,
+        attributes: FontAttributes,
+    },
+
+    #[error("Font family, {family_name}, was registered more than once")]
+    NonUniqueFontFamily { family_name: String },
+
+    #[error("Cannot parse font-color: {source}")]
+    ColorParseError {
+        #[from]
+        source: color_processing::ParseError,
+    },
+
+    #[error("Style name does not exist on stylesheet: {style_name}")]
+    StyleDoesNotExist { style_name: String },
+
+    #[error("Unable to parse unit string in stylesheet: {source_str}")]
+    MalformedUnitString { source_str: String },
+
+    #[error("Unable to parse unit quantity: {quantity_str}")]
+    UnparsableUnitQuantity { quantity_str: String },
+
+    #[error("Unit does is not supported: {attached_unit}")]
+    UnsupportedUnit { attached_unit: String },
+}
+
+#[derive(Error, Debug)]
+pub enum DocumentGenerationError {
+    #[error("Internal Server Error")]
+    InternalServerError(#[from] InternalServerError),
+
+    #[error("User input error")]
+    UserInputError(#[from] UserInputError),
 }

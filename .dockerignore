@@ -1,0 +1,10 @@
+rust-toolchain
+.git
+.vscode
+.github
+Dockerfile
+.dockerignore
+/target
+*.pdf
+trace-*.json
+cache
