@@ -186,13 +186,6 @@ impl<'a> LayoutEngine for YogaLayout<'a> {
         // We stored any errors during calculation in the context so now we have
         // to check them now that we're back in our own code.
         for (node_id, node) in self.yoga_nodes_by_id.iter() {
-            // JAKE:
-            // FIXME:
-            // NOTE:
-            // TODO: Find the rendered text block that is associated with the
-            // content width closest to the one returned by the node width
-            // (using take_closest_by_width)
-
             check_node_for_error(node)?;
 
             if let Some(context) = node.get_own_context_mut() {
@@ -202,6 +195,8 @@ impl<'a> LayoutEngine for YogaLayout<'a> {
 
                 let text_block_by_width = std::mem::take(&mut context.text_block_by_width);
 
+                // Jake:
+                // FIXME: Jake
                 // TODO: Check if this is right.
                 let content_width = node.get_layout_width()
                     - node.get_layout_border_left()
