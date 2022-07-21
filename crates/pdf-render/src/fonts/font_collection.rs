@@ -48,8 +48,11 @@ impl FontCollection {
         let family_name = family_collection.family_name().clone();
 
         if self.default_font.is_none() {
-            let font_data = family_collection.get_font_by_attribute(&FontAttributes::default())?;
-            self.set_default_font(font_data.font_id());
+            let font_data = family_collection.get_font_by_attribute(&FontAttributes::default());
+
+            if let Ok(font_data) = font_data {
+                self.set_default_font(font_data.font_id());
+            }
         }
 
         if self

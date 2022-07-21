@@ -96,6 +96,11 @@ impl RichText {
         char_start_index: usize,
         char_end_index: usize,
     ) -> Result<RichText, DocumentGenerationError> {
+
+        if char_start_index == char_end_index {
+            return Ok(RichText(vec![]));
+        }
+
         let span_data: Vec<(&RichTextSpan, usize, usize)> = self
             .0
             .iter()
@@ -169,6 +174,31 @@ impl RichText {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn empty_selection() {
+        let line = RichText(vec![
+            RichTextSpan {
+                // 89 characters
+                // 93 bytes
+                size: Pt(32.),
+                .."Your approach to work is one of the most visible parts of your professional “appearance”.".into()
+            },
+            RichTextSpan {
+                // 23 characters
+                // 51 bytes
+                size: Pt(15.),
+                .."🎅🎅🎅🎅🎅🎅🎅🎅 “appearance”.".into()
+            },
+            RichTextSpan {
+                // 9 characters
+                size: Pt(8.),
+                .." lazy dog".into()
+            },
+        ]);
+
+        assert_eq!(line.substr(0, 0).unwrap(), RichText(vec![]));
+    }
 
     #[test]
     fn unicode_support() {
