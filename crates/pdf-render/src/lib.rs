@@ -42,6 +42,7 @@ pub fn load_fonts_from_doc_structure(
         let mut font_family = FontFamilyCollection::new(&font_family_info.family_name);
 
         for font_info in font_family_info.fonts.iter() {
+            // TODO: Probaby shouldn't panic here
             let f = std::fs::read(&font_info.source).unwrap();
 
             font_family.add_font(font_info.attributes, Bytes::from(f))?;
