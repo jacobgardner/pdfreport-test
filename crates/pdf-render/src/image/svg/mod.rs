@@ -10,13 +10,6 @@ use self::attributes::{DominantBaseline, LowerCaseAttribute};
 
 mod attributes;
 
-// #[derive(Debug, Clone)]
-// pub struct TextBlock {
-//     x: Pt,
-//     y: Pt,
-//     text_block: RenderedTextBlock,
-// }
-
 #[derive(Debug, Clone)]
 pub struct Svg {
     pub content: String,
