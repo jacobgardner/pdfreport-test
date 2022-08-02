@@ -27,6 +27,8 @@ impl ParagraphLayout {
         span_style.set_height_override(true);
         span_style.set_height(span.line_height as f32);
         span_style.set_font_size(span.size.0 as f32);
+        // let ratio = span.letter_spacing / span.size;
+        // span_style.set_letter_spacing(1.50);
         span_style.set_letter_spacing(span.letter_spacing.0 as f32);
 
         if !self.font_families.contains(&span.font_family) {

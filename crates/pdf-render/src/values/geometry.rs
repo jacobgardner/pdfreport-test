@@ -1,12 +1,13 @@
 use std::{
     fmt::Display,
-    ops::{Add, AddAssign, Sub, SubAssign},
+    ops::{Add, AddAssign, Div, Mul, MulAssign, Sub, SubAssign},
 };
 
 use regex::Regex;
 use serde::Deserialize;
 
 use lazy_static::lazy_static;
+use ts_rs::TS;
 
 use crate::error::{DocumentGenerationError, UserInputError};
 
@@ -55,6 +56,26 @@ pub struct Mm(pub f64);
 #[derive(Default, Copy, Clone, Debug, PartialEq, PartialOrd)]
 pub struct Pt(pub f64);
 
+impl Pt {
+    pub const MAX: Pt = Pt(f64::MAX);
+}
+
+impl TS for Pt {
+    const EXPORT_TO: Option<&'static str> = None;
+
+    fn name() -> String {
+        "string | number".to_string()
+    }
+
+    fn dependencies() -> Vec<ts_rs::Dependency> {
+        vec![]
+    }
+
+    fn transparent() -> bool {
+        true
+    }
+}
+
 #[derive(Deserialize)]
 #[serde(untagged)]
 enum ValueType {
@@ -79,7 +100,13 @@ impl<'de> Deserialize<'de> for Pt {
 
 impl Display for Pt {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{} pt.", self.0)
+        write!(f, "{:.2} pt.", self.0)
+    }
+}
+
+impl Pt {
+    pub fn from_px(px: f64) -> Self {
+        Mm(px * (25.4 / 300.)).into()
     }
 }
 
@@ -108,7 +135,7 @@ impl TryFrom<&str> for Pt {
         let units = capture_groups.name("units").map_or("px", |u| u.as_str());
 
         Ok(match units.to_lowercase().as_str() {
-            "px" => Mm(quantity * (25.4 / 300.)).into(),
+            "px" => Pt::from_px(quantity),
             "mm" => Mm(quantity).into(),
             "cm" => Mm(quantity * 10.0).into(),
             "pt" => Pt(quantity),
@@ -141,6 +168,36 @@ impl From<Mm> for Pt {
 impl From<Pt> for Mm {
     fn from(pt: Pt) -> Self {
         Self(pt.0 * 1. / MM_TO_PT)
+    }
+}
+
+impl Div for Pt {
+    type Output = f64;
+
+    fn div(self, rhs: Self) -> Self::Output {
+        self.0 / rhs.0
+    }
+}
+
+impl Div<f64> for Pt {
+    type Output = Pt;
+
+    fn div(self, rhs: f64) -> Self::Output {
+        Pt(self.0 / rhs)
+    }
+}
+
+impl Mul<f64> for Pt {
+    type Output = Pt;
+
+    fn mul(self, rhs: f64) -> Self::Output {
+        Pt(self.0 * rhs)
+    }
+}
+
+impl MulAssign<f64> for Pt {
+    fn mul_assign(&mut self, rhs: f64) {
+        *self = *self * rhs;
     }
 }
 

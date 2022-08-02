@@ -12,42 +12,40 @@ impl<'a> PrintPdfWriter<'a> {
         &mut self,
         page_index: usize,
         rect: Rect<Pt>,
-        border_width: EdgeStyle::Unmergeable,
+        border_width: EdgeStyle,
         border_color: Option<Color>,
         background_color: Option<Color>,
-        border_radius: Option<BorderRadiusStyle::Unmergeable>,
+        border_radius: Option<BorderRadiusStyle>,
     ) {
         let layer = self.get_base_layer(page_index);
 
+        // bottom-left
         let start = Point {
             x: rect.left.into(),
             y: rect.top.into(),
         };
 
+        // top-right
         let end = Point {
             x: (rect.left + rect.width).into(),
-            y: (rect.top - rect.height).into(),
+            y: (rect.top + rect.height).into(),
         };
 
         let mut edge_ranges = [0..1, 1..2, 2..3, 3..4];
-        // let mut top_range = 0..1;
-        // let mut right_range = 1..2;
-        // let mut bottom_range = 2..3;
-        // let mut left_range = 3..4;
 
         let corners = &[
             Point {
                 x: start.x,
-                y: start.y,
+                y: end.y,
             },
+            Point { x: end.x, y: end.y },
             Point {
                 x: end.x,
                 y: start.y,
             },
-            Point { x: end.x, y: end.y },
             Point {
                 x: start.x,
-                y: end.y,
+                y: start.y,
             },
         ];
 
@@ -57,10 +55,11 @@ impl<'a> PrintPdfWriter<'a> {
             (
                 Point {
                     x: start.x,
-                    y: start.y,
+                    y: end.y,
                 },
                 false,
             ),
+            (Point { x: end.x, y: end.y }, false),
             (
                 Point {
                     x: end.x,
@@ -68,18 +67,17 @@ impl<'a> PrintPdfWriter<'a> {
                 },
                 false,
             ),
-            (Point { x: end.x, y: end.y }, false),
             (
                 Point {
                     x: start.x,
-                    y: end.y,
+                    y: start.y,
                 },
                 false,
             ),
         ];
 
         let points = match border_radius {
-            Some(border_radius) if border_radius != BorderRadiusStyle::Unmergeable::default() => {
+            Some(border_radius) if border_radius != BorderRadiusStyle::default() => {
                 // 4 points per corner & 2 points per edge
                 let mut points: Vec<(printpdf::Point, bool)> = Vec::with_capacity(4 * 4 + 4 * 2);
 
@@ -159,7 +157,7 @@ impl<'a> PrintPdfWriter<'a> {
                 border_width.top,
                 Point {
                     x: printpdf::Pt(0.),
-                    y: printpdf::Pt(border_width.top.0 / -2.),
+                    y: printpdf::Pt(0.),
                 },
             );
             draw_border_edge(
@@ -167,7 +165,7 @@ impl<'a> PrintPdfWriter<'a> {
                 points[edge_ranges[1].start..edge_ranges[2].end].iter(),
                 border_width.right,
                 Point {
-                    x: printpdf::Pt(border_width.right.0 / -2.),
+                    x: printpdf::Pt(0.),
                     y: printpdf::Pt(0.),
                 },
             );
@@ -177,7 +175,7 @@ impl<'a> PrintPdfWriter<'a> {
                 border_width.bottom,
                 Point {
                     x: printpdf::Pt(0.),
-                    y: printpdf::Pt(border_width.bottom.0 / 2.),
+                    y: printpdf::Pt(0.),
                 },
             );
             draw_border_edge(
@@ -187,7 +185,7 @@ impl<'a> PrintPdfWriter<'a> {
                     .chain(points[..edge_ranges[0].end].iter()),
                 border_width.left,
                 Point {
-                    x: printpdf::Pt(border_width.left.0 / 2.),
+                    x: printpdf::Pt(0.),
                     y: printpdf::Pt(0.),
                 },
             );

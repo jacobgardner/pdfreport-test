@@ -15,14 +15,12 @@ pub trait TreeNode: Sized {
     }
 
     fn sibling(&self, target_node: &Self) -> Option<&Self> {
-        // This should be safe from panic as well because the
-        // current_node MUST have come from the parent
         let current_index = self
             .children()
             .iter()
             .position(|node| std::ptr::eq(node, target_node))
-            .unwrap();
-
+            .expect("This should be safe from panic as well because the current_node MUST have come from the parent");
+                     
         self.children().get(current_index + 1)
     }
 
@@ -110,10 +108,8 @@ impl<'a, T: TreeNode> Iterator for TreeIterator<'a, T> {
             let mut found_node = false;
 
             while self.current_stack.len() > 1 {
-                // These two lines are safe from panic because we just checked
-                // the stack has at least 2 elements
-                let current_node = self.current_stack.pop().unwrap();
-                let parent_node = *self.current_stack.last().unwrap();
+                let current_node = self.current_stack.pop().expect("We just checked that there are at least 2 elements");
+                let parent_node = *self.current_stack.last().expect("Same");
 
                 let sibling_node = parent_node.sibling(current_node);
 

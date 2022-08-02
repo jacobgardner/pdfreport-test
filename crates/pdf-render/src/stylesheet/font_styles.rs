@@ -1,24 +1,33 @@
-use optional_merge_derive::mergeable;
+use optional_merge_derive::mergeable_fn;
+use serde::Deserialize;
 use ts_rs::TS;
 
 use crate::fonts::{FontSlant, FontWeight};
 use crate::values::Pt;
 
-#[mergeable]
-#[derive(TS, Clone, Debug, PartialEq)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-#[ts(export, rename_all = "camelCase")]
-pub struct FontStyles {
-    pub family: String,
-    #[ts(type = "string | number")]
-    pub size: Pt,
-    pub style: FontSlant,
-    pub weight: FontWeight,
-    #[ts(type = "string | number")]
-    pub letter_spacing: Pt,
+mergeable_fn! {
+    source => {
+        #[derive(Debug, Clone, PartialEq)]
+        pub struct FontStyles {
+            pub family: String,
+            pub size: Pt,
+            pub style: FontSlant,
+            pub weight: FontWeight,
+            pub letter_spacing: Pt,
+        }
+    }
+    mergeable => {
+        #[derive(Deserialize, TS)]
+        #[serde(rename_all = "camelCase", deny_unknown_fields)]
+        #[ts(export, rename_all = "camelCase", rename = "FontStyles")]
+        pub struct MergeableFontStyles;
+    }
+    unmergeable => {
+        pub struct FontStyles;
+    }
 }
 
-impl Default for FontStyles::Unmergeable {
+impl Default for FontStyles {
     fn default() -> Self {
         Self {
             family: String::from("sans-serif"),

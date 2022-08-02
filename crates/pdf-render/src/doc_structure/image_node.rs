@@ -1,6 +1,8 @@
 use serde::Deserialize;
 use ts_rs::TS;
 
+use crate::values::Pt;
+
 use super::{has_node_id::HasNodeId, NodeId};
 
 #[derive(TS, Clone, Deserialize, Debug)]
@@ -11,6 +13,8 @@ pub struct ImageNode {
     #[serde(default)]
     pub styles: Vec<String>,
     pub content: String,
+    pub width: Pt,
+    pub height: Pt,
 }
 
 impl HasNodeId for ImageNode {

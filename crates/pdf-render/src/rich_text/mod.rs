@@ -25,7 +25,7 @@ pub struct RichTextSpan {
 }
 
 impl RichTextSpan {
-    pub fn new(raw_str: &str, style: Style::Unmergeable) -> Self {
+    pub fn new(raw_str: &str, style: Style) -> Self {
         let line_height = if let Some(line_height) = style.line_height {
             line_height.0 / style.font.size.0
         } else {
@@ -96,6 +96,11 @@ impl RichText {
         char_start_index: usize,
         char_end_index: usize,
     ) -> Result<RichText, DocumentGenerationError> {
+
+        if char_start_index == char_end_index {
+            return Ok(RichText(vec![]));
+        }
+
         let span_data: Vec<(&RichTextSpan, usize, usize)> = self
             .0
             .iter()
@@ -149,9 +154,11 @@ impl RichText {
                 .extend(self.0[start_span_index + 1..end_span_index].iter().cloned());
 
             let (end_span, start, _) = span_data[end_span_index];
-            
-            let byte_end_index = end_span.text.get_byte_index_from_char(char_end_index - start);
-            
+
+            let byte_end_index = end_span
+                .text
+                .get_byte_index_from_char(char_end_index - start);
+
             rich_text.0.push(RichTextSpan {
                 text: end_span.text[0..byte_end_index].to_owned(),
                 ..end_span.clone()
@@ -167,6 +174,31 @@ impl RichText {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn empty_selection() {
+        let line = RichText(vec![
+            RichTextSpan {
+                // 89 characters
+                // 93 bytes
+                size: Pt(32.),
+                .."Your approach to work is one of the most visible parts of your professional “appearance”.".into()
+            },
+            RichTextSpan {
+                // 23 characters
+                // 51 bytes
+                size: Pt(15.),
+                .."🎅🎅🎅🎅🎅🎅🎅🎅 “appearance”.".into()
+            },
+            RichTextSpan {
+                // 9 characters
+                size: Pt(8.),
+                .." lazy dog".into()
+            },
+        ]);
+
+        assert_eq!(line.substr(0, 0).unwrap(), RichText(vec![]));
+    }
 
     #[test]
     fn unicode_support() {
@@ -202,7 +234,7 @@ mod tests {
                 }
             ])
         );
-        
+
         assert_eq!(
             line.substr(76, 88).unwrap(),
             RichText(vec![
@@ -224,7 +256,7 @@ mod tests {
                 }
             ])
         );
-        
+
         assert_eq!(
             line.substr(76, 89).unwrap(),
             RichText(vec![
@@ -235,7 +267,6 @@ mod tests {
                 }
             ])
         );
-        
     }
 
     #[test]

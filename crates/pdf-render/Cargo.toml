@@ -9,7 +9,7 @@ edition = "2021"
 [dependencies]
 serde = { version = "*", features = ["derive"] }
 thiserror = "*"
-printpdf = "*"
+printpdf = { version = "0.5", features = ["svg"] }
 num = "*"
 num-traits = "*"
 num-derive = "*"
@@ -19,7 +19,8 @@ ts-rs = { version = "*" }
 lazy_static = "*"
 regex = "*"
 tracing = "0.1"
-
+roxmltree = "*"
+serde_with = "*"
 
 color_processing = "*"
 polyhorn-yoga = "*"

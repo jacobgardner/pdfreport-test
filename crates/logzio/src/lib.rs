@@ -137,7 +137,8 @@ impl<T: Serialize + Send + 'static> LogzIoSender<T> {
                 while let Ok(message) = rx.recv_deadline(deadline) {
                     match message {
                         ChannelMessage::LogMessage(message) => {
-                            log_messages += &serde_json::to_string(&message).unwrap();
+                            log_messages += &serde_json::to_string(&message)
+                                .expect("None of the fields should be able to fail here");
                             log_messages += "\n";
                             message_count += 1;
                         }
@@ -148,7 +149,7 @@ impl<T: Serialize + Send + 'static> LogzIoSender<T> {
                         break;
                     }
                 }
-                
+
                 if message_count == 0 {
                     continue;
                 }

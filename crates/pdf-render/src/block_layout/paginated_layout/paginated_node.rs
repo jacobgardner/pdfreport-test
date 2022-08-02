@@ -1,16 +1,28 @@
 use crate::{
-    block_layout::layout_engine::NodeLayout, paragraph_layout::RenderedTextBlock, stylesheet::Style,
+    block_layout::layout_engine::NodeLayout, image::Svg, paragraph_layout::RenderedTextBlock,
+    stylesheet::Style,
 };
 
 #[derive(Clone, Debug)]
 pub struct DrawableTextNode {
     pub text_block: RenderedTextBlock,
-    pub style: Style::Unmergeable,
+    pub style: Style,
 }
 
 #[derive(Clone, Debug)]
 pub struct DrawableContainerNode {
-    pub style: Style::Unmergeable,
+    pub style: Style,
+}
+
+#[derive(Clone, Debug)]
+pub enum Image {
+    Svg(Svg),
+}
+
+#[derive(Clone, Debug)]
+pub struct DrawableImageNode {
+    pub style: Style,
+    pub image: Image,
 }
 
 #[derive(Clone, Debug)]
@@ -24,14 +36,15 @@ pub struct PaginatedNode {
 pub enum DrawableNode {
     Text(DrawableTextNode),
     Container(DrawableContainerNode),
-    // Image(DrawableImageNode)
+    Image(DrawableImageNode),
 }
 
 impl DrawableNode {
-    pub fn style(&self) -> &Style::Unmergeable {
+    pub fn style(&self) -> &Style {
         match self {
             Self::Text(node) => &node.style,
             Self::Container(node) => &node.style,
+            Self::Image(node) => &node.style,
         }
     }
 

@@ -7,7 +7,7 @@ use crate::fonts::FontAttributes;
 #[derive(Error, Debug)]
 pub enum InternalServerError {
     #[error("Write PDF Error")]
-    WritePdfError(#[from] std::io::Error),
+    WritePdfError(#[from] Box<dyn std::error::Error>),
 
     #[error("Error loading font: {family_name} w/ attributes: {attributes:?}")]
     LoadFontError {
@@ -66,6 +66,9 @@ pub enum UserInputError {
 
     #[error("Unit does is not supported: {attached_unit}")]
     UnsupportedUnit { attached_unit: String },
+
+    #[error("Svg Parse Error: {message}")]
+    SvgParseError { message: String },
 }
 
 #[derive(Error, Debug)]

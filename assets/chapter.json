@@ -1,0 +1,3721 @@
+{
+  "filename": "chapter.pdf",
+  "documentTitle": "Chapter 1",
+  "pageSize": "letter",
+  "stylesheet": {
+    "debug": {
+      "debug": true
+    },
+    "apples": {
+      "border": {
+        "width": {
+          "left": 1,
+          "bottom": 1
+        }
+      },
+      "debug": false
+    },
+    "default": {
+      "debug": false,
+      "color": "#444A5A",
+      "font": {"family": "Inter", "size": 12},
+      "padding": {"left": 27, "top": 27, "bottom": 27, "right": 27}
+    },
+    "breakBefore": {"breakBefore": "Always"},
+    "h1": {"font": {"size": 24, "weight": "Bold"}, "margin": {"bottom": 12}},
+    "h2": {
+      "font": {"size": 18.75, "weight": "Light"},
+      "margin": {"bottom": 12}
+    },
+    "h3": {
+      "font": {"size": 9, "weight": "ExtraBold", "letterSpacing": 1.125},
+      "margin": {"bottom": 12},
+      "debug": false,
+      "textTransform": "Uppercase"
+    },
+    "section": {"flex": {"direction": "Column"}, "debug": false},
+    "category": {
+      "breakBefore": "Always",
+      "font": {"weight": "Light", "size": 18.75},
+      "lineHeight": 27,
+      "margin": {"bottom": 6}
+    },
+    "chapter": {"breakBefore": "Always"},
+    "callout": {
+      "breakInside": "Avoid",
+      "backgroundColor": "#f1faf6",
+      "border": {
+        "radius": {
+          "topLeft": 4.5,
+          "topRight": 4.5,
+          "bottomLeft": 4.5,
+          "bottomRight": 4.5
+        }
+      },
+      "padding": {"left": 12, "top": 18, "right": 12},
+      "margin": {"bottom": 18}
+    },
+    "flagpoleBase": {
+      "breakInside": "Avoid",
+      "padding": {"left": 18, "top": 18, "right": 18},
+      "margin": {"bottom": 18},
+      "border": {
+        "width": {"left": 1.5},
+        "radius": {"topRight": 9, "bottomRight": 9}
+      }
+    },
+    "flagpoleYellow": {
+      "backgroundColor": "#FFFCF4",
+      "border": {"color": "#FFD166"}
+    },
+    "flagpoleBlue": {
+      "border": {"color": "#0080AD"},
+      "backgroundColor": "#EDF6F9"
+    },
+    "spacer": {"flex": {"grow": 1}},
+    "spotlightFlagContainer": {"flex": {"direction": "Column"}},
+    "flagContainer": {
+      "flex": {"shrink": 1, "grow": 0},
+      "backgroundColor": "#FFFFFF",
+      "padding": {"top": 6, "right": 6, "bottom": 6, "left": 6},
+      "border": {
+        "color": "#E2E4E9",
+        "width": {"top": 0.75, "right": 0.75, "bottom": 0.75, "left": 0.75},
+        "radius": {
+          "topRight": 6,
+          "bottomRight": 6,
+          "bottomLeft": 6,
+          "topLeft": 6
+        }
+      }
+    },
+    "shrink": {"flex": {"shrink": 1}},
+    "measureDefinition": {
+      "font": {"size": 12, "style": "Italic"},
+      "lineHeight": 18,
+      "color": "#444A5A"
+    },
+    "measureTitleLine": {
+      "flex": {"direction": "Row"},
+      "margin": {"bottom": 18}
+    },
+    "synonym": {
+      "margin": {"right": 6},
+      "border": {
+        "width": {"top": 0.75, "right": 0.75, "bottom": 0.75, "left": 0.75},
+        "radius": {
+          "topRight": 3,
+          "bottomRight": 3,
+          "bottomLeft": 3,
+          "topLeft": 3
+        },
+        "color": "#E2E4E9"
+      },
+      "padding": {"top": 4.5, "right": 4.5, "bottom": 4.5, "left": 4.5},
+      "font": {"weight": "Regular", "letterSpacing": 0.075, "size": 9},
+      "color": "#656D81"
+    },
+    "synonyms": {"flex": {"direction": "Row"}},
+    "titleAndSynonyms": {
+      "margin": {"top": 15, "left": 12},
+      "flex": {"direction": "Column"}
+    },
+    "measureHeading": {
+      "font": {"size": 18.75, "weight": "Bold"},
+      "margin": {"bottom": 3}
+    },
+    "instructionsHeading": {
+      "font": {
+        "weight": "Bold",
+        "size": 15,
+        "letterSpacing": 0.11249999999999999
+      },
+      "margin": {"bottom": 6}
+    },
+    "categorySeparator": {
+      "border": {"width": {"bottom": 1}, "color": "#E2E4E9"},
+      "margin": {"bottom": 36}
+    },
+    "instructionsSeparator": {
+      "border": {"width": {"bottom": 1}, "color": "#E2E4E9"},
+      "margin": {"bottom": 24}
+    },
+    "instructionsBox": {
+      "breakInside": "Avoid",
+      "backgroundColor": "#F5F7FA",
+      "padding": {"top": 18, "right": 18, "bottom": 18, "left": 18},
+      "border": {
+        "color": "#E2E4E9",
+        "width": {"top": 1, "right": 1, "bottom": 1, "left": 1},
+        "radius": {
+          "topLeft": 12,
+          "topRight": 12,
+          "bottomLeft": 12,
+          "bottomRight": 12
+        }
+      }
+    },
+    "measureBox": {
+      "breakInside": "Avoid",
+      "padding": {"top": 18, "bottom": 18, "left": 18, "right": 18},
+      "border": {
+        "radius": {
+          "topLeft": 9,
+          "topRight": 9,
+          "bottomLeft": 9,
+          "bottomRight": 9
+        }
+      },
+      "backgroundColor": "#F5F7FA",
+      "margin": {"bottom": 36}
+    },
+    "paragraph": {
+      "debug": false,
+      "breakInside": "Avoid",
+      "margin": {"bottom": 18},
+      "lineHeight": 18
+    },
+    "column": {"flex": {"direction": "Column"}},
+    "row": {"flex": {"direction": "Row"}},
+    "orderedList": {"flex": {"direction": "Column"}, "margin": {"bottom": 18}},
+    "unorderedList": {
+      "flex": {"direction": "Column"},
+      "margin": {"bottom": 18}
+    },
+    "anchor": {},
+    "strong": {"font": {"weight": "Bold"}},
+    "emphasis": {"font": {"style": "Italic"}},
+    "primary": {
+      "breakInside": "Avoid",
+      "flex": {"shrink": 2, "grow": 2},
+      "debug": false
+    },
+    "sidebar": {"flex": {"shrink": 1, "grow": 1}}
+  },
+  "fonts": [
+    {
+      "familyName": "Inter",
+      "fonts": [
+        {
+          "source": "./assets/fonts/inter-static/Inter-Bold.ttf",
+          "weight": "Bold",
+          "style": "Normal"
+        },
+        {
+          "source": "./assets/fonts/inter-static/Inter-Thin-BETA.ttf",
+          "weight": "Thin",
+          "style": "Normal"
+        },
+        {
+          "source": "./assets/fonts/inter-static/Inter-SemiBold.ttf",
+          "weight": "SemiBold",
+          "style": "Normal"
+        },
+        {
+          "source": "./assets/fonts/inter-static/Inter-ThinItalic-BETA.ttf",
+          "weight": "Thin",
+          "style": "Italic"
+        },
+        {
+          "source": "./assets/fonts/inter-static/Inter-SemiBoldItalic.ttf",
+          "weight": "SemiBold",
+          "style": "Italic"
+        },
+        {
+          "source": "./assets/fonts/inter-static/Inter-ExtraLight-BETA.ttf",
+          "weight": "ExtraLight",
+          "style": "Normal"
+        },
+        {
+          "source": "./assets/fonts/inter-static/Inter-ExtraBoldItalic.ttf",
+          "weight": "ExtraBold",
+          "style": "Italic"
+        },
+        {
+          "source": "./assets/fonts/inter-static/Inter-Light-BETA.ttf",
+          "weight": "Light",
+          "style": "Normal"
+        },
+        {
+          "source": "./assets/fonts/inter-static/Inter-UI-BlackItalic.ttf",
+          "weight": "Black",
+          "style": "Italic"
+        },
+        {
+          "source": "./assets/fonts/inter-static/Inter-BoldItalic.ttf",
+          "weight": "Bold",
+          "style": "Italic"
+        },
+        {
+          "source": "./assets/fonts/inter-static/Inter-Regular.ttf",
+          "weight": "Regular",
+          "style": "Normal"
+        },
+        {
+          "source": "./assets/fonts/inter-static/Inter-Italic.ttf",
+          "weight": "Regular",
+          "style": "Italic"
+        },
+        {
+          "source": "./assets/fonts/inter-static/Inter-ExtraLightItalic-BETA.ttf",
+          "weight": "ExtraLight",
+          "style": "Italic"
+        },
+        {
+          "source": "./assets/fonts/inter-static/Inter-LightItalic-BETA.ttf",
+          "weight": "Light",
+          "style": "Italic"
+        },
+        {
+          "source": "./assets/fonts/inter-static/Inter-ExtraBold.ttf",
+          "weight": "ExtraBold",
+          "style": "Normal"
+        },
+        {
+          "source": "./assets/fonts/inter-static/Inter-Medium.ttf",
+          "weight": "Medium",
+          "style": "Normal"
+        },
+        {
+          "source": "./assets/fonts/inter-static/Inter-Black.ttf",
+          "weight": "Black",
+          "style": "Normal"
+        },
+        {
+          "source": "./assets/fonts/inter-static/Inter-MediumItalic.ttf",
+          "weight": "Medium",
+          "style": "Italic"
+        }
+      ]
+    }
+  ],
+  "pageMargins": {"left": 27, "right": 27, "top": 27, "bottom": 27},
+  "root": {
+    "type": "Styled",
+    "styles": [],
+    "children": [
+      {
+        "type": "Styled",
+        "styles": ["default", "chapter"],
+        "children": [
+          {
+            "type": "Text",
+            "styles": ["h1"],
+            "children": ["Chapter 1: Your Approach to Work"]
+          },
+          {
+            "type": "Styled",
+            "styles": ["section"],
+            "children": [
+              {"type": "Text", "styles": ["h2"], "children": ["Introduction"]},
+              {
+                "type": "Styled",
+                "styles": ["column"],
+                "children": [
+                  {
+                    "type": "Styled",
+                    "styles": ["primary"],
+                    "children": [
+                      {
+                        "type": "Text",
+                        "styles": ["h3"],
+                        "children": ["Why This Matters"]
+                      },
+                      {
+                        "type": "Text",
+                        "styles": ["paragraph"],
+                        "children": [
+                          "Cillum nulla consequat ullamco. Ex sint in est labore id proident in enim culpa. Quis consectetur mollit officia deserunt aute laborum eiusmod do anim deserunt. Ea consequat ea id fugiat fugiat nulla mollit qui elit est aliquip. Irure Lorem et occaecat et in proident deserunt aute duis qui tempor fugiat."
+                        ]
+                      },
+                      {
+                        "type": "Text",
+                        "styles": ["paragraph"],
+                        "children": [
+                          "Commodo esse ipsum qui labore commodo consectetur eu elit Lorem amet enim in. Eu proident velit exercitation cillum do cupidatat duis. Tempor cupidatat aliquip occaecat labore labore excepteur dolore adipisicing commodo. Enim qui ea quis magna in quis irure velit magna exercitation fugiat ex. Incididunt enim nostrud labore eu proident irure laboris cupidatat ad aliqua."
+                        ]
+                      },
+                      {
+                        "type": "Text",
+                        "styles": ["paragraph"],
+                        "children": [
+                          "Tempor aliquip ea aliquip sunt est velit commodo anim cillum magna. Labore incididunt occaecat excepteur labore nulla ut consectetur quis sint non magna ut ex anim anim. Non id eu veniam duis amet consectetur cillum id deserunt culpa sint mollit. Proident qui duis non ullamco. Anim aliquip aliquip irure fugiat fugiat commodo cillum."
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "Styled",
+                "styles": ["column"],
+                "children": [
+                  {
+                    "type": "Styled",
+                    "styles": ["primary"],
+                    "children": [
+                      {
+                        "type": "Text",
+                        "styles": ["h3"],
+                        "children": ["Explain the groupings"]
+                      },
+                      {
+                        "type": "Text",
+                        "styles": ["paragraph"],
+                        "children": [
+                          "Reprehenderit veniam irure esse sit enim deserunt aliqua duis dolor. Ut cillum aliquip reprehenderit dolore consectetur aliqua ea aliqua sint labore. Lorem est excepteur non. Ad labore laborum laborum aliqua in laboris qui pariatur adipisicing ex nisi. Nisi mollit occaecat labore. Aute enim duis do aliqua voluptate. Officia sint voluptate voluptate officia consequat sint exercitation do irure Lorem labore."
+                        ]
+                      },
+                      {
+                        "type": "Text",
+                        "styles": ["paragraph"],
+                        "children": [
+                          "Aliquip voluptate reprehenderit aute sit Lorem elit adipisicing laboris. Qui ad eu anim laborum cupidatat eu ad do eiusmod amet aliqua sit. Reprehenderit ad consequat fugiat elit consectetur commodo in Lorem. Ipsum Lorem aliqua do ea cupidatat id deserunt cupidatat. Incididunt adipisicing veniam mollit. Non tempor ipsum duis minim proident exercitation nostrud sint deserunt esse ex. Mollit magna eiusmod duis est eu qui pariatur minim eu aute in consequat reprehenderit amet. Deserunt tempor dolor dolor."
+                        ]
+                      },
+                      {
+                        "type": "Styled",
+                        "styles": ["unorderedList"],
+                        "children": [
+                          {
+                            "type": "Text",
+                            "styles": [],
+                            "children": [
+                              "• ",
+                              {
+                                "type": "Text",
+                                "styles": ["paragraph"],
+                                "children": ["FIRST"]
+                              }
+                            ]
+                          },
+                          {
+                            "type": "Text",
+                            "styles": [],
+                            "children": [
+                              "• ",
+                              {
+                                "type": "Text",
+                                "styles": ["paragraph"],
+                                "children": ["SECOND"]
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "type": "Styled",
+                        "styles": ["orderedList"],
+                        "children": [
+                          {
+                            "type": "Text",
+                            "styles": [],
+                            "children": [
+                              "1",
+                              ". ",
+                              {
+                                "type": "Text",
+                                "styles": ["paragraph"],
+                                "children": [
+                                  "UNO dolor ",
+                                  {
+                                    "type": "Text",
+                                    "styles": ["strong"],
+                                    "children": [
+                                      {
+                                        "type": "Text",
+                                        "styles": ["emphasis"],
+                                        "children": ["sed rutrum augue"]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "type": "Text",
+                            "styles": [],
+                            "children": [
+                              "2",
+                              ". ",
+                              {
+                                "type": "Text",
+                                "styles": ["paragraph"],
+                                "children": [
+                                  "DOS amet ",
+                                  {
+                                    "type": "Text",
+                                    "styles": ["anchor"],
+                                    "children": ["nulla"]
+                                  },
+                                  " nisi"
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "type": "Styled",
+                    "styles": ["sidebar"],
+                    "children": [
+                      {
+                        "type": "Styled",
+                        "styles": ["callout"],
+                        "children": [
+                          {
+                            "type": "Text",
+                            "styles": ["h3"],
+                            "children": ["This is your callout"]
+                          },
+                          {
+                            "type": "Text",
+                            "styles": ["paragraph"],
+                            "children": [
+                              "This is your ",
+                              {
+                                "type": "Text",
+                                "styles": ["emphasis"],
+                                "children": [
+                                  {
+                                    "type": "Text",
+                                    "styles": ["strong"],
+                                    "children": ["body"]
+                                  }
+                                ]
+                              },
+                              ":"
+                            ]
+                          },
+                          {
+                            "type": "Styled",
+                            "styles": ["unorderedList"],
+                            "children": [
+                              {
+                                "type": "Text",
+                                "styles": [],
+                                "children": [
+                                  "• ",
+                                  {
+                                    "type": "Text",
+                                    "styles": ["paragraph"],
+                                    "children": ["With list items"]
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "Text",
+                                "styles": [],
+                                "children": [
+                                  "• ",
+                                  {
+                                    "type": "Text",
+                                    "styles": ["paragraph"],
+                                    "children": ["inside of it"]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "Styled",
+                "styles": ["column"],
+                "children": [
+                  {
+                    "type": "Styled",
+                    "styles": ["primary"],
+                    "children": [
+                      {
+                        "type": "Styled",
+                        "styles": ["flagpoleBase", "flagpoleYellow"],
+                        "children": [
+                          {
+                            "type": "Text",
+                            "styles": ["h3"],
+                            "children": ["This key info"]
+                          },
+                          {
+                            "type": "Text",
+                            "styles": ["paragraph"],
+                            "children": ["This is details for key info"]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "Styled",
+                "styles": ["column"],
+                "children": [
+                  {
+                    "type": "Styled",
+                    "styles": ["primary"],
+                    "children": [
+                      {
+                        "type": "Text",
+                        "styles": ["h3"],
+                        "children": ["How to use it"]
+                      },
+                      {
+                        "type": "Text",
+                        "styles": ["paragraph"],
+                        "children": [
+                          "Proident et minim deserunt deserunt aliqua tempor veniam adipisicing tempor velit. Qui sit laboris ullamco eu Lorem mollit quis ullamco ut reprehenderit. Do eu cupidatat ad adipisicing fugiat commodo irure eu minim mollit. Ipsum commodo sit labore incididunt esse ex aliquip consectetur quis ex do. Consectetur deserunt enim sunt nulla laboris aliqua qui do. Tempor nisi reprehenderit mollit veniam cupidatat in ut irure dolore. Sint amet do eiusmod ea ad officia excepteur magna. Est eu amet magna mollit occaecat consectetur qui deserunt reprehenderit sit."
+                        ]
+                      },
+                      {
+                        "type": "Text",
+                        "styles": ["paragraph"],
+                        "children": [
+                          "Velit magna cupidatat ad et. Ex exercitation Lorem non aute officia ex velit ad. Ea dolore officia voluptate veniam dolore amet tempor ullamco adipisicing. Fugiat deserunt commodo culpa nostrud reprehenderit est."
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "Styled",
+                "styles": ["instructionsBox"],
+                "children": [
+                  {
+                    "type": "Text",
+                    "styles": ["instructionsHeading"],
+                    "children": ["Instructions"]
+                  },
+                  {
+                    "type": "Styled",
+                    "styles": ["instructionsSeparator"],
+                    "children": []
+                  },
+                  {
+                    "type": "Text",
+                    "styles": ["h3"],
+                    "children": ["These are instructions"]
+                  }
+                ]
+              },
+              {
+                "type": "Styled",
+                "styles": [],
+                "children": [
+                  {
+                    "type": "Text",
+                    "styles": ["category"],
+                    "children": ["Capabilities"]
+                  },
+                  {
+                    "type": "Styled",
+                    "styles": ["categorySeparator"],
+                    "children": []
+                  }
+                ]
+              },
+              {
+                "type": "Styled",
+                "styles": [],
+                "children": [
+                  {
+                    "type": "Styled",
+                    "styles": [],
+                    "children": [
+                      {
+                        "type": "Image",
+                        "styles": ["debug"],
+                        "content": "<svg xmlns:xlink=\"http://www.w3.org/1999/xlink\" role=\"img\" aria-label=\"22\" width=\"1200\" height=\"146\"   viewBox=\"0 0 600 73\" xmlns=\"http://www.w3.org/2000/svg\">   <path d=\"M0 20 H 300 M320 0 V73 M420 0 V73 M550 0 V73\" stroke=\"black\" />    <text x=\"20\" y=\"20\" fill=\"#444A5A\" text-anchor=\"start\" font-size=\"15\"     font-family=\"Inter, Arial, Helvetica, sans-serif\" dominant-baseline=\"auto\">     AUTO   </text>   <text x=\"120\" y=\"20\" fill=\"#444A5A\" text-anchor=\"start\" font-size=\"90\"     font-family=\"Inter, Arial, Helvetica, sans-serif\" dominant-baseline=\"central\">     MIDDLE   </text>   <text x=\"220\" y=\"20\" fill=\"#444A5A\" text-anchor=\"start\" font-size=\"15\"     font-family=\"Inter, Arial, Helvetica, sans-serif\" dominant-baseline=\"hanging\">     HANGING   </text>    <text x=\"320\" y=\"20\" fill=\"#444A5A\" text-anchor=\"start\" font-size=\"15\"     font-family=\"Inter, Arial, Helvetica, sans-serif\" dominant-baseline=\"middle\">     AUTO   </text>   <text x=\"420\" y=\"20\" fill=\"#444A5A\" text-anchor=\"middle\" font-size=\"15\"     font-family=\"Inter, Arial, Helvetica, sans-serif\" dominant-baseline=\"middle\">     MIDDLE   </text>   <text x=\"550\" y=\"20\" fill=\"#444A5A\" text-anchor=\"end\" font-size=\"15\" font-family=\"Inter, Arial, Helvetica, sans-serif\"     dominant-baseline=\"middle\">     HANGING   </text> </svg> ",
+                        "width": 300,
+                        "height": 36.5
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "Styled",
+                "styles": ["column"],
+                "children": [
+                  {
+                    "type": "Styled",
+                    "styles": ["primary"],
+                    "children": [
+                      {
+                        "type": "Text",
+                        "styles": ["h3"],
+                        "children": ["Why This Matters"]
+                      },
+                      {
+                        "type": "Text",
+                        "styles": ["paragraph"],
+                        "children": [
+                          "Ullamco eu laboris consectetur. Sunt ipsum veniam aliqua aliquip duis enim. Minim laborum duis amet officia occaecat adipisicing eu ex dolore consequat velit enim aute et nisi. In do fugiat eiusmod qui id pariatur labore incididunt aute nostrud aliquip ut. Ut nostrud enim ullamco esse fugiat exercitation ullamco. Ut non amet deserunt eu dolor dolore veniam."
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "Styled",
+                "styles": ["column"],
+                "children": [
+                  {
+                    "type": "Styled",
+                    "styles": ["primary"],
+                    "children": [
+                      {
+                        "type": "Text",
+                        "styles": ["h3"],
+                        "children": ["Explain the groupings"]
+                      },
+                      {
+                        "type": "Text",
+                        "styles": ["paragraph"],
+                        "children": [
+                          "Ullamco eu laboris consectetur. Sunt ipsum veniam aliqua aliquip duis enim. Minim laborum duis amet officia occaecat adipisicing eu ex dolore consequat velit enim aute et nisi. In do fugiat eiusmod qui id pariatur labore incididunt aute nostrud aliquip ut. Ut nostrud enim ullamco esse fugiat exercitation ullamco. Ut non amet deserunt eu dolor dolore veniam."
+                        ]
+                      },
+                      {
+                        "type": "Text",
+                        "styles": ["paragraph"],
+                        "children": [
+                          "Sint sit do tempor cillum eu incididunt sit magna magna officia proident. Duis velit dolore tempor velit aute nisi commodo nostrud minim tempor sint aliqua eu. Duis laborum culpa aliquip do sint cillum duis ut dolore commodo in ipsum adipisicing. Commodo cillum ut sint dolore ex voluptate ea. Veniam veniam quis ex cillum mollit exercitation eu culpa ipsum elit est Lorem mollit duis reprehenderit. Occaecat esse culpa sit. Amet id eu id sunt cupidatat eiusmod."
+                        ]
+                      },
+                      {
+                        "type": "Styled",
+                        "styles": ["unorderedList"],
+                        "children": [
+                          {
+                            "type": "Text",
+                            "styles": [],
+                            "children": [
+                              "• ",
+                              {
+                                "type": "Text",
+                                "styles": ["paragraph"],
+                                "children": ["FIRST"]
+                              }
+                            ]
+                          },
+                          {
+                            "type": "Text",
+                            "styles": [],
+                            "children": [
+                              "• ",
+                              {
+                                "type": "Text",
+                                "styles": ["paragraph"],
+                                "children": ["SECOND"]
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "type": "Styled",
+                        "styles": ["orderedList"],
+                        "children": [
+                          {
+                            "type": "Text",
+                            "styles": [],
+                            "children": [
+                              "1",
+                              ". ",
+                              {
+                                "type": "Text",
+                                "styles": ["paragraph"],
+                                "children": [
+                                  "UNO dolor ",
+                                  {
+                                    "type": "Text",
+                                    "styles": ["strong"],
+                                    "children": [
+                                      {
+                                        "type": "Text",
+                                        "styles": ["emphasis"],
+                                        "children": ["sed rutrum augue"]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "type": "Text",
+                            "styles": [],
+                            "children": [
+                              "2",
+                              ". ",
+                              {
+                                "type": "Text",
+                                "styles": ["paragraph"],
+                                "children": [
+                                  "DOS amet ",
+                                  {
+                                    "type": "Text",
+                                    "styles": ["anchor"],
+                                    "children": ["nulla"]
+                                  },
+                                  " nisi"
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "type": "Styled",
+                    "styles": ["sidebar"],
+                    "children": [
+                      {
+                        "type": "Styled",
+                        "styles": ["callout"],
+                        "children": [
+                          {
+                            "type": "Text",
+                            "styles": ["h3"],
+                            "children": ["This is your callout"]
+                          },
+                          {
+                            "type": "Text",
+                            "styles": ["paragraph"],
+                            "children": [
+                              "This is your ",
+                              {
+                                "type": "Text",
+                                "styles": ["emphasis"],
+                                "children": [
+                                  {
+                                    "type": "Text",
+                                    "styles": ["strong"],
+                                    "children": ["body"]
+                                  }
+                                ]
+                              },
+                              ":"
+                            ]
+                          },
+                          {
+                            "type": "Styled",
+                            "styles": ["unorderedList"],
+                            "children": [
+                              {
+                                "type": "Text",
+                                "styles": [],
+                                "children": [
+                                  "• ",
+                                  {
+                                    "type": "Text",
+                                    "styles": ["paragraph"],
+                                    "children": ["With list items"]
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "Text",
+                                "styles": [],
+                                "children": [
+                                  "• ",
+                                  {
+                                    "type": "Text",
+                                    "styles": ["paragraph"],
+                                    "children": ["inside of it"]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "Styled",
+                "styles": ["column"],
+                "children": [
+                  {
+                    "type": "Styled",
+                    "styles": ["primary"],
+                    "children": [
+                      {
+                        "type": "Styled",
+                        "styles": ["flagpoleBase", "flagpoleYellow"],
+                        "children": [
+                          {
+                            "type": "Text",
+                            "styles": ["h3"],
+                            "children": ["This key info"]
+                          },
+                          {
+                            "type": "Text",
+                            "styles": ["paragraph"],
+                            "children": ["This is details for key info"]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "Styled",
+                "styles": ["column"],
+                "children": [
+                  {
+                    "type": "Styled",
+                    "styles": ["primary"],
+                    "children": [
+                      {
+                        "type": "Text",
+                        "styles": ["h3"],
+                        "children": ["How to use it"]
+                      },
+                      {
+                        "type": "Text",
+                        "styles": ["paragraph"],
+                        "children": [
+                          "Cupidatat amet esse do nisi quis. Anim quis sunt amet do laborum sit aliquip incididunt pariatur consequat velit sit irure. Ut sunt tempor cillum veniam sint quis. Aliquip aliqua quis incididunt in consequat exercitation aute ad pariatur esse enim esse incididunt laboris minim. Voluptate labore exercitation duis veniam in est reprehenderit. Et proident amet commodo dolor cillum ex dolor. Sunt elit ea occaecat aute magna eiusmod ut. Irure aliquip est voluptate adipisicing occaecat nulla."
+                        ]
+                      },
+                      {
+                        "type": "Text",
+                        "styles": ["paragraph"],
+                        "children": [
+                          "Ad ad cupidatat non eu dolore et. Voluptate in adipisicing minim. Pariatur est amet ad aliqua est quis aliqua velit labore et duis elit. Nisi enim exercitation eiusmod elit consectetur cillum nisi cupidatat. Culpa ea nulla esse est minim ipsum id velit anim sint commodo ea amet aliquip labore."
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "Styled",
+                "styles": ["measureBox", "breakBefore"],
+                "children": [
+                  {
+                    "type": "Styled",
+                    "styles": ["measureTitleLine"],
+                    "children": [
+                      {
+                        "type": "Image",
+                        "styles": ["shrink"],
+                        "content": "\n<svg role=\"img\" aria-label=\"10\" width=\"54\" height=\"54\" viewBox=\"0 0 54 54\" xmlns=\"http://www.w3.org/2000/svg\">\n  \n  \n\n  <circle cx=\"27\" cy=\"27\" r=\"24\" fill=\"none\" stroke=\"#E2E4E9\" stroke-width=\"4\" ></circle>\n\n  <path class=\"donutMetric__outerArc\" fill=\"none\" stroke=\"#F5F7FA\" stroke-dasharray=\"15.079644737231007, 150.79644737231007\" \n    d=\"M27 3 a 24 24 0 0 1 0 48 a 24 24 0 0 1 0 -48\" stroke-width=\"6\" stroke-linecap=\"round\"/>\n  <path class=\"donutMetric__outerArc\" fill=\"none\" stroke=\"#52489C\" stroke-dasharray=\"15.079644737231007, 150.79644737231007\" \n    d=\"M27 3 a 24 24 0 0 1 0 48 a 24 24 0 0 1 0 -48\" stroke-width=\"4\" stroke-linecap=\"round\"/>\n\n  \n  <circle class=\"donutMetric__innerCircle\" cx=\"27\" cy=\"27\" r=\"19\" fill=\"#D3D1E6\"></circle>\n\n  <text x=\"27\" y=\"27\" fill=\"#444A5A\" text-anchor=\"middle\" font-size=\"20\" dominant-baseline=\"central\" font-family=\"Inter, Arial, Helvetica, sans-serif\" font-weight=\"bold\">\n    10\n  </text>\n</svg>\n",
+                        "width": 64,
+                        "height": 64
+                      },
+                      {
+                        "type": "Styled",
+                        "styles": ["titleAndSynonyms"],
+                        "children": [
+                          {
+                            "type": "Text",
+                            "styles": ["measureHeading"],
+                            "children": ["Flexibility"]
+                          },
+                          {
+                            "type": "Styled",
+                            "styles": ["synonyms"],
+                            "children": [
+                              {
+                                "type": "Text",
+                                "styles": ["synonym"],
+                                "children": ["a"]
+                              },
+                              {
+                                "type": "Text",
+                                "styles": ["synonym"],
+                                "children": ["b"]
+                              },
+                              {
+                                "type": "Text",
+                                "styles": ["synonym"],
+                                "children": ["c"]
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {"type": "Styled", "styles": ["spacer"], "children": []},
+                      {
+                        "type": "Styled",
+                        "styles": ["spotlightFlagContainer"],
+                        "children": [
+                          {
+                            "type": "Styled",
+                            "styles": ["flagContainer"],
+                            "children": [
+                              {
+                                "type": "Image",
+                                "styles": [],
+                                "content": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">\n\t<path\n\t\td=\"M21 8.5C19.55 8.5 18.74 9.94 19.07 11.01L15.52 14.57C15.22 14.48 14.78 14.48 14.48 14.57L11.93 12.02C12.27 10.95 11.46 9.5 10 9.5C8.55 9.5 7.73 10.94 8.07 12.02L3.51 16.57C2.44 16.24 1 17.05 1 18.5C1 19.6 1.9 20.5 3 20.5C4.45 20.5 5.26 19.06 4.93 17.99L9.48 13.43C9.78 13.52 10.22 13.52 10.52 13.43L13.07 15.98C12.73 17.05 13.54 18.5 15 18.5C16.45 18.5 17.27 17.06 16.93 15.98L20.49 12.43C21.56 12.76 23 11.95 23 10.5C23 9.4 22.1 8.5 21 8.5Z\"\n\t\tfill=\"#0A8EBD\" />\n\t<path d=\"M15 9.5L15.94 7.43L18 6.5L15.94 5.57L15 3.5L14.08 5.57L12 6.5L14.08 7.43L15 9.5Z\" fill=\"#0A8EBD\" />\n\t<path d=\"M3.5 11.5L4 9.5L6 9L4 8.5L3.5 6.5L3 8.5L1 9L3 9.5L3.5 11.5Z\" fill=\"#0A8EBD\" />\n</svg>",
+                                "width": 20,
+                                "height": 20
+                              }
+                            ]
+                          },
+                          {
+                            "type": "Styled",
+                            "styles": ["spacer"],
+                            "children": []
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "type": "Text",
+                    "styles": ["measureDefinition"],
+                    "children": ["Measure definition"]
+                  },
+                  {
+                    "type": "Image",
+                    "styles": [],
+                    "content": "<svg role=\"img\" aria-label=\"10\" width=\"470\" height=\"36\" viewBox=\"0 0 470 36\" xmlns=\"http://www.w3.org/2000/svg\">\n\n    <rect width=\"470\" height=\"6\" y=\"8\" rx=\"2\" ry=\"2\" fill=\"#E2E4E9\" />\n    <rect width=\"4\" height=\"16\" x=\"1\" y=\"3\" rx=\"2\" ry=\"2\" fill=\"#656D81\" stroke=\"#F5F7FA\" stroke-width=\"2\" />\n    <rect width=\"4\" height=\"16\" x=\"465\" y=\"3\" rx=\"2\" ry=\"2\" fill=\"#656D81\" stroke=\"#F5F7FA\" stroke-width=\"2\" />\n\n    <g data-tip=\"\" data-for=\"None\">\n      <circle cx=\"55\" cy=\"11\" r=\"10\" fill=\"#52489C\" stroke=\"#F5F7FA\" stroke-width=\"2\" />\n      <circle cx=\"55\" cy=\"11\" r=\"7\" fill=\"#D3D1E6\" />\n    </g>\n\n    <text y=\"36\" fill=\"#444A5A\" text-anchor=\"left\" font-size=\"12\" font-family=\"Inter, Arial, Helvetica, sans-serif\" font-weight=\"600\" letter-spacing=\"1.5\" dominant-baseline=\"auto\">\n      MORE EFFORT\n    </text>\n    <text x=\"470\" y=\"36\" fill=\"#444A5A\" text-anchor=\"end\" font-size=\"12\" font-family=\"Inter, Arial, Helvetica, sans-serif\" font-weight=\"600\" letter-spacing=\"1.5\" dominant-baseline=\"auto\">\n      LESS EFFORT\n    </text>\n  </svg>",
+                    "width": 468,
+                    "height": 36
+                  }
+                ]
+              },
+              {
+                "type": "Styled",
+                "styles": ["column"],
+                "children": [
+                  {
+                    "type": "Styled",
+                    "styles": ["primary"],
+                    "children": [
+                      {
+                        "type": "Text",
+                        "styles": ["h3"],
+                        "children": ["Why This Matters"]
+                      },
+                      {
+                        "type": "Text",
+                        "styles": ["paragraph"],
+                        "children": [
+                          "Excepteur ex cupidatat Lorem enim mollit minim id dolore pariatur. Voluptate velit anim ea consectetur qui. Qui in ut labore irure voluptate. Occaecat reprehenderit mollit excepteur nulla."
+                        ]
+                      },
+                      {
+                        "type": "Text",
+                        "styles": ["paragraph"],
+                        "children": [
+                          "Pariatur occaecat ullamco culpa est velit magna incididunt nisi excepteur officia. Aute velit voluptate aliquip. Ullamco excepteur ut culpa velit eu. Lorem nisi elit exercitation nulla non. Aliquip ea labore veniam laboris."
+                        ]
+                      },
+                      {
+                        "type": "Text",
+                        "styles": ["paragraph"],
+                        "children": [
+                          "Voluptate magna esse anim eiusmod. Sit sunt anim cillum incididunt reprehenderit in mollit. Sunt minim in irure dolore aute. Exercitation adipisicing tempor magna est ad non veniam labore minim ullamco exercitation sunt veniam cupidatat. Eiusmod aute pariatur nostrud ipsum et nisi dolore cillum dolor anim ea nisi. Consequat et deserunt reprehenderit qui consectetur incididunt velit nostrud aliqua velit. Sit ipsum in proident commodo sint deserunt. Ea magna non magna do elit culpa reprehenderit officia irure ea exercitation deserunt et consectetur."
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "Styled",
+                "styles": ["column"],
+                "children": [
+                  {
+                    "type": "Styled",
+                    "styles": ["primary"],
+                    "children": [
+                      {
+                        "type": "Text",
+                        "styles": ["h3"],
+                        "children": ["Explain the groupings"]
+                      },
+                      {
+                        "type": "Text",
+                        "styles": ["paragraph"],
+                        "children": [
+                          "Proident non nostrud quis aliquip ea sit laborum eiusmod labore eiusmod officia. Est ipsum nulla esse do laboris incididunt. Dolore minim aute Lorem dolore commodo consectetur aute dolor ipsum aute duis id magna culpa. Qui ut laboris officia quis incididunt labore eu. Ut quis consequat sint id ea consectetur eiusmod fugiat elit duis non nulla proident fugiat esse."
+                        ]
+                      },
+                      {
+                        "type": "Text",
+                        "styles": ["paragraph"],
+                        "children": [
+                          "Culpa reprehenderit voluptate adipisicing incididunt aliquip aliqua ad occaecat officia ad mollit tempor. Veniam ipsum est eiusmod occaecat eiusmod dolore duis laboris tempor ut ad ad. Cillum irure cillum ex occaecat sit minim irure proident dolore aliquip reprehenderit minim Lorem ullamco. Velit enim voluptate adipisicing eiusmod dolore non cillum irure consequat dolor enim reprehenderit deserunt. Adipisicing exercitation irure nulla aliquip dolore voluptate veniam ex cillum voluptate pariatur eiusmod. Ex laboris ipsum ad adipisicing pariatur qui sint do labore do officia dolore. Nostrud fugiat dolore ut commodo cupidatat cillum aliqua amet eiusmod."
+                        ]
+                      },
+                      {
+                        "type": "Styled",
+                        "styles": ["unorderedList"],
+                        "children": [
+                          {
+                            "type": "Text",
+                            "styles": [],
+                            "children": [
+                              "• ",
+                              {
+                                "type": "Text",
+                                "styles": ["paragraph"],
+                                "children": ["FIRST"]
+                              }
+                            ]
+                          },
+                          {
+                            "type": "Text",
+                            "styles": [],
+                            "children": [
+                              "• ",
+                              {
+                                "type": "Text",
+                                "styles": ["paragraph"],
+                                "children": ["SECOND"]
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "type": "Styled",
+                        "styles": ["orderedList"],
+                        "children": [
+                          {
+                            "type": "Text",
+                            "styles": [],
+                            "children": [
+                              "1",
+                              ". ",
+                              {
+                                "type": "Text",
+                                "styles": ["paragraph"],
+                                "children": [
+                                  "UNO dolor ",
+                                  {
+                                    "type": "Text",
+                                    "styles": ["strong"],
+                                    "children": [
+                                      {
+                                        "type": "Text",
+                                        "styles": ["emphasis"],
+                                        "children": ["sed rutrum augue"]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "type": "Text",
+                            "styles": [],
+                            "children": [
+                              "2",
+                              ". ",
+                              {
+                                "type": "Text",
+                                "styles": ["paragraph"],
+                                "children": [
+                                  "DOS amet ",
+                                  {
+                                    "type": "Text",
+                                    "styles": ["anchor"],
+                                    "children": ["nulla"]
+                                  },
+                                  " nisi"
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "type": "Styled",
+                    "styles": ["sidebar"],
+                    "children": [
+                      {
+                        "type": "Styled",
+                        "styles": ["callout"],
+                        "children": [
+                          {
+                            "type": "Text",
+                            "styles": ["h3"],
+                            "children": ["This is your callout"]
+                          },
+                          {
+                            "type": "Text",
+                            "styles": ["paragraph"],
+                            "children": [
+                              "This is your ",
+                              {
+                                "type": "Text",
+                                "styles": ["emphasis"],
+                                "children": [
+                                  {
+                                    "type": "Text",
+                                    "styles": ["strong"],
+                                    "children": ["body"]
+                                  }
+                                ]
+                              },
+                              ":"
+                            ]
+                          },
+                          {
+                            "type": "Styled",
+                            "styles": ["unorderedList"],
+                            "children": [
+                              {
+                                "type": "Text",
+                                "styles": [],
+                                "children": [
+                                  "• ",
+                                  {
+                                    "type": "Text",
+                                    "styles": ["paragraph"],
+                                    "children": ["With list items"]
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "Text",
+                                "styles": [],
+                                "children": [
+                                  "• ",
+                                  {
+                                    "type": "Text",
+                                    "styles": ["paragraph"],
+                                    "children": ["inside of it"]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "Styled",
+                "styles": ["column"],
+                "children": [
+                  {
+                    "type": "Styled",
+                    "styles": ["primary"],
+                    "children": [
+                      {
+                        "type": "Styled",
+                        "styles": ["flagpoleBase", "flagpoleYellow"],
+                        "children": [
+                          {
+                            "type": "Text",
+                            "styles": ["h3"],
+                            "children": ["This key info"]
+                          },
+                          {
+                            "type": "Text",
+                            "styles": ["paragraph"],
+                            "children": ["This is details for key info"]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "Styled",
+                "styles": ["column"],
+                "children": [
+                  {
+                    "type": "Styled",
+                    "styles": ["primary"],
+                    "children": [
+                      {
+                        "type": "Text",
+                        "styles": ["h3"],
+                        "children": ["How to use it"]
+                      },
+                      {
+                        "type": "Text",
+                        "styles": ["paragraph"],
+                        "children": [
+                          "Do eu do esse eiusmod aute mollit veniam tempor excepteur deserunt. Labore sunt laborum et adipisicing qui elit adipisicing sit. Cillum reprehenderit irure laboris ullamco ut elit reprehenderit in adipisicing voluptate eu. Reprehenderit enim qui amet aliqua qui. Nulla fugiat incididunt officia voluptate. Magna sunt cupidatat magna do commodo ex anim. Laboris ex velit commodo amet consequat officia non dolor sit pariatur est adipisicing duis ipsum. Magna cillum minim id incididunt qui."
+                        ]
+                      },
+                      {
+                        "type": "Text",
+                        "styles": ["paragraph"],
+                        "children": [
+                          "Sint reprehenderit amet non labore do consectetur laborum pariatur dolore occaecat. Sint do cupidatat fugiat veniam id quis ut non sunt aute consequat elit ea. Sint irure exercitation commodo proident adipisicing aute culpa irure. Cupidatat anim cillum fugiat non ipsum qui est in ea. Pariatur nulla consectetur culpa ipsum minim duis sint laboris Lorem. Magna sint veniam do nisi consectetur exercitation incididunt amet quis veniam incididunt."
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "Styled",
+                "styles": ["measureBox", "breakBefore"],
+                "children": [
+                  {
+                    "type": "Styled",
+                    "styles": ["measureTitleLine"],
+                    "children": [
+                      {
+                        "type": "Image",
+                        "styles": ["shrink"],
+                        "content": "\n<svg role=\"img\" aria-label=\"20\" width=\"54\" height=\"54\" viewBox=\"0 0 54 54\" xmlns=\"http://www.w3.org/2000/svg\">\n  \n  \n\n  <circle cx=\"27\" cy=\"27\" r=\"24\" fill=\"none\" stroke=\"#E2E4E9\" stroke-width=\"4\" ></circle>\n\n  <path class=\"donutMetric__outerArc\" fill=\"none\" stroke=\"#F5F7FA\" stroke-dasharray=\"30.159289474462014, 150.79644737231007\" \n    d=\"M27 3 a 24 24 0 0 1 0 48 a 24 24 0 0 1 0 -48\" stroke-width=\"6\" stroke-linecap=\"round\"/>\n  <path class=\"donutMetric__outerArc\" fill=\"none\" stroke=\"#EF5350\" stroke-dasharray=\"30.159289474462014, 150.79644737231007\" \n    d=\"M27 3 a 24 24 0 0 1 0 48 a 24 24 0 0 1 0 -48\" stroke-width=\"4\" stroke-linecap=\"round\"/>\n\n  \n  <circle class=\"donutMetric__innerCircle\" cx=\"27\" cy=\"27\" r=\"19\" fill=\"#FBD4D3\"></circle>\n\n  <text x=\"27\" y=\"27\" fill=\"#444A5A\" text-anchor=\"middle\" font-size=\"20\" dominant-baseline=\"central\" font-family=\"Inter, Arial, Helvetica, sans-serif\" font-weight=\"bold\">\n    20\n  </text>\n</svg>\n",
+                        "width": 64,
+                        "height": 64
+                      },
+                      {
+                        "type": "Styled",
+                        "styles": ["titleAndSynonyms"],
+                        "children": [
+                          {
+                            "type": "Text",
+                            "styles": ["measureHeading"],
+                            "children": ["Composure"]
+                          },
+                          {
+                            "type": "Styled",
+                            "styles": ["synonyms"],
+                            "children": [
+                              {
+                                "type": "Text",
+                                "styles": ["synonym"],
+                                "children": ["a"]
+                              },
+                              {
+                                "type": "Text",
+                                "styles": ["synonym"],
+                                "children": ["b"]
+                              },
+                              {
+                                "type": "Text",
+                                "styles": ["synonym"],
+                                "children": ["c"]
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {"type": "Styled", "styles": ["spacer"], "children": []},
+                      {
+                        "type": "Styled",
+                        "styles": ["spotlightFlagContainer"],
+                        "children": [
+                          {
+                            "type": "Styled",
+                            "styles": ["flagContainer"],
+                            "children": [
+                              {
+                                "type": "Image",
+                                "styles": [],
+                                "content": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">\n  <g id=\"Style=Round\">\n    <path id=\"Vector\"\n      d=\"M12.0001 17.5196L16.1501 20.0296C16.9101 20.4896 17.8401 19.8096 17.6401 18.9496L16.5401 14.2296L20.2101 11.0496C20.8801 10.4696 20.5201 9.36958 19.6401 9.29958L14.8101 8.88958L12.9201 4.42958C12.5801 3.61958 11.4201 3.61958 11.0801 4.42958L9.19007 8.87958L4.36007 9.28958C3.48007 9.35958 3.12007 10.4596 3.79007 11.0396L7.46007 14.2196L6.36007 18.9396C6.16007 19.7996 7.09007 20.4796 7.85007 20.0196L12.0001 17.5196Z\"\n      fill=\"#0A8EBD\" />\n  </g>\n</svg>",
+                                "width": 20,
+                                "height": 20
+                              }
+                            ]
+                          },
+                          {
+                            "type": "Styled",
+                            "styles": ["spacer"],
+                            "children": []
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "type": "Text",
+                    "styles": ["measureDefinition"],
+                    "children": ["Measure definition"]
+                  },
+                  {
+                    "type": "Image",
+                    "styles": [],
+                    "content": "<svg role=\"img\" aria-label=\"20\" width=\"470\" height=\"36\" viewBox=\"0 0 470 36\" xmlns=\"http://www.w3.org/2000/svg\">\n\n    <rect width=\"470\" height=\"6\" y=\"8\" rx=\"2\" ry=\"2\" fill=\"#E2E4E9\" />\n    <rect width=\"4\" height=\"16\" x=\"1\" y=\"3\" rx=\"2\" ry=\"2\" fill=\"#656D81\" stroke=\"#F5F7FA\" stroke-width=\"2\" />\n    <rect width=\"4\" height=\"16\" x=\"465\" y=\"3\" rx=\"2\" ry=\"2\" fill=\"#656D81\" stroke=\"#F5F7FA\" stroke-width=\"2\" />\n\n    <g data-tip=\"\" data-for=\"None\">\n      <circle cx=\"100\" cy=\"11\" r=\"10\" fill=\"#EF5350\" stroke=\"#F5F7FA\" stroke-width=\"2\" />\n      <circle cx=\"100\" cy=\"11\" r=\"7\" fill=\"#FBD4D3\" />\n    </g>\n\n    <text y=\"36\" fill=\"#444A5A\" text-anchor=\"left\" font-size=\"12\" font-family=\"Inter, Arial, Helvetica, sans-serif\" font-weight=\"600\" letter-spacing=\"1.5\" dominant-baseline=\"auto\">\n      MORE EFFORT\n    </text>\n    <text x=\"470\" y=\"36\" fill=\"#444A5A\" text-anchor=\"end\" font-size=\"12\" font-family=\"Inter, Arial, Helvetica, sans-serif\" font-weight=\"600\" letter-spacing=\"1.5\" dominant-baseline=\"auto\">\n      LESS EFFORT\n    </text>\n  </svg>",
+                    "width": 468,
+                    "height": 36
+                  }
+                ]
+              },
+              {
+                "type": "Styled",
+                "styles": ["column"],
+                "children": [
+                  {
+                    "type": "Styled",
+                    "styles": ["primary"],
+                    "children": [
+                      {
+                        "type": "Text",
+                        "styles": ["h3"],
+                        "children": ["Why This Matters"]
+                      },
+                      {
+                        "type": "Text",
+                        "styles": ["paragraph"],
+                        "children": [
+                          "Enim eu sit aliqua amet veniam. Eiusmod consequat enim aliqua excepteur eiusmod velit magna nostrud excepteur dolore do officia. Commodo elit consectetur enim incididunt amet cillum. Ad consequat cupidatat ex sunt."
+                        ]
+                      },
+                      {
+                        "type": "Text",
+                        "styles": ["paragraph"],
+                        "children": [
+                          "Velit enim anim mollit consectetur magna ullamco officia. Fugiat sunt nostrud nulla reprehenderit culpa enim est cupidatat officia enim anim ex consectetur eu. Duis quis sit nostrud proident occaecat ea ipsum minim fugiat reprehenderit voluptate. Do quis non anim do. Lorem eu proident mollit aliquip."
+                        ]
+                      },
+                      {
+                        "type": "Text",
+                        "styles": ["paragraph"],
+                        "children": [
+                          "Irure duis laborum nisi quis aute et reprehenderit culpa amet do veniam eiusmod pariatur ullamco. Ex duis fugiat ex. Dolor deserunt fugiat quis reprehenderit Lorem veniam magna aliqua anim pariatur reprehenderit sit adipisicing ut ex. Sunt anim aliqua qui voluptate. Incididunt sunt non minim est. Incididunt culpa et ea in do et anim aliquip id dolor magna. Ea voluptate ipsum Lorem consectetur deserunt pariatur nisi culpa incididunt ea ipsum et."
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "Styled",
+                "styles": ["column"],
+                "children": [
+                  {
+                    "type": "Styled",
+                    "styles": ["primary"],
+                    "children": [
+                      {
+                        "type": "Text",
+                        "styles": ["h3"],
+                        "children": ["Explain the groupings"]
+                      },
+                      {
+                        "type": "Text",
+                        "styles": ["paragraph"],
+                        "children": [
+                          "Elit reprehenderit qui minim non sit in non excepteur ut sit nisi consequat quis. Ea magna magna adipisicing consectetur ullamco nisi ullamco anim sint qui id cillum officia. Aliqua eu cupidatat ea. Voluptate velit cupidatat irure laborum aute. Eu ut anim ea deserunt in."
+                        ]
+                      },
+                      {
+                        "type": "Text",
+                        "styles": ["paragraph"],
+                        "children": [
+                          "Est labore laborum officia aliqua consectetur veniam ipsum excepteur aute mollit velit laboris sint fugiat excepteur. Amet exercitation cillum sint ipsum nulla elit pariatur. Voluptate adipisicing minim excepteur aliqua in. Sint occaecat aliquip est ea irure velit eiusmod et cupidatat quis et amet. Aliqua id mollit incididunt occaecat eiusmod magna nulla consequat qui enim ipsum dolore esse dolore laborum. Laborum culpa commodo nostrud consequat excepteur dolore fugiat veniam exercitation. Sint tempor anim veniam esse voluptate."
+                        ]
+                      },
+                      {
+                        "type": "Styled",
+                        "styles": ["unorderedList"],
+                        "children": [
+                          {
+                            "type": "Text",
+                            "styles": [],
+                            "children": [
+                              "• ",
+                              {
+                                "type": "Text",
+                                "styles": ["paragraph"],
+                                "children": ["FIRST"]
+                              }
+                            ]
+                          },
+                          {
+                            "type": "Text",
+                            "styles": [],
+                            "children": [
+                              "• ",
+                              {
+                                "type": "Text",
+                                "styles": ["paragraph"],
+                                "children": ["SECOND"]
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "type": "Styled",
+                        "styles": ["orderedList"],
+                        "children": [
+                          {
+                            "type": "Text",
+                            "styles": [],
+                            "children": [
+                              "1",
+                              ". ",
+                              {
+                                "type": "Text",
+                                "styles": ["paragraph"],
+                                "children": [
+                                  "UNO dolor ",
+                                  {
+                                    "type": "Text",
+                                    "styles": ["strong"],
+                                    "children": [
+                                      {
+                                        "type": "Text",
+                                        "styles": ["emphasis"],
+                                        "children": ["sed rutrum augue"]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "type": "Text",
+                            "styles": [],
+                            "children": [
+                              "2",
+                              ". ",
+                              {
+                                "type": "Text",
+                                "styles": ["paragraph"],
+                                "children": [
+                                  "DOS amet ",
+                                  {
+                                    "type": "Text",
+                                    "styles": ["anchor"],
+                                    "children": ["nulla"]
+                                  },
+                                  " nisi"
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "type": "Styled",
+                    "styles": ["sidebar"],
+                    "children": [
+                      {
+                        "type": "Styled",
+                        "styles": ["callout"],
+                        "children": [
+                          {
+                            "type": "Text",
+                            "styles": ["h3"],
+                            "children": ["This is your callout"]
+                          },
+                          {
+                            "type": "Text",
+                            "styles": ["paragraph"],
+                            "children": [
+                              "This is your ",
+                              {
+                                "type": "Text",
+                                "styles": ["emphasis"],
+                                "children": [
+                                  {
+                                    "type": "Text",
+                                    "styles": ["strong"],
+                                    "children": ["body"]
+                                  }
+                                ]
+                              },
+                              ":"
+                            ]
+                          },
+                          {
+                            "type": "Styled",
+                            "styles": ["unorderedList"],
+                            "children": [
+                              {
+                                "type": "Text",
+                                "styles": [],
+                                "children": [
+                                  "• ",
+                                  {
+                                    "type": "Text",
+                                    "styles": ["paragraph"],
+                                    "children": ["With list items"]
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "Text",
+                                "styles": [],
+                                "children": [
+                                  "• ",
+                                  {
+                                    "type": "Text",
+                                    "styles": ["paragraph"],
+                                    "children": ["inside of it"]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "Styled",
+                "styles": ["column"],
+                "children": [
+                  {
+                    "type": "Styled",
+                    "styles": ["primary"],
+                    "children": [
+                      {
+                        "type": "Styled",
+                        "styles": ["flagpoleBase", "flagpoleYellow"],
+                        "children": [
+                          {
+                            "type": "Text",
+                            "styles": ["h3"],
+                            "children": ["This key info"]
+                          },
+                          {
+                            "type": "Text",
+                            "styles": ["paragraph"],
+                            "children": ["This is details for key info"]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "Styled",
+                "styles": ["column"],
+                "children": [
+                  {
+                    "type": "Styled",
+                    "styles": ["primary"],
+                    "children": [
+                      {
+                        "type": "Text",
+                        "styles": ["h3"],
+                        "children": ["How to use it"]
+                      },
+                      {
+                        "type": "Text",
+                        "styles": ["paragraph"],
+                        "children": [
+                          "Excepteur voluptate duis laborum nostrud amet incididunt velit ut ex commodo magna consectetur do culpa. Ut proident magna sunt commodo ullamco anim est sunt est Lorem. Ea adipisicing cillum irure incididunt esse. Aute exercitation tempor non fugiat duis nulla ex est aliquip esse cupidatat duis aute irure. Deserunt sit voluptate eiusmod voluptate. Tempor dolore officia nisi nisi sint ea exercitation laborum Lorem reprehenderit. Eiusmod sunt irure tempor consectetur aliqua eu ut eiusmod quis mollit consequat veniam cillum enim."
+                        ]
+                      },
+                      {
+                        "type": "Text",
+                        "styles": ["paragraph"],
+                        "children": [
+                          "Veniam consequat nulla laboris enim anim pariatur enim sunt pariatur amet commodo ad amet non sint. Quis ex anim ex. Sunt occaecat dolor aliqua anim nostrud officia elit incididunt eu esse sint amet. Anim minim adipisicing Lorem. Irure et ullamco voluptate sunt et non ad. Tempor fugiat fugiat laboris aliquip incididunt irure non eu tempor occaecat duis esse deserunt ipsum. Eiusmod enim dolor nostrud ea."
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "Styled",
+                "styles": [],
+                "children": [
+                  {
+                    "type": "Text",
+                    "styles": ["category"],
+                    "children": ["Behaviors"]
+                  },
+                  {
+                    "type": "Styled",
+                    "styles": ["categorySeparator"],
+                    "children": []
+                  }
+                ]
+              },
+              {
+                "type": "Styled",
+                "styles": ["measureBox"],
+                "children": [
+                  {
+                    "type": "Styled",
+                    "styles": ["measureTitleLine"],
+                    "children": [
+                      {
+                        "type": "Image",
+                        "styles": ["shrink"],
+                        "content": "\n<svg role=\"img\" aria-label=\"30\" width=\"54\" height=\"54\" viewBox=\"0 0 54 54\" xmlns=\"http://www.w3.org/2000/svg\">\n  \n  \n\n  <circle cx=\"27\" cy=\"27\" r=\"24\" fill=\"none\" stroke=\"#E2E4E9\" stroke-width=\"4\" ></circle>\n\n  <path class=\"donutMetric__outerArc\" fill=\"none\" stroke=\"#F5F7FA\" stroke-dasharray=\"45.23893421169302, 150.79644737231007\" \n    d=\"M27 3 a 24 24 0 0 1 0 48 a 24 24 0 0 1 0 -48\" stroke-width=\"6\" stroke-linecap=\"round\"/>\n  <path class=\"donutMetric__outerArc\" fill=\"none\" stroke=\"#FFD166\" stroke-dasharray=\"45.23893421169302, 150.79644737231007\" \n    d=\"M27 3 a 24 24 0 0 1 0 48 a 24 24 0 0 1 0 -48\" stroke-width=\"4\" stroke-linecap=\"round\"/>\n\n  \n  <circle class=\"donutMetric__innerCircle\" cx=\"27\" cy=\"27\" r=\"19\" fill=\"#FFF3D8\"></circle>\n\n  <text x=\"27\" y=\"27\" fill=\"#444A5A\" text-anchor=\"middle\" font-size=\"20\" dominant-baseline=\"central\" font-family=\"Inter, Arial, Helvetica, sans-serif\" font-weight=\"bold\">\n    30\n  </text>\n</svg>\n",
+                        "width": 64,
+                        "height": 64
+                      },
+                      {
+                        "type": "Styled",
+                        "styles": ["titleAndSynonyms"],
+                        "children": [
+                          {
+                            "type": "Text",
+                            "styles": ["measureHeading"],
+                            "children": ["Time Management"]
+                          },
+                          {
+                            "type": "Styled",
+                            "styles": ["synonyms"],
+                            "children": [
+                              {
+                                "type": "Text",
+                                "styles": ["synonym"],
+                                "children": ["a"]
+                              },
+                              {
+                                "type": "Text",
+                                "styles": ["synonym"],
+                                "children": ["b"]
+                              },
+                              {
+                                "type": "Text",
+                                "styles": ["synonym"],
+                                "children": ["c"]
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {"type": "Styled", "styles": ["spacer"], "children": []}
+                    ]
+                  },
+                  {
+                    "type": "Text",
+                    "styles": ["measureDefinition"],
+                    "children": ["Measure definition"]
+                  },
+                  {
+                    "type": "Image",
+                    "styles": [],
+                    "content": "<svg role=\"img\" aria-label=\"30\" width=\"470\" height=\"36\" viewBox=\"0 0 470 36\" xmlns=\"http://www.w3.org/2000/svg\">\n\n    <rect width=\"470\" height=\"6\" y=\"8\" rx=\"2\" ry=\"2\" fill=\"#E2E4E9\" />\n    <rect width=\"4\" height=\"16\" x=\"1\" y=\"3\" rx=\"2\" ry=\"2\" fill=\"#656D81\" stroke=\"#F5F7FA\" stroke-width=\"2\" />\n    <rect width=\"4\" height=\"16\" x=\"465\" y=\"3\" rx=\"2\" ry=\"2\" fill=\"#656D81\" stroke=\"#F5F7FA\" stroke-width=\"2\" />\n\n    <g data-tip=\"\" data-for=\"None\">\n      <circle cx=\"145\" cy=\"11\" r=\"10\" fill=\"#FFD166\" stroke=\"#F5F7FA\" stroke-width=\"2\" />\n      <circle cx=\"145\" cy=\"11\" r=\"7\" fill=\"#FFF3D8\" />\n    </g>\n\n    <text y=\"36\" fill=\"#444A5A\" text-anchor=\"left\" font-size=\"12\" font-family=\"Inter, Arial, Helvetica, sans-serif\" font-weight=\"600\" letter-spacing=\"1.5\" dominant-baseline=\"auto\">\n      MORE EFFORT\n    </text>\n    <text x=\"470\" y=\"36\" fill=\"#444A5A\" text-anchor=\"end\" font-size=\"12\" font-family=\"Inter, Arial, Helvetica, sans-serif\" font-weight=\"600\" letter-spacing=\"1.5\" dominant-baseline=\"auto\">\n      LESS EFFORT\n    </text>\n  </svg>",
+                    "width": 468,
+                    "height": 36
+                  }
+                ]
+              },
+              {
+                "type": "Styled",
+                "styles": ["column"],
+                "children": [
+                  {
+                    "type": "Styled",
+                    "styles": ["primary"],
+                    "children": [
+                      {
+                        "type": "Text",
+                        "styles": ["h3"],
+                        "children": ["Why This Matters"]
+                      },
+                      {
+                        "type": "Text",
+                        "styles": ["paragraph"],
+                        "children": [
+                          "Deserunt aute veniam velit. Irure non pariatur laborum sunt velit enim elit ipsum fugiat nisi do nisi eu deserunt. Eiusmod mollit ullamco in eu irure amet deserunt exercitation dolore elit ea eu eu velit. Nulla velit ut laboris fugiat occaecat voluptate pariatur est quis. Tempor culpa sint eu voluptate in incididunt consectetur."
+                        ]
+                      },
+                      {
+                        "type": "Text",
+                        "styles": ["paragraph"],
+                        "children": [
+                          "Pariatur aliqua sunt amet enim minim cillum culpa pariatur adipisicing consectetur esse laborum dolor. Anim nulla esse irure labore duis duis Lorem consectetur labore irure et duis amet magna culpa. Dolor non labore reprehenderit incididunt fugiat aute tempor amet. Incididunt commodo amet reprehenderit officia do adipisicing deserunt nostrud nulla non. Do qui veniam ex Lorem proident aute."
+                        ]
+                      },
+                      {
+                        "type": "Text",
+                        "styles": ["paragraph"],
+                        "children": [
+                          "Sint sunt occaecat cillum voluptate ad eu. Ea deserunt enim ea proident elit sunt aliqua eiusmod laboris. Commodo irure duis sunt amet excepteur sint proident id occaecat adipisicing tempor ullamco mollit magna. Nulla occaecat non amet laboris mollit elit nostrud aute mollit nostrud. Exercitation labore cupidatat labore ullamco fugiat in incididunt Lorem velit non et aliqua. Non minim reprehenderit labore."
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "Styled",
+                "styles": ["column"],
+                "children": [
+                  {
+                    "type": "Styled",
+                    "styles": ["primary"],
+                    "children": [
+                      {
+                        "type": "Text",
+                        "styles": ["h3"],
+                        "children": ["Explain the groupings"]
+                      },
+                      {
+                        "type": "Text",
+                        "styles": ["paragraph"],
+                        "children": [
+                          "Eiusmod ipsum consectetur irure est ullamco qui qui. Ex eiusmod nulla nostrud do. Laboris Lorem tempor sint laboris tempor nisi consequat eiusmod sit laborum ut. Non ullamco adipisicing reprehenderit laboris aliquip laborum elit laboris sit consectetur sunt. Commodo ut in pariatur tempor. Ad elit nostrud velit ad nulla id qui. Adipisicing dolor occaecat duis et fugiat. Elit veniam sit et esse ad aliqua tempor."
+                        ]
+                      },
+                      {
+                        "type": "Text",
+                        "styles": ["paragraph"],
+                        "children": [
+                          "Eiusmod occaecat ullamco ex et excepteur est eu ullamco enim ullamco culpa commodo exercitation Lorem. Sit ea ad consequat adipisicing. Do et consectetur ad velit veniam Lorem. Non ea aute dolore eiusmod. Culpa dolor minim excepteur proident officia ea Lorem excepteur velit et elit. Dolore pariatur nostrud in magna Lorem aute est cupidatat sunt reprehenderit excepteur nostrud culpa. Velit excepteur labore aliqua labore adipisicing aliqua."
+                        ]
+                      },
+                      {
+                        "type": "Styled",
+                        "styles": ["unorderedList"],
+                        "children": [
+                          {
+                            "type": "Text",
+                            "styles": [],
+                            "children": [
+                              "• ",
+                              {
+                                "type": "Text",
+                                "styles": ["paragraph"],
+                                "children": ["FIRST"]
+                              }
+                            ]
+                          },
+                          {
+                            "type": "Text",
+                            "styles": [],
+                            "children": [
+                              "• ",
+                              {
+                                "type": "Text",
+                                "styles": ["paragraph"],
+                                "children": ["SECOND"]
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "type": "Styled",
+                        "styles": ["orderedList"],
+                        "children": [
+                          {
+                            "type": "Text",
+                            "styles": [],
+                            "children": [
+                              "1",
+                              ". ",
+                              {
+                                "type": "Text",
+                                "styles": ["paragraph"],
+                                "children": [
+                                  "UNO dolor ",
+                                  {
+                                    "type": "Text",
+                                    "styles": ["strong"],
+                                    "children": [
+                                      {
+                                        "type": "Text",
+                                        "styles": ["emphasis"],
+                                        "children": ["sed rutrum augue"]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "type": "Text",
+                            "styles": [],
+                            "children": [
+                              "2",
+                              ". ",
+                              {
+                                "type": "Text",
+                                "styles": ["paragraph"],
+                                "children": [
+                                  "DOS amet ",
+                                  {
+                                    "type": "Text",
+                                    "styles": ["anchor"],
+                                    "children": ["nulla"]
+                                  },
+                                  " nisi"
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "type": "Styled",
+                    "styles": ["sidebar"],
+                    "children": [
+                      {
+                        "type": "Styled",
+                        "styles": ["callout"],
+                        "children": [
+                          {
+                            "type": "Text",
+                            "styles": ["h3"],
+                            "children": ["This is your callout"]
+                          },
+                          {
+                            "type": "Text",
+                            "styles": ["paragraph"],
+                            "children": [
+                              "This is your ",
+                              {
+                                "type": "Text",
+                                "styles": ["emphasis"],
+                                "children": [
+                                  {
+                                    "type": "Text",
+                                    "styles": ["strong"],
+                                    "children": ["body"]
+                                  }
+                                ]
+                              },
+                              ":"
+                            ]
+                          },
+                          {
+                            "type": "Styled",
+                            "styles": ["unorderedList"],
+                            "children": [
+                              {
+                                "type": "Text",
+                                "styles": [],
+                                "children": [
+                                  "• ",
+                                  {
+                                    "type": "Text",
+                                    "styles": ["paragraph"],
+                                    "children": ["With list items"]
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "Text",
+                                "styles": [],
+                                "children": [
+                                  "• ",
+                                  {
+                                    "type": "Text",
+                                    "styles": ["paragraph"],
+                                    "children": ["inside of it"]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "Styled",
+                "styles": ["column"],
+                "children": [
+                  {
+                    "type": "Styled",
+                    "styles": ["primary"],
+                    "children": [
+                      {
+                        "type": "Styled",
+                        "styles": ["flagpoleBase", "flagpoleYellow"],
+                        "children": [
+                          {
+                            "type": "Text",
+                            "styles": ["h3"],
+                            "children": ["This key info"]
+                          },
+                          {
+                            "type": "Text",
+                            "styles": ["paragraph"],
+                            "children": ["This is details for key info"]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "Styled",
+                "styles": ["column"],
+                "children": [
+                  {
+                    "type": "Styled",
+                    "styles": ["primary"],
+                    "children": [
+                      {
+                        "type": "Text",
+                        "styles": ["h3"],
+                        "children": ["How to use it"]
+                      },
+                      {
+                        "type": "Text",
+                        "styles": ["paragraph"],
+                        "children": [
+                          "Quis laborum ut in duis sint nisi exercitation labore commodo. Anim laboris id excepteur. Quis fugiat magna culpa veniam pariatur officia. Adipisicing excepteur irure voluptate ut enim incididunt eiusmod aliquip dolore occaecat do."
+                        ]
+                      },
+                      {
+                        "type": "Text",
+                        "styles": ["paragraph"],
+                        "children": [
+                          "Consectetur ipsum aliqua ea anim magna elit reprehenderit exercitation mollit aliquip consequat elit quis labore. Ea minim enim id proident laboris aliqua tempor. Est labore aliqua id labore. Commodo magna quis officia consectetur laboris Lorem."
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "Styled",
+                "styles": ["measureBox", "breakBefore"],
+                "children": [
+                  {
+                    "type": "Styled",
+                    "styles": ["measureTitleLine"],
+                    "children": [
+                      {
+                        "type": "Image",
+                        "styles": ["shrink"],
+                        "content": "\n<svg role=\"img\" aria-label=\"40\" width=\"54\" height=\"54\" viewBox=\"0 0 54 54\" xmlns=\"http://www.w3.org/2000/svg\">\n  \n  \n\n  <circle cx=\"27\" cy=\"27\" r=\"24\" fill=\"none\" stroke=\"#E2E4E9\" stroke-width=\"4\" ></circle>\n\n  <path class=\"donutMetric__outerArc\" fill=\"none\" stroke=\"#F5F7FA\" stroke-dasharray=\"60.31857894892403, 150.79644737231007\" \n    d=\"M27 3 a 24 24 0 0 1 0 48 a 24 24 0 0 1 0 -48\" stroke-width=\"6\" stroke-linecap=\"round\"/>\n  <path class=\"donutMetric__outerArc\" fill=\"none\" stroke=\"#FFD166\" stroke-dasharray=\"60.31857894892403, 150.79644737231007\" \n    d=\"M27 3 a 24 24 0 0 1 0 48 a 24 24 0 0 1 0 -48\" stroke-width=\"4\" stroke-linecap=\"round\"/>\n\n  \n  <circle class=\"donutMetric__innerCircle\" cx=\"27\" cy=\"27\" r=\"19\" fill=\"#FFF3D8\"></circle>\n\n  <text x=\"27\" y=\"27\" fill=\"#444A5A\" text-anchor=\"middle\" font-size=\"20\" dominant-baseline=\"central\" font-family=\"Inter, Arial, Helvetica, sans-serif\" font-weight=\"bold\">\n    40\n  </text>\n</svg>\n",
+                        "width": 64,
+                        "height": 64
+                      },
+                      {
+                        "type": "Styled",
+                        "styles": ["titleAndSynonyms"],
+                        "children": [
+                          {
+                            "type": "Text",
+                            "styles": ["measureHeading"],
+                            "children": ["Organization & Planning"]
+                          },
+                          {
+                            "type": "Styled",
+                            "styles": ["synonyms"],
+                            "children": [
+                              {
+                                "type": "Text",
+                                "styles": ["synonym"],
+                                "children": ["a"]
+                              },
+                              {
+                                "type": "Text",
+                                "styles": ["synonym"],
+                                "children": ["b"]
+                              },
+                              {
+                                "type": "Text",
+                                "styles": ["synonym"],
+                                "children": ["c"]
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {"type": "Styled", "styles": ["spacer"], "children": []}
+                    ]
+                  },
+                  {
+                    "type": "Text",
+                    "styles": ["measureDefinition"],
+                    "children": ["Measure definition"]
+                  },
+                  {
+                    "type": "Image",
+                    "styles": [],
+                    "content": "<svg role=\"img\" aria-label=\"40\" width=\"470\" height=\"36\" viewBox=\"0 0 470 36\" xmlns=\"http://www.w3.org/2000/svg\">\n\n    <rect width=\"470\" height=\"6\" y=\"8\" rx=\"2\" ry=\"2\" fill=\"#E2E4E9\" />\n    <rect width=\"4\" height=\"16\" x=\"1\" y=\"3\" rx=\"2\" ry=\"2\" fill=\"#656D81\" stroke=\"#F5F7FA\" stroke-width=\"2\" />\n    <rect width=\"4\" height=\"16\" x=\"465\" y=\"3\" rx=\"2\" ry=\"2\" fill=\"#656D81\" stroke=\"#F5F7FA\" stroke-width=\"2\" />\n\n    <g data-tip=\"\" data-for=\"None\">\n      <circle cx=\"190\" cy=\"11\" r=\"10\" fill=\"#FFD166\" stroke=\"#F5F7FA\" stroke-width=\"2\" />\n      <circle cx=\"190\" cy=\"11\" r=\"7\" fill=\"#FFF3D8\" />\n    </g>\n\n    <text y=\"36\" fill=\"#444A5A\" text-anchor=\"left\" font-size=\"12\" font-family=\"Inter, Arial, Helvetica, sans-serif\" font-weight=\"600\" letter-spacing=\"1.5\" dominant-baseline=\"auto\">\n      MORE EFFORT\n    </text>\n    <text x=\"470\" y=\"36\" fill=\"#444A5A\" text-anchor=\"end\" font-size=\"12\" font-family=\"Inter, Arial, Helvetica, sans-serif\" font-weight=\"600\" letter-spacing=\"1.5\" dominant-baseline=\"auto\">\n      LESS EFFORT\n    </text>\n  </svg>",
+                    "width": 468,
+                    "height": 36
+                  }
+                ]
+              },
+              {
+                "type": "Styled",
+                "styles": ["column"],
+                "children": [
+                  {
+                    "type": "Styled",
+                    "styles": ["primary"],
+                    "children": [
+                      {
+                        "type": "Text",
+                        "styles": ["h3"],
+                        "children": ["Why This Matters"]
+                      },
+                      {
+                        "type": "Text",
+                        "styles": ["paragraph"],
+                        "children": [
+                          "Fugiat sit ex aliqua quis ea ad. Do velit do sit aliquip dolor aliquip ipsum. Velit ea enim ex esse Lorem reprehenderit cillum amet anim. Quis in incididunt ut occaecat sint duis cupidatat occaecat sint sint eu nostrud do. Sunt reprehenderit aliqua officia duis nulla. Amet aliquip laborum fugiat. Culpa irure laboris dolore qui occaecat dolor consequat laborum exercitation minim sunt Lorem."
+                        ]
+                      },
+                      {
+                        "type": "Text",
+                        "styles": ["paragraph"],
+                        "children": [
+                          "Cillum sint non proident esse adipisicing non dolor qui amet dolor qui reprehenderit. Aute qui ea elit voluptate reprehenderit non ipsum culpa eiusmod eu esse id. Eiusmod irure mollit occaecat qui sunt tempor pariatur aliquip amet. Excepteur veniam ea amet ea esse incididunt qui id velit eiusmod labore irure adipisicing voluptate. Nostrud reprehenderit sit commodo deserunt tempor nostrud sint anim. Nulla duis qui laboris aute veniam nisi incididunt proident. Officia sunt qui ullamco laborum reprehenderit enim qui. Incididunt laboris reprehenderit dolor aute sunt reprehenderit dolore amet esse non aliquip fugiat irure laboris est."
+                        ]
+                      },
+                      {
+                        "type": "Text",
+                        "styles": ["paragraph"],
+                        "children": [
+                          "Irure aliquip sit laboris voluptate elit non aliquip eu. Commodo in ad voluptate exercitation officia enim sit laboris velit. Voluptate elit duis laboris. Elit sunt amet qui veniam occaecat ut sunt."
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "Styled",
+                "styles": ["column"],
+                "children": [
+                  {
+                    "type": "Styled",
+                    "styles": ["primary"],
+                    "children": [
+                      {
+                        "type": "Text",
+                        "styles": ["h3"],
+                        "children": ["Explain the groupings"]
+                      },
+                      {
+                        "type": "Text",
+                        "styles": ["paragraph"],
+                        "children": [
+                          "Consectetur labore amet esse pariatur enim duis ipsum consequat. Est sint pariatur fugiat ad deserunt quis culpa irure enim. Et exercitation ex reprehenderit sunt commodo. Pariatur adipisicing aute proident."
+                        ]
+                      },
+                      {
+                        "type": "Text",
+                        "styles": ["paragraph"],
+                        "children": [
+                          "Laboris est officia irure commodo sit Lorem duis id nostrud deserunt velit pariatur sint. Eu deserunt ex non nulla nisi laborum dolore do et amet non velit. Proident sunt in pariatur exercitation velit dolore dolor incididunt nulla proident labore culpa cupidatat. Exercitation sint incididunt exercitation proident sunt commodo non id mollit ut deserunt excepteur. Nostrud magna et amet. Exercitation cupidatat elit non. Consectetur minim nostrud culpa non anim elit minim. Dolore duis mollit in enim tempor tempor ullamco ut ex Lorem magna officia sunt."
+                        ]
+                      },
+                      {
+                        "type": "Styled",
+                        "styles": ["unorderedList"],
+                        "children": [
+                          {
+                            "type": "Text",
+                            "styles": [],
+                            "children": [
+                              "• ",
+                              {
+                                "type": "Text",
+                                "styles": ["paragraph"],
+                                "children": ["FIRST"]
+                              }
+                            ]
+                          },
+                          {
+                            "type": "Text",
+                            "styles": [],
+                            "children": [
+                              "• ",
+                              {
+                                "type": "Text",
+                                "styles": ["paragraph"],
+                                "children": ["SECOND"]
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "type": "Styled",
+                        "styles": ["orderedList"],
+                        "children": [
+                          {
+                            "type": "Text",
+                            "styles": [],
+                            "children": [
+                              "1",
+                              ". ",
+                              {
+                                "type": "Text",
+                                "styles": ["paragraph"],
+                                "children": [
+                                  "UNO dolor ",
+                                  {
+                                    "type": "Text",
+                                    "styles": ["strong"],
+                                    "children": [
+                                      {
+                                        "type": "Text",
+                                        "styles": ["emphasis"],
+                                        "children": ["sed rutrum augue"]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "type": "Text",
+                            "styles": [],
+                            "children": [
+                              "2",
+                              ". ",
+                              {
+                                "type": "Text",
+                                "styles": ["paragraph"],
+                                "children": [
+                                  "DOS amet ",
+                                  {
+                                    "type": "Text",
+                                    "styles": ["anchor"],
+                                    "children": ["nulla"]
+                                  },
+                                  " nisi"
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "type": "Styled",
+                    "styles": ["sidebar"],
+                    "children": [
+                      {
+                        "type": "Styled",
+                        "styles": ["callout"],
+                        "children": [
+                          {
+                            "type": "Text",
+                            "styles": ["h3"],
+                            "children": ["This is your callout"]
+                          },
+                          {
+                            "type": "Text",
+                            "styles": ["paragraph"],
+                            "children": [
+                              "This is your ",
+                              {
+                                "type": "Text",
+                                "styles": ["emphasis"],
+                                "children": [
+                                  {
+                                    "type": "Text",
+                                    "styles": ["strong"],
+                                    "children": ["body"]
+                                  }
+                                ]
+                              },
+                              ":"
+                            ]
+                          },
+                          {
+                            "type": "Styled",
+                            "styles": ["unorderedList"],
+                            "children": [
+                              {
+                                "type": "Text",
+                                "styles": [],
+                                "children": [
+                                  "• ",
+                                  {
+                                    "type": "Text",
+                                    "styles": ["paragraph"],
+                                    "children": ["With list items"]
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "Text",
+                                "styles": [],
+                                "children": [
+                                  "• ",
+                                  {
+                                    "type": "Text",
+                                    "styles": ["paragraph"],
+                                    "children": ["inside of it"]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "Styled",
+                "styles": ["column"],
+                "children": [
+                  {
+                    "type": "Styled",
+                    "styles": ["primary"],
+                    "children": [
+                      {
+                        "type": "Styled",
+                        "styles": ["flagpoleBase", "flagpoleYellow"],
+                        "children": [
+                          {
+                            "type": "Text",
+                            "styles": ["h3"],
+                            "children": ["This key info"]
+                          },
+                          {
+                            "type": "Text",
+                            "styles": ["paragraph"],
+                            "children": ["This is details for key info"]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "Styled",
+                "styles": ["column"],
+                "children": [
+                  {
+                    "type": "Styled",
+                    "styles": ["primary"],
+                    "children": [
+                      {
+                        "type": "Text",
+                        "styles": ["h3"],
+                        "children": ["How to use it"]
+                      },
+                      {
+                        "type": "Text",
+                        "styles": ["paragraph"],
+                        "children": [
+                          "Ullamco consectetur quis voluptate adipisicing laborum consectetur incididunt excepteur Lorem occaecat. Velit laboris magna ipsum amet commodo aliqua cupidatat magna velit pariatur aliquip sit reprehenderit Lorem. Quis do pariatur duis eiusmod consectetur ullamco. Dolore est ipsum mollit amet reprehenderit laborum labore esse excepteur pariatur cupidatat exercitation ea. Nostrud velit sunt consequat fugiat deserunt consectetur exercitation. Eiusmod nulla sit duis anim ea. Voluptate exercitation enim irure qui ullamco ad in quis dolore cupidatat labore laboris consectetur mollit. Quis cillum consectetur sint anim aliquip labore commodo proident amet magna officia ullamco ullamco."
+                        ]
+                      },
+                      {
+                        "type": "Text",
+                        "styles": ["paragraph"],
+                        "children": [
+                          "Occaecat occaecat do fugiat do mollit tempor incididunt dolor. Tempor nisi officia eiusmod aute fugiat velit fugiat ut commodo elit esse dolore irure. Non ut irure sint dolore. Non magna culpa irure occaecat anim eu. Do amet veniam esse enim amet. Sit reprehenderit et laborum in eu do culpa laborum labore enim voluptate. Ullamco adipisicing minim labore sint. Cupidatat amet irure commodo."
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "Styled",
+                "styles": ["measureBox", "breakBefore"],
+                "children": [
+                  {
+                    "type": "Styled",
+                    "styles": ["measureTitleLine"],
+                    "children": [
+                      {
+                        "type": "Image",
+                        "styles": ["shrink"],
+                        "content": "\n<svg role=\"img\" aria-label=\"50\" width=\"54\" height=\"54\" viewBox=\"0 0 54 54\" xmlns=\"http://www.w3.org/2000/svg\">\n  \n  \n\n  <circle cx=\"27\" cy=\"27\" r=\"24\" fill=\"none\" stroke=\"#E2E4E9\" stroke-width=\"4\" ></circle>\n\n  <path class=\"donutMetric__outerArc\" fill=\"none\" stroke=\"#F5F7FA\" stroke-dasharray=\"75.39822368615503, 150.79644737231007\" \n    d=\"M27 3 a 24 24 0 0 1 0 48 a 24 24 0 0 1 0 -48\" stroke-width=\"6\" stroke-linecap=\"round\"/>\n  <path class=\"donutMetric__outerArc\" fill=\"none\" stroke=\"#0080AD\" stroke-dasharray=\"75.39822368615503, 150.79644737231007\" \n    d=\"M27 3 a 24 24 0 0 1 0 48 a 24 24 0 0 1 0 -48\" stroke-width=\"4\" stroke-linecap=\"round\"/>\n\n  \n  <circle class=\"donutMetric__innerCircle\" cx=\"27\" cy=\"27\" r=\"19\" fill=\"#BFDFEA\"></circle>\n\n  <text x=\"27\" y=\"27\" fill=\"#444A5A\" text-anchor=\"middle\" font-size=\"20\" dominant-baseline=\"central\" font-family=\"Inter, Arial, Helvetica, sans-serif\" font-weight=\"bold\">\n    50\n  </text>\n</svg>\n",
+                        "width": 64,
+                        "height": 64
+                      },
+                      {
+                        "type": "Styled",
+                        "styles": ["titleAndSynonyms"],
+                        "children": [
+                          {
+                            "type": "Text",
+                            "styles": ["measureHeading"],
+                            "children": ["Results Motivation"]
+                          },
+                          {
+                            "type": "Styled",
+                            "styles": ["synonyms"],
+                            "children": [
+                              {
+                                "type": "Text",
+                                "styles": ["synonym"],
+                                "children": ["a"]
+                              },
+                              {
+                                "type": "Text",
+                                "styles": ["synonym"],
+                                "children": ["b"]
+                              },
+                              {
+                                "type": "Text",
+                                "styles": ["synonym"],
+                                "children": ["c"]
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {"type": "Styled", "styles": ["spacer"], "children": []}
+                    ]
+                  },
+                  {
+                    "type": "Text",
+                    "styles": ["measureDefinition"],
+                    "children": ["Measure definition"]
+                  },
+                  {
+                    "type": "Image",
+                    "styles": [],
+                    "content": "<svg role=\"img\" aria-label=\"50\" width=\"470\" height=\"36\" viewBox=\"0 0 470 36\" xmlns=\"http://www.w3.org/2000/svg\">\n\n    <rect width=\"470\" height=\"6\" y=\"8\" rx=\"2\" ry=\"2\" fill=\"#E2E4E9\" />\n    <rect width=\"4\" height=\"16\" x=\"1\" y=\"3\" rx=\"2\" ry=\"2\" fill=\"#656D81\" stroke=\"#F5F7FA\" stroke-width=\"2\" />\n    <rect width=\"4\" height=\"16\" x=\"465\" y=\"3\" rx=\"2\" ry=\"2\" fill=\"#656D81\" stroke=\"#F5F7FA\" stroke-width=\"2\" />\n\n    <g data-tip=\"\" data-for=\"None\">\n      <circle cx=\"235\" cy=\"11\" r=\"10\" fill=\"#0080AD\" stroke=\"#F5F7FA\" stroke-width=\"2\" />\n      <circle cx=\"235\" cy=\"11\" r=\"7\" fill=\"#BFDFEA\" />\n    </g>\n\n    <text y=\"36\" fill=\"#444A5A\" text-anchor=\"left\" font-size=\"12\" font-family=\"Inter, Arial, Helvetica, sans-serif\" font-weight=\"600\" letter-spacing=\"1.5\" dominant-baseline=\"auto\">\n      MORE EFFORT\n    </text>\n    <text x=\"470\" y=\"36\" fill=\"#444A5A\" text-anchor=\"end\" font-size=\"12\" font-family=\"Inter, Arial, Helvetica, sans-serif\" font-weight=\"600\" letter-spacing=\"1.5\" dominant-baseline=\"auto\">\n      LESS EFFORT\n    </text>\n  </svg>",
+                    "width": 468,
+                    "height": 36
+                  }
+                ]
+              },
+              {
+                "type": "Styled",
+                "styles": ["column"],
+                "children": [
+                  {
+                    "type": "Styled",
+                    "styles": ["primary"],
+                    "children": [
+                      {
+                        "type": "Text",
+                        "styles": ["h3"],
+                        "children": ["Why This Matters"]
+                      },
+                      {
+                        "type": "Text",
+                        "styles": ["paragraph"],
+                        "children": [
+                          "Dolor voluptate adipisicing eiusmod amet deserunt dolore exercitation ipsum Lorem ipsum magna. Laborum exercitation officia duis. Enim officia enim voluptate commodo laborum veniam incididunt amet commodo labore excepteur esse occaecat incididunt. In culpa commodo cupidatat consequat in nulla culpa cillum. Aute culpa commodo velit sint eiusmod cupidatat duis nulla voluptate."
+                        ]
+                      },
+                      {
+                        "type": "Text",
+                        "styles": ["paragraph"],
+                        "children": [
+                          "Minim duis ipsum Lorem nulla culpa ipsum Lorem exercitation et sunt officia velit eu dolore deserunt. Consequat voluptate exercitation voluptate qui id deserunt Lorem. Velit et sit et et ipsum ea qui dolore in irure. Tempor id reprehenderit eu deserunt labore ea consectetur dolor irure excepteur consectetur non. Est dolore nisi dolore duis et pariatur esse excepteur enim culpa id. Commodo enim labore pariatur anim."
+                        ]
+                      },
+                      {
+                        "type": "Text",
+                        "styles": ["paragraph"],
+                        "children": [
+                          "Laborum occaecat qui proident qui nisi ut ullamco tempor. Qui elit duis do irure cupidatat veniam. Sint proident do culpa deserunt quis occaecat sunt nostrud incididunt incididunt nulla aliquip. Est non labore adipisicing aliqua fugiat nostrud sit."
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "Styled",
+                "styles": ["column"],
+                "children": [
+                  {
+                    "type": "Styled",
+                    "styles": ["primary"],
+                    "children": [
+                      {
+                        "type": "Text",
+                        "styles": ["h3"],
+                        "children": ["Explain the groupings"]
+                      },
+                      {
+                        "type": "Text",
+                        "styles": ["paragraph"],
+                        "children": [
+                          "Excepteur adipisicing anim veniam occaecat laborum eiusmod eu irure duis deserunt sit. Et Lorem ad fugiat excepteur adipisicing ea qui. Officia culpa aliquip laborum reprehenderit id reprehenderit enim aute veniam. Fugiat esse quis qui. Esse et duis incididunt enim labore eiusmod. Culpa consectetur elit do aliquip non cupidatat sit pariatur officia. Dolore in id mollit."
+                        ]
+                      },
+                      {
+                        "type": "Text",
+                        "styles": ["paragraph"],
+                        "children": [
+                          "Tempor proident exercitation officia laborum cupidatat non veniam nulla pariatur amet. Eu officia labore est mollit exercitation nulla amet quis eiusmod irure ut qui. Elit aute aliqua esse fugiat in exercitation deserunt sunt enim proident dolore est tempor fugiat proident. Et fugiat dolor elit id id duis incididunt eiusmod nostrud ex do laboris esse ullamco."
+                        ]
+                      },
+                      {
+                        "type": "Styled",
+                        "styles": ["unorderedList"],
+                        "children": [
+                          {
+                            "type": "Text",
+                            "styles": [],
+                            "children": [
+                              "• ",
+                              {
+                                "type": "Text",
+                                "styles": ["paragraph"],
+                                "children": ["FIRST"]
+                              }
+                            ]
+                          },
+                          {
+                            "type": "Text",
+                            "styles": [],
+                            "children": [
+                              "• ",
+                              {
+                                "type": "Text",
+                                "styles": ["paragraph"],
+                                "children": ["SECOND"]
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "type": "Styled",
+                        "styles": ["orderedList"],
+                        "children": [
+                          {
+                            "type": "Text",
+                            "styles": [],
+                            "children": [
+                              "1",
+                              ". ",
+                              {
+                                "type": "Text",
+                                "styles": ["paragraph"],
+                                "children": [
+                                  "UNO dolor ",
+                                  {
+                                    "type": "Text",
+                                    "styles": ["strong"],
+                                    "children": [
+                                      {
+                                        "type": "Text",
+                                        "styles": ["emphasis"],
+                                        "children": ["sed rutrum augue"]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "type": "Text",
+                            "styles": [],
+                            "children": [
+                              "2",
+                              ". ",
+                              {
+                                "type": "Text",
+                                "styles": ["paragraph"],
+                                "children": [
+                                  "DOS amet ",
+                                  {
+                                    "type": "Text",
+                                    "styles": ["anchor"],
+                                    "children": ["nulla"]
+                                  },
+                                  " nisi"
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "type": "Styled",
+                    "styles": ["sidebar"],
+                    "children": [
+                      {
+                        "type": "Styled",
+                        "styles": ["callout"],
+                        "children": [
+                          {
+                            "type": "Text",
+                            "styles": ["h3"],
+                            "children": ["This is your callout"]
+                          },
+                          {
+                            "type": "Text",
+                            "styles": ["paragraph"],
+                            "children": [
+                              "This is your ",
+                              {
+                                "type": "Text",
+                                "styles": ["emphasis"],
+                                "children": [
+                                  {
+                                    "type": "Text",
+                                    "styles": ["strong"],
+                                    "children": ["body"]
+                                  }
+                                ]
+                              },
+                              ":"
+                            ]
+                          },
+                          {
+                            "type": "Styled",
+                            "styles": ["unorderedList"],
+                            "children": [
+                              {
+                                "type": "Text",
+                                "styles": [],
+                                "children": [
+                                  "• ",
+                                  {
+                                    "type": "Text",
+                                    "styles": ["paragraph"],
+                                    "children": ["With list items"]
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "Text",
+                                "styles": [],
+                                "children": [
+                                  "• ",
+                                  {
+                                    "type": "Text",
+                                    "styles": ["paragraph"],
+                                    "children": ["inside of it"]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "Styled",
+                "styles": ["column"],
+                "children": [
+                  {
+                    "type": "Styled",
+                    "styles": ["primary"],
+                    "children": [
+                      {
+                        "type": "Styled",
+                        "styles": ["flagpoleBase", "flagpoleYellow"],
+                        "children": [
+                          {
+                            "type": "Text",
+                            "styles": ["h3"],
+                            "children": ["This key info"]
+                          },
+                          {
+                            "type": "Text",
+                            "styles": ["paragraph"],
+                            "children": ["This is details for key info"]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "Styled",
+                "styles": ["column"],
+                "children": [
+                  {
+                    "type": "Styled",
+                    "styles": ["primary"],
+                    "children": [
+                      {
+                        "type": "Text",
+                        "styles": ["h3"],
+                        "children": ["How to use it"]
+                      },
+                      {
+                        "type": "Text",
+                        "styles": ["paragraph"],
+                        "children": [
+                          "Consectetur minim anim eiusmod. Deserunt occaecat amet dolor est minim proident commodo sit labore. Fugiat non eiusmod reprehenderit. Culpa veniam elit quis. Aliquip pariatur eu duis cillum aliquip laborum ex. Magna quis deserunt tempor minim."
+                        ]
+                      },
+                      {
+                        "type": "Text",
+                        "styles": ["paragraph"],
+                        "children": [
+                          "Velit cillum do culpa enim reprehenderit aliquip non nostrud velit exercitation. Non et minim id. Amet consectetur officia minim eu est pariatur proident excepteur veniam excepteur. Magna sit eiusmod culpa pariatur. Sint ullamco tempor dolor excepteur anim aliquip incididunt laboris. Dolor labore tempor exercitation exercitation sunt irure incididunt. Enim esse cillum incididunt mollit ex excepteur aute amet in consequat irure reprehenderit occaecat aliqua proident."
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "Styled",
+                "styles": [],
+                "children": [
+                  {
+                    "type": "Text",
+                    "styles": ["category"],
+                    "children": ["Interests"]
+                  },
+                  {
+                    "type": "Styled",
+                    "styles": ["categorySeparator"],
+                    "children": []
+                  }
+                ]
+              },
+              {
+                "type": "Styled",
+                "styles": ["measureBox"],
+                "children": [
+                  {
+                    "type": "Styled",
+                    "styles": ["measureTitleLine"],
+                    "children": [
+                      {
+                        "type": "Image",
+                        "styles": ["shrink"],
+                        "content": "\n<svg role=\"img\" aria-label=\"60\" width=\"54\" height=\"54\" viewBox=\"0 0 54 54\" xmlns=\"http://www.w3.org/2000/svg\">\n  \n  \n\n  <circle cx=\"27\" cy=\"27\" r=\"24\" fill=\"none\" stroke=\"#E2E4E9\" stroke-width=\"4\" ></circle>\n\n  <path class=\"donutMetric__outerArc\" fill=\"none\" stroke=\"#F5F7FA\" stroke-dasharray=\"90.47786842338604, 150.79644737231007\" \n    d=\"M27 3 a 24 24 0 0 1 0 48 a 24 24 0 0 1 0 -48\" stroke-width=\"6\" stroke-linecap=\"round\"/>\n  <path class=\"donutMetric__outerArc\" fill=\"none\" stroke=\"#0080AD\" stroke-dasharray=\"90.47786842338604, 150.79644737231007\" \n    d=\"M27 3 a 24 24 0 0 1 0 48 a 24 24 0 0 1 0 -48\" stroke-width=\"4\" stroke-linecap=\"round\"/>\n\n  \n  <circle class=\"donutMetric__innerCircle\" cx=\"27\" cy=\"27\" r=\"19\" fill=\"#BFDFEA\"></circle>\n\n  <text x=\"27\" y=\"27\" fill=\"#444A5A\" text-anchor=\"middle\" font-size=\"20\" dominant-baseline=\"central\" font-family=\"Inter, Arial, Helvetica, sans-serif\" font-weight=\"bold\">\n    60\n  </text>\n</svg>\n",
+                        "width": 64,
+                        "height": 64
+                      },
+                      {
+                        "type": "Styled",
+                        "styles": ["titleAndSynonyms"],
+                        "children": [
+                          {
+                            "type": "Text",
+                            "styles": ["measureHeading"],
+                            "children": ["Hands-On"]
+                          },
+                          {
+                            "type": "Styled",
+                            "styles": ["synonyms"],
+                            "children": [
+                              {
+                                "type": "Text",
+                                "styles": ["synonym"],
+                                "children": ["a"]
+                              },
+                              {
+                                "type": "Text",
+                                "styles": ["synonym"],
+                                "children": ["b"]
+                              },
+                              {
+                                "type": "Text",
+                                "styles": ["synonym"],
+                                "children": ["c"]
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {"type": "Styled", "styles": ["spacer"], "children": []}
+                    ]
+                  },
+                  {
+                    "type": "Text",
+                    "styles": ["measureDefinition"],
+                    "children": ["Measure definition"]
+                  },
+                  {
+                    "type": "Image",
+                    "styles": [],
+                    "content": "<svg role=\"img\" aria-label=\"60\" width=\"470\" height=\"36\" viewBox=\"0 0 470 36\" xmlns=\"http://www.w3.org/2000/svg\">\n\n    <rect width=\"470\" height=\"6\" y=\"8\" rx=\"2\" ry=\"2\" fill=\"#E2E4E9\" />\n    <rect width=\"4\" height=\"16\" x=\"1\" y=\"3\" rx=\"2\" ry=\"2\" fill=\"#656D81\" stroke=\"#F5F7FA\" stroke-width=\"2\" />\n    <rect width=\"4\" height=\"16\" x=\"465\" y=\"3\" rx=\"2\" ry=\"2\" fill=\"#656D81\" stroke=\"#F5F7FA\" stroke-width=\"2\" />\n\n    <g data-tip=\"\" data-for=\"None\">\n      <circle cx=\"280\" cy=\"11\" r=\"10\" fill=\"#0080AD\" stroke=\"#F5F7FA\" stroke-width=\"2\" />\n      <circle cx=\"280\" cy=\"11\" r=\"7\" fill=\"#BFDFEA\" />\n    </g>\n\n    <text y=\"36\" fill=\"#444A5A\" text-anchor=\"left\" font-size=\"12\" font-family=\"Inter, Arial, Helvetica, sans-serif\" font-weight=\"600\" letter-spacing=\"1.5\" dominant-baseline=\"auto\">\n      MORE EFFORT\n    </text>\n    <text x=\"470\" y=\"36\" fill=\"#444A5A\" text-anchor=\"end\" font-size=\"12\" font-family=\"Inter, Arial, Helvetica, sans-serif\" font-weight=\"600\" letter-spacing=\"1.5\" dominant-baseline=\"auto\">\n      LESS EFFORT\n    </text>\n  </svg>",
+                    "width": 468,
+                    "height": 36
+                  }
+                ]
+              },
+              {
+                "type": "Styled",
+                "styles": ["column"],
+                "children": [
+                  {
+                    "type": "Styled",
+                    "styles": ["primary"],
+                    "children": [
+                      {
+                        "type": "Text",
+                        "styles": ["h3"],
+                        "children": ["Why This Matters"]
+                      },
+                      {
+                        "type": "Text",
+                        "styles": ["paragraph"],
+                        "children": [
+                          "Consectetur magna eiusmod et eu incididunt. Non reprehenderit dolor officia elit sit occaecat consequat duis do sit eiusmod Lorem cupidatat proident. Deserunt excepteur laborum velit id reprehenderit veniam proident consequat proident irure ad aute id. Minim culpa officia pariatur adipisicing ex tempor cupidatat mollit elit ad officia. Fugiat sunt eu dolor. Dolore cillum culpa Lorem excepteur eiusmod tempor mollit duis ut eiusmod veniam nostrud magna exercitation. Qui nisi sint laborum Lorem sit sint quis officia mollit irure."
+                        ]
+                      },
+                      {
+                        "type": "Text",
+                        "styles": ["paragraph"],
+                        "children": [
+                          "Mollit excepteur est nulla quis eiusmod. Pariatur deserunt pariatur deserunt occaecat deserunt nostrud voluptate enim in aliqua velit adipisicing labore tempor irure. Ex sit culpa officia qui deserunt ipsum esse id incididunt ullamco. Sunt officia velit eiusmod ut id non deserunt in tempor nisi. Veniam ullamco nostrud cillum consequat reprehenderit exercitation veniam est sint aliqua sint dolore aliquip eu. Fugiat Lorem est consequat commodo fugiat velit laboris dolor ullamco laboris voluptate excepteur labore. Mollit cillum voluptate sit incididunt consequat ut."
+                        ]
+                      },
+                      {
+                        "type": "Text",
+                        "styles": ["paragraph"],
+                        "children": [
+                          "Et ex proident sunt Lorem eiusmod excepteur ad commodo. Laborum elit eiusmod consectetur in cillum ex aute reprehenderit eiusmod pariatur exercitation elit. Fugiat consequat dolor sint nisi tempor eu exercitation laborum ipsum voluptate ullamco irure voluptate. Culpa reprehenderit magna ullamco nisi ad sunt fugiat duis nisi occaecat laboris irure consequat. Nisi dolor pariatur consectetur tempor qui."
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "Styled",
+                "styles": ["column"],
+                "children": [
+                  {
+                    "type": "Styled",
+                    "styles": ["primary"],
+                    "children": [
+                      {
+                        "type": "Text",
+                        "styles": ["h3"],
+                        "children": ["Explain the groupings"]
+                      },
+                      {
+                        "type": "Text",
+                        "styles": ["paragraph"],
+                        "children": [
+                          "Voluptate eu laboris Lorem minim dolore adipisicing et deserunt enim do irure ad sit reprehenderit tempor. Veniam exercitation adipisicing tempor ipsum ullamco elit nulla consequat eu. Ex nulla ex labore veniam qui laborum voluptate dolore. Ex sint duis fugiat reprehenderit occaecat ipsum irure."
+                        ]
+                      },
+                      {
+                        "type": "Text",
+                        "styles": ["paragraph"],
+                        "children": [
+                          "Id eiusmod elit labore eiusmod. Proident elit do nulla incididunt proident. Labore Lorem fugiat ut exercitation duis do et minim Lorem dolor quis labore aute cupidatat. Ex reprehenderit cillum fugiat laboris. Sint consequat ex incididunt consectetur occaecat est ad voluptate culpa officia quis reprehenderit magna cupidatat. Ipsum esse officia commodo velit duis ex mollit consequat. In incididunt aute ullamco cupidatat sit incididunt."
+                        ]
+                      },
+                      {
+                        "type": "Styled",
+                        "styles": ["unorderedList"],
+                        "children": [
+                          {
+                            "type": "Text",
+                            "styles": [],
+                            "children": [
+                              "• ",
+                              {
+                                "type": "Text",
+                                "styles": ["paragraph"],
+                                "children": ["FIRST"]
+                              }
+                            ]
+                          },
+                          {
+                            "type": "Text",
+                            "styles": [],
+                            "children": [
+                              "• ",
+                              {
+                                "type": "Text",
+                                "styles": ["paragraph"],
+                                "children": ["SECOND"]
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "type": "Styled",
+                        "styles": ["orderedList"],
+                        "children": [
+                          {
+                            "type": "Text",
+                            "styles": [],
+                            "children": [
+                              "1",
+                              ". ",
+                              {
+                                "type": "Text",
+                                "styles": ["paragraph"],
+                                "children": [
+                                  "UNO dolor ",
+                                  {
+                                    "type": "Text",
+                                    "styles": ["strong"],
+                                    "children": [
+                                      {
+                                        "type": "Text",
+                                        "styles": ["emphasis"],
+                                        "children": ["sed rutrum augue"]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "type": "Text",
+                            "styles": [],
+                            "children": [
+                              "2",
+                              ". ",
+                              {
+                                "type": "Text",
+                                "styles": ["paragraph"],
+                                "children": [
+                                  "DOS amet ",
+                                  {
+                                    "type": "Text",
+                                    "styles": ["anchor"],
+                                    "children": ["nulla"]
+                                  },
+                                  " nisi"
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "type": "Styled",
+                    "styles": ["sidebar"],
+                    "children": [
+                      {
+                        "type": "Styled",
+                        "styles": ["callout"],
+                        "children": [
+                          {
+                            "type": "Text",
+                            "styles": ["h3"],
+                            "children": ["This is your callout"]
+                          },
+                          {
+                            "type": "Text",
+                            "styles": ["paragraph"],
+                            "children": [
+                              "This is your ",
+                              {
+                                "type": "Text",
+                                "styles": ["emphasis"],
+                                "children": [
+                                  {
+                                    "type": "Text",
+                                    "styles": ["strong"],
+                                    "children": ["body"]
+                                  }
+                                ]
+                              },
+                              ":"
+                            ]
+                          },
+                          {
+                            "type": "Styled",
+                            "styles": ["unorderedList"],
+                            "children": [
+                              {
+                                "type": "Text",
+                                "styles": [],
+                                "children": [
+                                  "• ",
+                                  {
+                                    "type": "Text",
+                                    "styles": ["paragraph"],
+                                    "children": ["With list items"]
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "Text",
+                                "styles": [],
+                                "children": [
+                                  "• ",
+                                  {
+                                    "type": "Text",
+                                    "styles": ["paragraph"],
+                                    "children": ["inside of it"]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "Styled",
+                "styles": ["column"],
+                "children": [
+                  {
+                    "type": "Styled",
+                    "styles": ["primary"],
+                    "children": [
+                      {
+                        "type": "Styled",
+                        "styles": ["flagpoleBase", "flagpoleYellow"],
+                        "children": [
+                          {
+                            "type": "Text",
+                            "styles": ["h3"],
+                            "children": ["This key info"]
+                          },
+                          {
+                            "type": "Text",
+                            "styles": ["paragraph"],
+                            "children": ["This is details for key info"]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "Styled",
+                "styles": ["column"],
+                "children": [
+                  {
+                    "type": "Styled",
+                    "styles": ["primary"],
+                    "children": [
+                      {
+                        "type": "Text",
+                        "styles": ["h3"],
+                        "children": ["How to use it"]
+                      },
+                      {
+                        "type": "Text",
+                        "styles": ["paragraph"],
+                        "children": [
+                          "Do nisi ea proident duis consequat ex eiusmod ullamco cillum pariatur do amet quis aliqua. Do culpa laborum aliqua velit mollit non. Aliquip et ad aliqua aliqua ad. Deserunt do veniam fugiat laboris. Magna consectetur officia exercitation aliqua ipsum ut proident. Esse laborum amet ut exercitation do labore fugiat mollit. Ad eu elit in commodo reprehenderit id. Magna dolore aliquip et."
+                        ]
+                      },
+                      {
+                        "type": "Text",
+                        "styles": ["paragraph"],
+                        "children": [
+                          "Commodo fugiat dolor reprehenderit. Cupidatat sunt voluptate occaecat cillum et magna ipsum sunt reprehenderit. Cupidatat non sit ea veniam labore reprehenderit labore tempor dolor duis exercitation cillum culpa culpa. Amet ipsum aliqua veniam excepteur esse dolor sunt anim occaecat duis sunt qui enim qui cupidatat. Ut est proident labore nostrud reprehenderit sint. Consectetur et amet quis eu ea esse ex Lorem deserunt pariatur sit non do. Non nisi culpa nisi ea non. Nisi culpa sint fugiat ullamco excepteur enim ex cillum occaecat elit laboris amet."
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "Styled",
+                "styles": ["measureBox", "breakBefore"],
+                "children": [
+                  {
+                    "type": "Styled",
+                    "styles": ["measureTitleLine"],
+                    "children": [
+                      {
+                        "type": "Image",
+                        "styles": ["shrink"],
+                        "content": "\n<svg role=\"img\" aria-label=\"70\" width=\"54\" height=\"54\" viewBox=\"0 0 54 54\" xmlns=\"http://www.w3.org/2000/svg\">\n  \n  \n\n  <circle cx=\"27\" cy=\"27\" r=\"24\" fill=\"none\" stroke=\"#E2E4E9\" stroke-width=\"4\" ></circle>\n\n  <path class=\"donutMetric__outerArc\" fill=\"none\" stroke=\"#F5F7FA\" stroke-dasharray=\"105.55751316061705, 150.79644737231007\" \n    d=\"M27 3 a 24 24 0 0 1 0 48 a 24 24 0 0 1 0 -48\" stroke-width=\"6\" stroke-linecap=\"round\"/>\n  <path class=\"donutMetric__outerArc\" fill=\"none\" stroke=\"#0080AD\" stroke-dasharray=\"105.55751316061705, 150.79644737231007\" \n    d=\"M27 3 a 24 24 0 0 1 0 48 a 24 24 0 0 1 0 -48\" stroke-width=\"4\" stroke-linecap=\"round\"/>\n\n  \n  <circle class=\"donutMetric__innerCircle\" cx=\"27\" cy=\"27\" r=\"19\" fill=\"#BFDFEA\"></circle>\n\n  <text x=\"27\" y=\"27\" fill=\"#444A5A\" text-anchor=\"middle\" font-size=\"20\" dominant-baseline=\"central\" font-family=\"Inter, Arial, Helvetica, sans-serif\" font-weight=\"bold\">\n    70\n  </text>\n</svg>\n",
+                        "width": 64,
+                        "height": 64
+                      },
+                      {
+                        "type": "Styled",
+                        "styles": ["titleAndSynonyms"],
+                        "children": [
+                          {
+                            "type": "Text",
+                            "styles": ["measureHeading"],
+                            "children": ["Analytical"]
+                          },
+                          {
+                            "type": "Styled",
+                            "styles": ["synonyms"],
+                            "children": [
+                              {
+                                "type": "Text",
+                                "styles": ["synonym"],
+                                "children": ["a"]
+                              },
+                              {
+                                "type": "Text",
+                                "styles": ["synonym"],
+                                "children": ["b"]
+                              },
+                              {
+                                "type": "Text",
+                                "styles": ["synonym"],
+                                "children": ["c"]
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {"type": "Styled", "styles": ["spacer"], "children": []}
+                    ]
+                  },
+                  {
+                    "type": "Text",
+                    "styles": ["measureDefinition"],
+                    "children": ["Measure definition"]
+                  },
+                  {
+                    "type": "Image",
+                    "styles": [],
+                    "content": "<svg role=\"img\" aria-label=\"70\" width=\"470\" height=\"36\" viewBox=\"0 0 470 36\" xmlns=\"http://www.w3.org/2000/svg\">\n\n    <rect width=\"470\" height=\"6\" y=\"8\" rx=\"2\" ry=\"2\" fill=\"#E2E4E9\" />\n    <rect width=\"4\" height=\"16\" x=\"1\" y=\"3\" rx=\"2\" ry=\"2\" fill=\"#656D81\" stroke=\"#F5F7FA\" stroke-width=\"2\" />\n    <rect width=\"4\" height=\"16\" x=\"465\" y=\"3\" rx=\"2\" ry=\"2\" fill=\"#656D81\" stroke=\"#F5F7FA\" stroke-width=\"2\" />\n\n    <g data-tip=\"\" data-for=\"None\">\n      <circle cx=\"325\" cy=\"11\" r=\"10\" fill=\"#0080AD\" stroke=\"#F5F7FA\" stroke-width=\"2\" />\n      <circle cx=\"325\" cy=\"11\" r=\"7\" fill=\"#BFDFEA\" />\n    </g>\n\n    <text y=\"36\" fill=\"#444A5A\" text-anchor=\"left\" font-size=\"12\" font-family=\"Inter, Arial, Helvetica, sans-serif\" font-weight=\"600\" letter-spacing=\"1.5\" dominant-baseline=\"auto\">\n      MORE EFFORT\n    </text>\n    <text x=\"470\" y=\"36\" fill=\"#444A5A\" text-anchor=\"end\" font-size=\"12\" font-family=\"Inter, Arial, Helvetica, sans-serif\" font-weight=\"600\" letter-spacing=\"1.5\" dominant-baseline=\"auto\">\n      LESS EFFORT\n    </text>\n  </svg>",
+                    "width": 468,
+                    "height": 36
+                  }
+                ]
+              },
+              {
+                "type": "Styled",
+                "styles": ["column"],
+                "children": [
+                  {
+                    "type": "Styled",
+                    "styles": ["primary"],
+                    "children": [
+                      {
+                        "type": "Text",
+                        "styles": ["h3"],
+                        "children": ["Why This Matters"]
+                      },
+                      {
+                        "type": "Text",
+                        "styles": ["paragraph"],
+                        "children": [
+                          "Mollit ut laborum dolor laboris. Aliquip laborum labore duis nulla id incididunt laboris. Aute cupidatat adipisicing ut sunt labore aliqua nulla. Ut quis occaecat ut. Voluptate dolor dolore laboris sunt laborum do dolore commodo ea. Ipsum sint minim nostrud. Voluptate voluptate voluptate aliquip aliqua veniam et veniam do incididunt mollit ipsum aliquip deserunt aute. Dolore dolor aute culpa."
+                        ]
+                      },
+                      {
+                        "type": "Text",
+                        "styles": ["paragraph"],
+                        "children": [
+                          "Velit adipisicing consequat minim aute sunt mollit aliqua cupidatat culpa. Duis anim officia consequat. Id ea duis qui duis et aliqua dolor incididunt nisi cupidatat. Ea anim aliqua minim ut laborum magna. Excepteur mollit magna proident ullamco in culpa commodo anim ut amet reprehenderit minim do officia magna. Sunt anim esse fugiat ea fugiat cillum eu voluptate in minim consectetur esse laborum aute. Sit mollit eiusmod commodo consequat fugiat."
+                        ]
+                      },
+                      {
+                        "type": "Text",
+                        "styles": ["paragraph"],
+                        "children": [
+                          "Nisi laborum eiusmod dolor fugiat pariatur cillum sunt. Aliquip ex minim cupidatat consequat aliquip. Proident ex et labore qui commodo amet. Cupidatat aliquip eiusmod consequat esse minim duis."
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "Styled",
+                "styles": ["column"],
+                "children": [
+                  {
+                    "type": "Styled",
+                    "styles": ["primary"],
+                    "children": [
+                      {
+                        "type": "Text",
+                        "styles": ["h3"],
+                        "children": ["Explain the groupings"]
+                      },
+                      {
+                        "type": "Text",
+                        "styles": ["paragraph"],
+                        "children": [
+                          "Laboris ipsum commodo tempor consequat enim. Occaecat adipisicing proident cillum ut dolor nulla ex cillum elit commodo anim laboris pariatur ut culpa. Eu do nostrud Lorem excepteur cillum cillum do eu sunt esse in ullamco ea. Fugiat nulla exercitation deserunt proident commodo irure ea reprehenderit amet ea ad Lorem. Non anim sit tempor incididunt deserunt sunt officia proident. Dolor qui laboris aute aliqua mollit eu."
+                        ]
+                      },
+                      {
+                        "type": "Text",
+                        "styles": ["paragraph"],
+                        "children": [
+                          "Dolor amet enim est. Ipsum consectetur ad Lorem dolore ullamco laboris dolore. Fugiat aliqua exercitation incididunt ex velit deserunt eu ipsum excepteur Lorem. Cupidatat anim ullamco qui sit culpa sint in eu qui. Voluptate anim voluptate commodo velit excepteur laboris ut do reprehenderit amet."
+                        ]
+                      },
+                      {
+                        "type": "Styled",
+                        "styles": ["unorderedList"],
+                        "children": [
+                          {
+                            "type": "Text",
+                            "styles": [],
+                            "children": [
+                              "• ",
+                              {
+                                "type": "Text",
+                                "styles": ["paragraph"],
+                                "children": ["FIRST"]
+                              }
+                            ]
+                          },
+                          {
+                            "type": "Text",
+                            "styles": [],
+                            "children": [
+                              "• ",
+                              {
+                                "type": "Text",
+                                "styles": ["paragraph"],
+                                "children": ["SECOND"]
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "type": "Styled",
+                        "styles": ["orderedList"],
+                        "children": [
+                          {
+                            "type": "Text",
+                            "styles": [],
+                            "children": [
+                              "1",
+                              ". ",
+                              {
+                                "type": "Text",
+                                "styles": ["paragraph"],
+                                "children": [
+                                  "UNO dolor ",
+                                  {
+                                    "type": "Text",
+                                    "styles": ["strong"],
+                                    "children": [
+                                      {
+                                        "type": "Text",
+                                        "styles": ["emphasis"],
+                                        "children": ["sed rutrum augue"]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "type": "Text",
+                            "styles": [],
+                            "children": [
+                              "2",
+                              ". ",
+                              {
+                                "type": "Text",
+                                "styles": ["paragraph"],
+                                "children": [
+                                  "DOS amet ",
+                                  {
+                                    "type": "Text",
+                                    "styles": ["anchor"],
+                                    "children": ["nulla"]
+                                  },
+                                  " nisi"
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "type": "Styled",
+                    "styles": ["sidebar"],
+                    "children": [
+                      {
+                        "type": "Styled",
+                        "styles": ["callout"],
+                        "children": [
+                          {
+                            "type": "Text",
+                            "styles": ["h3"],
+                            "children": ["This is your callout"]
+                          },
+                          {
+                            "type": "Text",
+                            "styles": ["paragraph"],
+                            "children": [
+                              "This is your ",
+                              {
+                                "type": "Text",
+                                "styles": ["emphasis"],
+                                "children": [
+                                  {
+                                    "type": "Text",
+                                    "styles": ["strong"],
+                                    "children": ["body"]
+                                  }
+                                ]
+                              },
+                              ":"
+                            ]
+                          },
+                          {
+                            "type": "Styled",
+                            "styles": ["unorderedList"],
+                            "children": [
+                              {
+                                "type": "Text",
+                                "styles": [],
+                                "children": [
+                                  "• ",
+                                  {
+                                    "type": "Text",
+                                    "styles": ["paragraph"],
+                                    "children": ["With list items"]
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "Text",
+                                "styles": [],
+                                "children": [
+                                  "• ",
+                                  {
+                                    "type": "Text",
+                                    "styles": ["paragraph"],
+                                    "children": ["inside of it"]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "Styled",
+                "styles": ["column"],
+                "children": [
+                  {
+                    "type": "Styled",
+                    "styles": ["primary"],
+                    "children": [
+                      {
+                        "type": "Styled",
+                        "styles": ["flagpoleBase", "flagpoleYellow"],
+                        "children": [
+                          {
+                            "type": "Text",
+                            "styles": ["h3"],
+                            "children": ["This key info"]
+                          },
+                          {
+                            "type": "Text",
+                            "styles": ["paragraph"],
+                            "children": ["This is details for key info"]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "Styled",
+                "styles": ["column"],
+                "children": [
+                  {
+                    "type": "Styled",
+                    "styles": ["primary"],
+                    "children": [
+                      {
+                        "type": "Text",
+                        "styles": ["h3"],
+                        "children": ["How to use it"]
+                      },
+                      {
+                        "type": "Text",
+                        "styles": ["paragraph"],
+                        "children": [
+                          "Irure veniam anim incididunt nulla reprehenderit proident velit ea labore. Dolor cillum culpa ullamco dolore pariatur Lorem ad ex. In excepteur exercitation Lorem mollit occaecat Lorem laborum pariatur esse. Reprehenderit sit proident laboris duis ullamco officia aute do exercitation ad ullamco consectetur adipisicing aliquip duis. Duis duis sit minim adipisicing nisi eu ullamco anim nisi ad consequat. Esse cillum consequat esse aute ut culpa mollit ullamco nisi elit commodo irure in eu. Adipisicing esse mollit magna sunt aute sit do reprehenderit mollit ex culpa nisi. Non mollit non consectetur dolore labore ipsum aliqua nulla."
+                        ]
+                      },
+                      {
+                        "type": "Text",
+                        "styles": ["paragraph"],
+                        "children": [
+                          "Consequat excepteur ex elit eu nulla ipsum exercitation. Aliqua veniam consequat dolor. Ut id deserunt laboris velit. Tempor irure labore elit veniam veniam reprehenderit nulla esse duis ullamco enim sit id enim. Nulla eiusmod aute minim amet commodo elit labore amet."
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "Styled",
+                "styles": ["measureBox", "breakBefore"],
+                "children": [
+                  {
+                    "type": "Styled",
+                    "styles": ["measureTitleLine"],
+                    "children": [
+                      {
+                        "type": "Image",
+                        "styles": ["shrink"],
+                        "content": "\n<svg role=\"img\" aria-label=\"80\" width=\"54\" height=\"54\" viewBox=\"0 0 54 54\" xmlns=\"http://www.w3.org/2000/svg\">\n  \n  \n\n  <circle cx=\"27\" cy=\"27\" r=\"24\" fill=\"none\" stroke=\"#E2E4E9\" stroke-width=\"4\" ></circle>\n\n  <path class=\"donutMetric__outerArc\" fill=\"none\" stroke=\"#F5F7FA\" stroke-dasharray=\"120.63715789784806, 150.79644737231007\" \n    d=\"M27 3 a 24 24 0 0 1 0 48 a 24 24 0 0 1 0 -48\" stroke-width=\"6\" stroke-linecap=\"round\"/>\n  <path class=\"donutMetric__outerArc\" fill=\"none\" stroke=\"#34BC7D\" stroke-dasharray=\"120.63715789784806, 150.79644737231007\" \n    d=\"M27 3 a 24 24 0 0 1 0 48 a 24 24 0 0 1 0 -48\" stroke-width=\"4\" stroke-linecap=\"round\"/>\n\n  \n  <circle class=\"donutMetric__innerCircle\" cx=\"27\" cy=\"27\" r=\"19\" fill=\"#CCEEDE\"></circle>\n\n  <text x=\"27\" y=\"27\" fill=\"#444A5A\" text-anchor=\"middle\" font-size=\"20\" dominant-baseline=\"central\" font-family=\"Inter, Arial, Helvetica, sans-serif\" font-weight=\"bold\">\n    80\n  </text>\n</svg>\n",
+                        "width": 64,
+                        "height": 64
+                      },
+                      {
+                        "type": "Styled",
+                        "styles": ["titleAndSynonyms"],
+                        "children": [
+                          {
+                            "type": "Text",
+                            "styles": ["measureHeading"],
+                            "children": ["Creative"]
+                          },
+                          {
+                            "type": "Styled",
+                            "styles": ["synonyms"],
+                            "children": [
+                              {
+                                "type": "Text",
+                                "styles": ["synonym"],
+                                "children": ["a"]
+                              },
+                              {
+                                "type": "Text",
+                                "styles": ["synonym"],
+                                "children": ["b"]
+                              },
+                              {
+                                "type": "Text",
+                                "styles": ["synonym"],
+                                "children": ["c"]
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {"type": "Styled", "styles": ["spacer"], "children": []}
+                    ]
+                  },
+                  {
+                    "type": "Text",
+                    "styles": ["measureDefinition"],
+                    "children": ["Measure definition"]
+                  },
+                  {
+                    "type": "Image",
+                    "styles": [],
+                    "content": "<svg role=\"img\" aria-label=\"80\" width=\"470\" height=\"36\" viewBox=\"0 0 470 36\" xmlns=\"http://www.w3.org/2000/svg\">\n\n    <rect width=\"470\" height=\"6\" y=\"8\" rx=\"2\" ry=\"2\" fill=\"#E2E4E9\" />\n    <rect width=\"4\" height=\"16\" x=\"1\" y=\"3\" rx=\"2\" ry=\"2\" fill=\"#656D81\" stroke=\"#F5F7FA\" stroke-width=\"2\" />\n    <rect width=\"4\" height=\"16\" x=\"465\" y=\"3\" rx=\"2\" ry=\"2\" fill=\"#656D81\" stroke=\"#F5F7FA\" stroke-width=\"2\" />\n\n    <g data-tip=\"\" data-for=\"None\">\n      <circle cx=\"370\" cy=\"11\" r=\"10\" fill=\"#34BC7D\" stroke=\"#F5F7FA\" stroke-width=\"2\" />\n      <circle cx=\"370\" cy=\"11\" r=\"7\" fill=\"#CCEEDE\" />\n    </g>\n\n    <text y=\"36\" fill=\"#444A5A\" text-anchor=\"left\" font-size=\"12\" font-family=\"Inter, Arial, Helvetica, sans-serif\" font-weight=\"600\" letter-spacing=\"1.5\" dominant-baseline=\"auto\">\n      MORE EFFORT\n    </text>\n    <text x=\"470\" y=\"36\" fill=\"#444A5A\" text-anchor=\"end\" font-size=\"12\" font-family=\"Inter, Arial, Helvetica, sans-serif\" font-weight=\"600\" letter-spacing=\"1.5\" dominant-baseline=\"auto\">\n      LESS EFFORT\n    </text>\n  </svg>",
+                    "width": 468,
+                    "height": 36
+                  }
+                ]
+              },
+              {
+                "type": "Styled",
+                "styles": ["column"],
+                "children": [
+                  {
+                    "type": "Styled",
+                    "styles": ["primary"],
+                    "children": [
+                      {
+                        "type": "Text",
+                        "styles": ["h3"],
+                        "children": ["Why This Matters"]
+                      },
+                      {
+                        "type": "Text",
+                        "styles": ["paragraph"],
+                        "children": [
+                          "Velit minim incididunt anim eiusmod. Incididunt enim laborum tempor minim laboris. Duis elit cupidatat Lorem nostrud laborum velit et est amet dolor nostrud. Officia laboris id ullamco quis est adipisicing est elit ipsum est sint. Ipsum sit velit consectetur minim ea veniam ullamco est."
+                        ]
+                      },
+                      {
+                        "type": "Text",
+                        "styles": ["paragraph"],
+                        "children": [
+                          "Quis occaecat velit reprehenderit irure qui cillum officia do officia sint ad labore deserunt veniam. Velit culpa aliquip voluptate. Ipsum labore laborum qui pariatur. Nostrud proident sint est ex irure id excepteur culpa duis nulla."
+                        ]
+                      },
+                      {
+                        "type": "Text",
+                        "styles": ["paragraph"],
+                        "children": [
+                          "Sit mollit elit est aliquip ex ea dolor nisi occaecat amet ipsum. Ea do nisi id ut occaecat qui qui voluptate exercitation esse ullamco nisi. Quis consequat ad sint adipisicing non ex sit culpa sit occaecat elit enim. Sit ipsum mollit commodo nulla nostrud minim esse consequat non consequat officia anim sit. Consequat aliqua fugiat ad aliquip adipisicing velit. Cupidatat eiusmod reprehenderit culpa eiusmod Lorem laborum qui est do veniam aliquip et sint. Nulla commodo qui et id commodo in eu incididunt fugiat aute nostrud sunt incididunt. Nisi reprehenderit commodo fugiat fugiat nostrud incididunt et ut."
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "Styled",
+                "styles": ["column"],
+                "children": [
+                  {
+                    "type": "Styled",
+                    "styles": ["primary"],
+                    "children": [
+                      {
+                        "type": "Text",
+                        "styles": ["h3"],
+                        "children": ["Explain the groupings"]
+                      },
+                      {
+                        "type": "Text",
+                        "styles": ["paragraph"],
+                        "children": [
+                          "Non sunt cillum incididunt nisi laboris ad dolor officia commodo in velit. Proident proident veniam ullamco laborum laborum aute enim amet ipsum ea anim occaecat quis cupidatat labore. Mollit labore do ad sit enim incididunt nisi exercitation nisi excepteur occaecat. Duis duis aliqua et labore cillum esse nisi tempor culpa nostrud mollit tempor laborum sint. Quis eu ad labore sunt. Officia minim dolor Lorem. Laboris commodo irure irure culpa reprehenderit aute deserunt do enim."
+                        ]
+                      },
+                      {
+                        "type": "Text",
+                        "styles": ["paragraph"],
+                        "children": [
+                          "Proident mollit ipsum amet in aute deserunt elit anim deserunt voluptate sunt aliqua sit reprehenderit. Anim nostrud consequat velit proident proident adipisicing exercitation. Deserunt proident magna aute. Ad dolor consequat id et in aute consequat consectetur ex pariatur ex officia et ipsum non."
+                        ]
+                      },
+                      {
+                        "type": "Styled",
+                        "styles": ["unorderedList"],
+                        "children": [
+                          {
+                            "type": "Text",
+                            "styles": [],
+                            "children": [
+                              "• ",
+                              {
+                                "type": "Text",
+                                "styles": ["paragraph"],
+                                "children": ["FIRST"]
+                              }
+                            ]
+                          },
+                          {
+                            "type": "Text",
+                            "styles": [],
+                            "children": [
+                              "• ",
+                              {
+                                "type": "Text",
+                                "styles": ["paragraph"],
+                                "children": ["SECOND"]
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "type": "Styled",
+                        "styles": ["orderedList"],
+                        "children": [
+                          {
+                            "type": "Text",
+                            "styles": [],
+                            "children": [
+                              "1",
+                              ". ",
+                              {
+                                "type": "Text",
+                                "styles": ["paragraph"],
+                                "children": [
+                                  "UNO dolor ",
+                                  {
+                                    "type": "Text",
+                                    "styles": ["strong"],
+                                    "children": [
+                                      {
+                                        "type": "Text",
+                                        "styles": ["emphasis"],
+                                        "children": ["sed rutrum augue"]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "type": "Text",
+                            "styles": [],
+                            "children": [
+                              "2",
+                              ". ",
+                              {
+                                "type": "Text",
+                                "styles": ["paragraph"],
+                                "children": [
+                                  "DOS amet ",
+                                  {
+                                    "type": "Text",
+                                    "styles": ["anchor"],
+                                    "children": ["nulla"]
+                                  },
+                                  " nisi"
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "type": "Styled",
+                    "styles": ["sidebar"],
+                    "children": [
+                      {
+                        "type": "Styled",
+                        "styles": ["callout"],
+                        "children": [
+                          {
+                            "type": "Text",
+                            "styles": ["h3"],
+                            "children": ["This is your callout"]
+                          },
+                          {
+                            "type": "Text",
+                            "styles": ["paragraph"],
+                            "children": [
+                              "This is your ",
+                              {
+                                "type": "Text",
+                                "styles": ["emphasis"],
+                                "children": [
+                                  {
+                                    "type": "Text",
+                                    "styles": ["strong"],
+                                    "children": ["body"]
+                                  }
+                                ]
+                              },
+                              ":"
+                            ]
+                          },
+                          {
+                            "type": "Styled",
+                            "styles": ["unorderedList"],
+                            "children": [
+                              {
+                                "type": "Text",
+                                "styles": [],
+                                "children": [
+                                  "• ",
+                                  {
+                                    "type": "Text",
+                                    "styles": ["paragraph"],
+                                    "children": ["With list items"]
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "Text",
+                                "styles": [],
+                                "children": [
+                                  "• ",
+                                  {
+                                    "type": "Text",
+                                    "styles": ["paragraph"],
+                                    "children": ["inside of it"]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "Styled",
+                "styles": ["column"],
+                "children": [
+                  {
+                    "type": "Styled",
+                    "styles": ["primary"],
+                    "children": [
+                      {
+                        "type": "Styled",
+                        "styles": ["flagpoleBase", "flagpoleYellow"],
+                        "children": [
+                          {
+                            "type": "Text",
+                            "styles": ["h3"],
+                            "children": ["This key info"]
+                          },
+                          {
+                            "type": "Text",
+                            "styles": ["paragraph"],
+                            "children": ["This is details for key info"]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "Styled",
+                "styles": ["column"],
+                "children": [
+                  {
+                    "type": "Styled",
+                    "styles": ["primary"],
+                    "children": [
+                      {
+                        "type": "Text",
+                        "styles": ["h3"],
+                        "children": ["How to use it"]
+                      },
+                      {
+                        "type": "Text",
+                        "styles": ["paragraph"],
+                        "children": [
+                          "Irure minim irure proident aliquip irure. Magna sint aliquip do cillum cupidatat cillum excepteur aute. Tempor pariatur aute nostrud ullamco consequat labore ex incididunt sit ea quis reprehenderit sit. Aute sint eiusmod aliqua esse ullamco laborum consectetur aliqua Lorem. Lorem ad amet veniam aliquip cillum pariatur do et labore dolor."
+                        ]
+                      },
+                      {
+                        "type": "Text",
+                        "styles": ["paragraph"],
+                        "children": [
+                          "Non aute exercitation nulla laborum tempor non dolore enim ullamco ea cillum officia aliqua. Fugiat tempor adipisicing labore commodo excepteur aliquip magna non incididunt ut voluptate voluptate ipsum ipsum enim. Id anim magna duis in. Nostrud amet commodo excepteur anim dolor deserunt veniam dolor. Qui nulla elit velit. Magna sint amet quis voluptate velit excepteur culpa. Minim duis consectetur aute velit aliqua pariatur elit culpa sunt adipisicing deserunt commodo laborum. Aute sunt culpa magna labore ullamco."
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

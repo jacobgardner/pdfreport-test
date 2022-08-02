@@ -7,7 +7,7 @@ use std::{
 
 use printpdf::{
     IndirectFontRef, PdfDocument, PdfDocumentReference, PdfLayerIndex, PdfLayerReference,
-    PdfPageIndex, TextMatrix,
+    PdfPageIndex, Svg, SvgTransform, TextMatrix,
 };
 
 mod corners;
@@ -16,7 +16,10 @@ mod font_lookup;
 mod rect;
 
 use crate::{
-    block_layout::paginated_layout::{DrawableNode, PaginatedNode},
+    block_layout::{
+        layout_engine::NodeLayout,
+        paginated_layout::{DrawableImageNode, DrawableNode, Image, PaginatedNode},
+    },
     document_builder::UnstructuredDocumentWriter,
     error::{DocumentGenerationError, InternalServerError},
     fonts::{FontCollection, FontId},
@@ -45,7 +48,7 @@ pub struct PrintPdfWriter<'a> {
     page_layer_indices: Vec<(PdfPageIndex, Vec<PdfLayerIndex>)>,
     font_collection: &'a FontCollection,
     page_size: Size<Pt>,
-    page_margins: EdgeStyle::Unmergeable,
+    page_margins: EdgeStyle,
     current_style_by_page: Vec<CurrentStyles>,
     circle_cache: Circles,
 }
@@ -54,7 +57,7 @@ impl<'a> PrintPdfWriter<'a> {
     pub fn new(
         doc_title: &str,
         page_size: impl Into<Size<Mm>>,
-        page_margins: impl Into<EdgeStyle::Unmergeable>,
+        page_margins: impl Into<EdgeStyle>,
         font_collection: &'a FontCollection,
     ) -> Self {
         let dimensions = page_size.into();
@@ -85,10 +88,7 @@ impl<'a> PrintPdfWriter<'a> {
         if let Some(font) = self.fonts.get(font_id) {
             Ok(font)
         } else {
-            let font_data = self
-                .font_collection
-                .get_font(font_id)
-                .ok_or(InternalServerError::FontIdNotLoaded)?;
+            let font_data = self.font_collection.get_font(font_id);
 
             let font_ref = self
                 .raw_pdf_doc
@@ -109,11 +109,13 @@ impl<'a> PrintPdfWriter<'a> {
     ) -> Result<W, crate::error::DocumentGenerationError> {
         let mut buf_writer = BufWriter::new(pdf_doc_writer);
 
-        self.raw_pdf_doc.save(&mut buf_writer).unwrap();
+        self.raw_pdf_doc
+            .save(&mut buf_writer)
+            .map_err(|err| InternalServerError::WritePdfError(err.into()))?;
 
         let write_result = buf_writer
             .into_inner()
-            .map_err(|e| InternalServerError::WritePdfError(e.into()));
+            .map_err(|e| InternalServerError::WritePdfError(e.into_error().into()));
 
         Ok(write_result?)
     }
@@ -123,25 +125,23 @@ impl<'a> UnstructuredDocumentWriter for PrintPdfWriter<'a> {
     fn draw_text_block(
         &mut self,
         node: &PaginatedNode,
-        style: &Style::Unmergeable,
+        style: &Style,
         text_block: &RenderedTextBlock,
     ) -> Result<&mut Self, DocumentGenerationError> {
         let layer = self.get_base_layer(node.page_index);
 
         layer.begin_text_section();
 
-        let x =
-            printpdf::Pt::from(style.padding.left + node.page_layout.left + self.page_margins.left);
+        let coords = self.get_placement_coords(&node.page_layout);
+        let x = printpdf::Pt::from(coords.0 + style.padding.left + style.border.width.left);
         let y = printpdf::Pt::from(
-            self.page_size.height
-                - (node.page_layout.top + style.padding.top + self.page_margins.top),
+            coords.1 + style.padding.bottom + style.border.width.bottom + text_block.height(),
         );
 
-        let mut current_y = y;
         for line in text_block.lines.iter() {
             layer.set_text_matrix(TextMatrix::Translate(
                 x + line.line_metrics.left.into(),
-                current_y - line.line_metrics.ascent.into(),
+                y - (line.line_metrics.baseline).into(),
             ));
 
             for span in line.rich_text.0.iter() {
@@ -149,8 +149,6 @@ impl<'a> UnstructuredDocumentWriter for PrintPdfWriter<'a> {
 
                 layer.write_text(span.text.clone(), font.as_ref());
             }
-
-            current_y -= line.line_metrics.height.into();
         }
 
         layer.end_text_section();
@@ -163,11 +161,12 @@ impl<'a> UnstructuredDocumentWriter for PrintPdfWriter<'a> {
 
         self.draw_container(node, node_style)?;
 
-        // Remove this allow once we have image rendering
-        #[allow(clippy::single_match)]
         match &node.drawable_node {
             DrawableNode::Text(text_node) => {
                 self.draw_text_block(node, node_style, &text_node.text_block)?;
+            }
+            DrawableNode::Image(image_node) => {
+                self.draw_image(node, image_node)?;
             }
             _ => {}
         }
@@ -177,14 +176,76 @@ impl<'a> UnstructuredDocumentWriter for PrintPdfWriter<'a> {
 }
 
 impl<'a> PrintPdfWriter<'a> {
+    fn get_placement_coords(&self, layout: &NodeLayout) -> (Pt, Pt) {
+        let x_position = layout.left + self.page_margins.left;
+        let y_position =
+            self.page_size.height - (layout.top + self.page_margins.top) - layout.height;
+
+        (x_position, y_position)
+    }
+
+    fn draw_image(
+        &mut self,
+        paginated_node: &PaginatedNode,
+        image_node: &DrawableImageNode,
+    ) -> Result<&mut Self, DocumentGenerationError> {
+        let layer = self.get_base_layer(paginated_node.page_index);
+
+        let Image::Svg(ref svg) = image_node.image;
+        let parsed_svg = Svg::parse(&svg.content).unwrap();
+
+        let svg_xobject = parsed_svg.into_xobject(&layer);
+
+        let NodeLayout { width, height, .. } = paginated_node.page_layout;
+
+        let (x_position, y_position) = self.get_placement_coords(&paginated_node.page_layout);
+        let (x_scale, y_scale) = svg.computed_scale(
+            paginated_node.page_layout.width,
+            paginated_node.page_layout.height,
+        );
+
+        svg_xobject.add_to_layer(
+            &layer,
+            SvgTransform {
+                translate_x: Some(x_position.into()),
+                translate_y: Some(y_position.into()),
+                scale_x: Some(x_scale),
+                scale_y: Some(y_scale),
+                ..Default::default()
+            },
+        );
+
+        for (point, text_block) in svg.text_from_dims(width, height) {
+            self.draw_text_block(
+                &PaginatedNode {
+                    page_layout: NodeLayout {
+                        left: paginated_node.page_layout.left + point.0,
+                        right: paginated_node.page_layout.right - point.0,
+                        top: paginated_node.page_layout.top + point.1,
+                        height: text_block.height(),
+                        width: text_block.width(),
+                    },
+                    ..paginated_node.clone()
+                },
+                &Style::default(),
+                &text_block,
+            )
+            .unwrap();
+        }
+
+        Ok(self)
+    }
+
     fn draw_container(
         &mut self,
         node: &PaginatedNode,
-        container_style: &Style::Unmergeable,
+        container_style: &Style,
     ) -> Result<&mut Self, DocumentGenerationError> {
+        let coords = self.get_placement_coords(&node.page_layout);
+
         let rect = crate::values::Rect {
-            left: node.page_layout.left + self.page_margins.left,
-            top: self.page_size.height - (node.page_layout.top + self.page_margins.top),
+            left: coords.0,
+            top: coords.1,
             width: node.page_layout.width,
             height: node.page_layout.height,
         };

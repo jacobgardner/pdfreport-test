@@ -2,8 +2,7 @@ use printpdf::{Line, Point, Rgb};
 
 use crate::{
     block_layout::paginated_layout::PaginatedNode,
-    fonts::FontAttributes,
-    stylesheet::{BorderRadiusStyle, EdgeStyle, Style},
+    stylesheet::{EdgeStyle, Style},
     utils::debug_cursor::DebugCursor,
     values::{Color, Mm, Pt, Rect},
 };
@@ -11,7 +10,7 @@ use crate::{
 use super::PrintPdfWriter;
 
 impl<'a> PrintPdfWriter<'a> {
-    pub(super) fn draw_debug_outlines(&mut self, node: &PaginatedNode, style: &Style::Unmergeable) {
+    pub(super) fn draw_debug_outlines(&mut self, node: &PaginatedNode, style: &Style) {
         let PaginatedNode {
             page_layout: layout,
             page_index,
@@ -20,64 +19,62 @@ impl<'a> PrintPdfWriter<'a> {
 
         let page_index = *page_index;
 
-        let mut margin_rect = Rect {
-            left: layout.left - style.margin.left + self.page_margins.left,
-            top: layout.top - style.margin.top + self.page_margins.top,
+        let coords = self.get_placement_coords(layout);
+
+        let margin_rect = Rect {
+            left: coords.0 - style.margin.left,
+            top: coords.1 - style.margin.top,
             width: layout.width + style.margin.horizontal(),
             height: layout.height + style.margin.vertical(),
         };
 
-        let mut border_rect = Rect {
-            left: layout.left + self.page_margins.left,
-            top: layout.top + self.page_margins.top,
+        let border_rect = Rect {
+            left: coords.0,
+            top: coords.1,
             width: layout.width,
             height: layout.height,
         };
 
-        let mut content_rect = Rect {
-            left: border_rect.left + style.padding.left,
-            top: border_rect.top + style.padding.top,
-            width: border_rect.width - style.padding.horizontal(),
-            height: border_rect.height - style.padding.vertical(),
+        let content_rect = Rect {
+            left: border_rect.left + style.padding.left + style.border.width.left,
+            top: border_rect.top + (style.padding.bottom + style.border.width.bottom),
+            width: border_rect.width - style.padding.horizontal() - style.border.width.horizontal(),
+            height: border_rect.height - style.padding.vertical() - style.border.width.vertical(),
         };
-
-        margin_rect.top = self.page_size.height - margin_rect.top;
-        border_rect.top = self.page_size.height - border_rect.top;
-        content_rect.top = self.page_size.height - content_rect.top;
 
         self.draw_rect(
             page_index,
             margin_rect,
-            EdgeStyle::Unmergeable::new(Pt(1.)),
-            Some(Color::try_from("green").unwrap()),
+            EdgeStyle::new(Pt(0.1)),
+            Some(Color::try_from("green").expect("We know green is a valid color.")),
             None,
-            Some(BorderRadiusStyle::Unmergeable::new(Pt(10.))),
+            None,
         );
 
         self.draw_rect(
             page_index,
             border_rect,
-            EdgeStyle::Unmergeable::new(Pt(1.)),
-            Some(Color::try_from("red").unwrap()),
+            EdgeStyle::new(Pt(0.4)),
+            Some(Color::try_from("red").expect("We know red is a valid color")),
             None,
-            Some(BorderRadiusStyle::Unmergeable::new(Pt(7.5))),
+            None,
         );
 
         self.draw_rect(
             page_index,
             content_rect,
-            EdgeStyle::Unmergeable::new(Pt(1.)),
-            Some(Color::try_from("blue").unwrap()),
+            EdgeStyle::new(Pt(0.8)),
+            Some(Color::try_from("blue").expect("We know blue is a valid color")),
             None,
-            Some(BorderRadiusStyle::Unmergeable::new(Pt(5.))),
+            None,
         );
     }
 
     pub fn draw_debug_cursors(&mut self, debug_cursors: &[DebugCursor]) {
         let font = self
             .font_collection
-            .lookup_font("Inter", &FontAttributes::bold())
-            .unwrap();
+            .default_font()
+            .expect("If you are debugging, you must provide at least one font.");
 
         let font = self.get_font(font.font_id()).unwrap();
 

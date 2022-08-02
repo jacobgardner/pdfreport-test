@@ -16,33 +16,50 @@ mod page_break_rule;
 mod style;
 mod text_transformation;
 
-pub use border_radius::BorderRadiusStyle;
+pub use border_radius::{BorderRadiusStyle, MergeableBorderRadiusStyle};
 pub use border_style::BorderStyle;
 pub use edge_style::EdgeStyle;
 pub use flex_style::FlexStyle;
 pub use flex_values::*;
 pub use font_styles::FontStyles;
 pub use page_break_rule::PageBreakRule;
-pub use style::Style;
+pub use style::{MergeableStyle, Style};
 pub use text_transformation::TextTransformation;
+use ts_rs::{Dependency, TS};
 
 use crate::error::{DocumentGenerationError, UserInputError};
 
 #[derive(Deserialize, Debug, Default)]
 pub struct Stylesheet {
     #[serde(flatten)]
-    style_lookup: HashMap<String, Style::Mergeable>,
+    style_lookup: HashMap<String, MergeableStyle>,
+}
+
+impl TS for Stylesheet {
+    const EXPORT_TO: Option<&'static str> = None;
+
+    fn name() -> String {
+        "Record<string, Style>".to_string()
+    }
+
+    fn dependencies() -> Vec<ts_rs::Dependency> {
+        vec![Dependency::from_ty::<MergeableStyle>().unwrap()]
+    }
+
+    fn transparent() -> bool {
+        true
+    }
 }
 
 impl Stylesheet {
     pub fn get_mergeable_style(
         &self,
         class_names: &[String],
-    ) -> Result<Style::Mergeable, DocumentGenerationError> {
+    ) -> Result<MergeableStyle, DocumentGenerationError> {
         class_names
             .iter()
             .map(|class_name| (class_name, self.style_lookup.get(class_name)))
-            .try_fold(Style::Mergeable::default(), |acc, (class_name, style)| {
+            .try_fold(MergeableStyle::default(), |acc, (class_name, style)| {
                 Ok(
                     acc.merge(style.ok_or_else(|| UserInputError::StyleDoesNotExist {
                         style_name: class_name.to_owned(),
@@ -53,9 +70,9 @@ impl Stylesheet {
 
     pub fn get_style(
         &self,
-        base_style: Style::Unmergeable,
+        base_style: Style,
         class_names: &[String],
-    ) -> Result<Style::Unmergeable, DocumentGenerationError> {
+    ) -> Result<Style, DocumentGenerationError> {
         let mergeable = self.get_mergeable_style(class_names)?;
 
         Ok(base_style.merge_style(&mergeable))
@@ -63,9 +80,9 @@ impl Stylesheet {
 
     pub fn compute_mergeable_style(
         &self,
-        parent_style: &Style::Mergeable,
+        parent_style: &MergeableStyle,
         class_names: &[String],
-    ) -> Result<Style::Mergeable, DocumentGenerationError> {
+    ) -> Result<MergeableStyle, DocumentGenerationError> {
         let mergeable = self.get_mergeable_style(class_names)?;
 
         let inherited_style = mergeable.merge_inherited_styles(parent_style);
@@ -86,7 +103,7 @@ mod tests {
             style_lookup: [
                 (
                     "a".to_owned(),
-                    Style::Mergeable {
+                    MergeableStyle {
                         color: Some(Color::white()),
                         width: Some("a".to_owned()),
                         ..Default::default()
@@ -94,21 +111,21 @@ mod tests {
                 ),
                 (
                     "b".to_owned(),
-                    Style::Mergeable {
+                    MergeableStyle {
                         height: Some("b".to_owned()),
                         ..Default::default()
                     },
                 ),
                 (
                     "c".to_owned(),
-                    Style::Mergeable {
+                    MergeableStyle {
                         width: Some("c".to_owned()),
                         ..Default::default()
                     },
                 ),
                 (
                     "d".to_owned(),
-                    Style::Mergeable {
+                    MergeableStyle {
                         height: Some("d".to_owned()),
                         width: Some("d".to_owned()),
                         color: Some(Color::white()),
@@ -128,7 +145,7 @@ mod tests {
             stylesheet
                 .get_style(Default::default(), &["a".to_owned()])
                 .unwrap(),
-            Style::Unmergeable {
+            Style {
                 color: Color::white(),
                 width: String::from("a"),
                 ..Default::default()
@@ -139,7 +156,7 @@ mod tests {
             stylesheet
                 .get_style(Default::default(), &["a".to_owned(), "b".to_owned()])
                 .unwrap(),
-            Style::Unmergeable {
+            Style {
                 color: Color::white(),
                 height: String::from("b"),
                 width: String::from("a"),
@@ -154,7 +171,7 @@ mod tests {
                     &["a".to_owned(), "b".to_owned(), "c".to_owned()]
                 )
                 .unwrap(),
-            Style::Unmergeable {
+            Style {
                 color: Color::white(),
                 height: String::from("b"),
                 width: String::from("c"),
@@ -174,7 +191,7 @@ mod tests {
                     ]
                 )
                 .unwrap(),
-            Style::Unmergeable {
+            Style {
                 color: Color::white(),
                 height: String::from("d"),
                 width: String::from("d"),
@@ -186,7 +203,7 @@ mod tests {
             stylesheet
                 .get_style(Default::default(), &["b".to_owned()])
                 .unwrap(),
-            Style::Unmergeable {
+            Style {
                 height: String::from("b"),
                 ..Default::default()
             }
@@ -196,7 +213,7 @@ mod tests {
             stylesheet
                 .get_style(Default::default(), &["b".to_owned(), "c".to_owned()])
                 .unwrap(),
-            Style::Unmergeable {
+            Style {
                 height: String::from("b"),
                 width: String::from("c"),
                 ..Default::default()
@@ -210,7 +227,7 @@ mod tests {
                     &["b".to_owned(), "c".to_owned(), "d".to_owned()]
                 )
                 .unwrap(),
-            Style::Unmergeable {
+            Style {
                 color: Color::white(),
                 height: String::from("d"),
                 width: String::from("d"),

@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use darling::{FromField, FromMeta};
-use syn::{Data, DeriveInput, Field, Fields, Type};
+use syn::{Field, Fields, ItemStruct, Type};
 
 use crate::config::FIELD_ATTR;
 
@@ -18,16 +18,12 @@ pub struct MergeableField {
 #[derive(Clone, FromMeta, Debug, Default)]
 #[darling(default)]
 pub struct FieldOptions {
-    pub rename: Option<String>,
-    pub use_null_in_serde: bool,
     pub is_nested: bool,
 }
 
 impl From<MergeableField> for FieldOptions {
     fn from(field: MergeableField) -> Self {
         Self {
-            rename: None,
-            use_null_in_serde: false,
             is_nested: field.nested,
         }
     }
@@ -73,25 +69,21 @@ impl FieldsOptions {
     }
 }
 
-pub fn extract_field_attrs(ast: &mut DeriveInput) -> FieldsOptions {
+pub fn extract_field_attrs(unmergeable_struct: &mut ItemStruct) -> FieldsOptions {
     let mut field_options = FieldsOptions::new();
 
-    if let Data::Struct(unmergeable_struct) = &mut ast.data {
-        if let Fields::Named(named_fields) = &mut unmergeable_struct.fields {
-            for field in named_fields.named.iter_mut() {
-                let mergeable_attr_index = field
-                    .attrs
-                    .iter()
-                    .position(|attr| attr.path.is_ident(FIELD_ATTR));
+    if let Fields::Named(named_fields) = &mut unmergeable_struct.fields {
+        for field in named_fields.named.iter_mut() {
+            let mergeable_attr_index = field
+                .attrs
+                .iter()
+                .position(|attr| attr.path.is_ident(FIELD_ATTR));
 
-                if let Some(index) = mergeable_attr_index {
-                    field_options.insert_by_field(field);
+            if let Some(index) = mergeable_attr_index {
+                field_options.insert_by_field(field);
 
-                    field.attrs.remove(index);
-                }
+                field.attrs.remove(index);
             }
-        } else {
-            unimplemented!();
         }
     } else {
         unimplemented!();

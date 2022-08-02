@@ -19,7 +19,6 @@ impl RenderedTextBlock {
         self.lines
             .iter()
             .fold(Pt(0.), |acc, line| acc + line.line_metrics.height)
-        // .fold(Pt(0.), |acc, line| acc + line.line_metrics.ascent - line.line_metrics.descent)
     }
 
     pub fn width(&self) -> Pt {

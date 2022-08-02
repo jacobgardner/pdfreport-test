@@ -4,14 +4,14 @@ use std::collections::HashMap;
 use crate::{
     doc_structure::{DomNode, NodeId},
     error::DocumentGenerationError,
-    stylesheet::{Style, Stylesheet},
+    stylesheet::{MergeableStyle, Style, Stylesheet},
 };
 
 use super::parent_lookup::ParentLookup;
 
 pub struct NodeLookup<'a> {
     dom_node_lookup: HashMap<NodeId, &'a DomNode>,
-    style_lookup: HashMap<NodeId, Style::Unmergeable>,
+    style_lookup: HashMap<NodeId, Style>,
     parent_lookup: ParentLookup,
 }
 
@@ -22,7 +22,7 @@ impl<'a> NodeLookup<'a> {
     ) -> Result<Self, DocumentGenerationError> {
         let mut parent_lookup = ParentLookup::new();
         let mut dom_node_lookup = HashMap::new();
-        let mut partially_computed_style: HashMap<NodeId, Style::Mergeable> = HashMap::new();
+        let mut partially_computed_style: HashMap<NodeId, MergeableStyle> = HashMap::new();
         let mut style_lookup = HashMap::new();
 
         for (node, parent) in root_node.block_iter() {
@@ -39,10 +39,7 @@ impl<'a> NodeLookup<'a> {
 
             let node_style = stylesheet.compute_mergeable_style(&parent_style, node.styles())?;
 
-            style_lookup.insert(
-                node.node_id(),
-                Style::Unmergeable::default().merge_style(&node_style),
-            );
+            style_lookup.insert(node.node_id(), Style::default().merge_style(&node_style));
             partially_computed_style.insert(node.node_id(), node_style);
 
             if let Some(parent) = parent {
@@ -57,7 +54,7 @@ impl<'a> NodeLookup<'a> {
         })
     }
 
-    pub fn get_style(&self, node: impl Into<NodeId>) -> &Style::Unmergeable {
+    pub fn get_style(&self, node: impl Into<NodeId>) -> &Style {
         self.style_lookup
             .get(&node.into())
             .expect("If it has a NodeId it should exist in the lookup")

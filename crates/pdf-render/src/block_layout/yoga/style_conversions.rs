@@ -7,6 +7,8 @@ use crate::{
     values::Pt,
 };
 
+use super::EPSILON;
+
 impl From<Direction> for FlexDirection {
     fn from(dir: Direction) -> Self {
         match dir {
@@ -39,14 +41,14 @@ impl From<FlexAlign> for Align {
     }
 }
 
-impl From<Style::Unmergeable> for yoga::Node {
-    fn from(style: Style::Unmergeable) -> Self {
+impl From<Style> for yoga::Node {
+    fn from(style: Style) -> Self {
         let mut layout_node = yoga::Node::new();
 
-        layout_node.set_border(Edge::Top, style.border.width.top.0 as f32);
-        layout_node.set_border(Edge::Right, style.border.width.right.0 as f32);
-        layout_node.set_border(Edge::Bottom, style.border.width.bottom.0 as f32);
-        layout_node.set_border(Edge::Left, style.border.width.left.0 as f32);
+        layout_node.set_border(Edge::Top, style.border.width.top.0 as f32 * EPSILON);
+        layout_node.set_border(Edge::Right, style.border.width.right.0 as f32 * EPSILON);
+        layout_node.set_border(Edge::Bottom, style.border.width.bottom.0 as f32 * EPSILON);
+        layout_node.set_border(Edge::Left, style.border.width.left.0 as f32 * EPSILON);
 
         layout_node.set_margin(Edge::Top, style.margin.top.into());
         layout_node.set_margin(Edge::Right, style.margin.right.into());
@@ -72,6 +74,6 @@ impl From<Style::Unmergeable> for yoga::Node {
 
 impl From<Pt> for StyleUnit {
     fn from(pt: Pt) -> Self {
-        StyleUnit::Point((pt.0 as f32).into())
+        StyleUnit::Point((pt.0 as f32 * EPSILON).into())
     }
 }

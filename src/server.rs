@@ -1,4 +1,4 @@
-use actix_web::{dev::Service, get, post, web, App, HttpResponse, HttpServer, middleware::Logger};
+use actix_web::{dev::Service, get, middleware::Logger, post, web, App, HttpResponse, HttpServer};
 
 use logger::LogData;
 use logzio::{LogzIoSender, LogzIoSenderBuilder};
@@ -71,7 +71,6 @@ async fn main() -> Result<(), std::io::Error> {
     let access_token = std::env::var("LOGGER_SERVER_TOKEN").ok();
     let logz_shipping_token = std::env::var("LOGGER_TRANSPORTS_REMOTE_TOKEN").ok();
 
-
     let logz_shipping_layer = if let Some(shipping_token) = logz_shipping_token {
         let logz_sender: LogzIoSender<LogData> =
             LogzIoSenderBuilder::new("listener.logz.io".to_owned(), shipping_token).build();
@@ -119,7 +118,7 @@ async fn main() -> Result<(), std::io::Error> {
         std::env::var("PORT").map_or(DEFAULT_PORT, |str| str.parse().unwrap_or(DEFAULT_PORT));
 
     let base_path = std::env::var("BASE_PATH").unwrap_or_else(|_| "/".to_owned());
-    
+
     info!("Starting server w/ port: {port} and base-path: {base_path}");
 
     HttpServer::new(move || {

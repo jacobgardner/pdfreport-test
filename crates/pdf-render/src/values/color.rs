@@ -3,13 +3,29 @@ use ts_rs::TS;
 
 use crate::error::UserInputError;
 
-#[derive(TS, Deserialize, Debug, Clone, PartialEq)]
+#[derive(Deserialize, Debug, Clone, PartialEq)]
 #[serde(try_from = "&str")]
 pub struct Color {
     pub r: f64,
     pub g: f64,
     pub b: f64,
     pub a: f64,
+}
+
+impl TS for Color {
+    const EXPORT_TO: Option<&'static str> = None;
+
+    fn name() -> String {
+        "string".to_string()
+    }
+
+    fn dependencies() -> Vec<ts_rs::Dependency> {
+        vec![]
+    }
+
+    fn transparent() -> bool {
+        true
+    }
 }
 
 impl Color {
