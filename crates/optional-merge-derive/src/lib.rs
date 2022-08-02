@@ -3,7 +3,6 @@ extern crate proc_macro;
 mod associated_struct;
 mod config;
 mod field_options;
-mod output;
 
 use associated_struct::Mergeable;
 use field_options::{extract_field_attrs, FieldOptions, FieldsOptions};
